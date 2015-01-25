@@ -1,0 +1,8 @@
+.DS_Store
+mysite/temp/
+*.db
+backup/*
+mysite/pdb.db
+*.log
+*.pyc
+mysite/search/migrations/
