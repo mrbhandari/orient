@@ -17,27 +17,30 @@ python manage.py migrate
 #on ubuntu server
 
 ssh -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com
+
+#http://www.nickpolet.com/blog/deploying-django-on-aws/1/
 sudo apt-get update
 sudo apt-get install apache2 libapache2-mod-wsgi
 sudo apt-get install python-pip
 sudo pip install django
 sudo apt-get install mysql-server python-mysqldb
 
+sudo vim /etc/apache2/sites-enabled/orient.conf
 
-WSGIScriptAlias / /data/test_site.com/testproject/testproject/wsgi.py
-WSGIPythonPath /data/test_site.com/testproject 
-<Directory /data/test_site.com/testproject/testproject>
+WSGIScriptAlias / /data/orient/mysite/mysite/wsgi.py
+WSGIPythonPath /data/orient/mysite 
+<Directory /data/orient/mysite/mysite>
     <Files wsgi.py>
         Order deny,allow
         Require all granted
     </Files>
 </Directory>
 
-<Directory /data/test_site.com/testproject/static>
+<Directory /data/orient/mysite/static>
     Require all granted
 </Directory>
 
-<Directory /data/test_site.com/testproject/media>
+<Directory /data/orient/mysite/media>
     Require all granted
 </Directory>
 
@@ -52,3 +55,7 @@ sudo vim /etc/apparmor.d/usr.sbin.mysqld
 Look for lines beginning with /var/lib/mysql. Change /var/lib/mysql in the lines with the new path.
 
 sudo /etc/init.d/apparmor reload
+sudo apt-get install git
+sudo git clone https://github.com/mrbhandari/orient.git
+cd orient/mysite
+sudo python manage.py migrate

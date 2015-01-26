@@ -1,0 +1,32 @@
+{% load staticfiles %}
+{% load humanize %}
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+    
+    <!-- Custom Google Web Font -->
+    <link href="{% static 'landing-page/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
+
+    <!-- Add custom CSS here -->
+    <link href="{% static 'jumbotron-narrow.css' %}" rel="stylesheet">
+      
+    <script src="{% static 'jquery-1.11.1.min.js' %}"></script>
+   <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+   
+        
+
+        
+  </head>
+
+  
+  
+  <body>
+    {% block content %}
+    {% endblock %}
+  
+    
+  </body>
+</html>
