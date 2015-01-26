@@ -5,4 +5,4 @@ backup/*
 mysite/pdb.db
 *.log
 *.pyc
-mysite/search/migrations/
+mysite/orient/migrations/

@@ -1,0 +1,54 @@
+#Rahul's computer setup
+
+bash <(curl -Ls http://git.io/eUx7rg)
+sudo pip install mysql-python
+
+/usr/local/mysql-5.6.22-osx10.8-x86_64/support-files/mysql.server start
+mysql -u root -p
+    CREATE DATABASE orient;
+
+
+python manage.py migrate
+
+
+
+
+
+#on ubuntu server
+
+ssh -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com
+sudo apt-get update
+sudo apt-get install apache2 libapache2-mod-wsgi
+sudo apt-get install python-pip
+sudo pip install django
+sudo apt-get install mysql-server python-mysqldb
+
+
+WSGIScriptAlias / /data/test_site.com/testproject/testproject/wsgi.py
+WSGIPythonPath /data/test_site.com/testproject 
+<Directory /data/test_site.com/testproject/testproject>
+    <Files wsgi.py>
+        Order deny,allow
+        Require all granted
+    </Files>
+</Directory>
+
+<Directory /data/test_site.com/testproject/static>
+    Require all granted
+</Directory>
+
+<Directory /data/test_site.com/testproject/media>
+    Require all granted
+</Directory>
+
+#http://stackoverflow.com/questions/1795176/how-to-change-mysql-data-directory
+#http://thomas.broxrost.com/2008/08/21/persistent-django-on-amazon-ec2-and-ebs-the-easy-way/
+service mysql stop
+sudo cp -R -p /var/lib/mysql /data
+sudo vim /etc/mysql/my.cnf 
+datadir         = /data/mysql
+
+sudo vim /etc/apparmor.d/usr.sbin.mysqld
+Look for lines beginning with /var/lib/mysql. Change /var/lib/mysql in the lines with the new path.
+
+sudo /etc/init.d/apparmor reload
