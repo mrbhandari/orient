@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from views import render_home
+from views import render_home, login, auth_view, logout, loggedin, invalid_login
 
 urlpatterns = patterns('',
     # Examples:
@@ -9,4 +9,12 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', render_home),
+    
+    # user auth urls
+    url(r'^accounts/login/$',  login),
+    url(r'^accounts/auth/$',  auth_view),    
+    url(r'^accounts/logout/$', logout),
+    url(r'^accounts/loggedin/$', loggedin),
+    url(r'^accounts/invalid/$', invalid_login),    
+    
         )
