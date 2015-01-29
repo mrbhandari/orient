@@ -1,8 +1,9 @@
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import auth
 from django.core.context_processors import csrf
-
+from random import randint
+import json
 
 def render_home(request):
   error = None
@@ -40,3 +41,14 @@ def invalid_login(request):
 def logout(request):
     auth.logout(request)
     return render_to_response('logout.html')
+  
+def series(request):
+    results = []
+    
+    for i in xrange(1, 11):
+        results.append({
+            'y': randint(0, 100)
+        })
+        
+    json_results = json.dumps(results)
+    return HttpResponse(json_results)

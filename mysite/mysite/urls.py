@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from views import render_home, login, auth_view, logout, loggedin, invalid_login
+from views import render_home, login, auth_view, logout, loggedin, invalid_login, series
 
 urlpatterns = patterns('',
     # Examples:
@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^accounts/auth/$',  auth_view),    
     url(r'^accounts/logout/$', logout),
     url(r'^accounts/loggedin/$', loggedin),
-    url(r'^accounts/invalid/$', invalid_login),    
+    url(r'^accounts/invalid/$', invalid_login),
+    url(r'^ajax/series/?$', series, name='series'),
     
         )

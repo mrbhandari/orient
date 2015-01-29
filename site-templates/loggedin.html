@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block content %}
   <div class="container">
   <h2>Hi {{full_name}} you are now logged in!</h2>
@@ -7,6 +7,44 @@
   
   <p>Click <a href="/accounts/profile/">here</a> to edit your profile information</p>
   
+  </div>
+  
+  <div class='example' id='example'></div>
+    
+    <script src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
+    
+    <script type='text/javascript'>
+        $(document).ready(function() {
+            var options = {
+                chart: {
+                    type: 'bar',
+                    events: {
+                        load: function () {
+                            var self = this;
+                            setInterval(function() {
+                                $.getJSON('/ajax/series', function(data) {
+                                    var series = self.series[0];
+                                    series.setData(data);
+                                });
+                            }, 2000);
+                        }
+                    }
+                },
+                title: {
+                    text: 'Using AJAX for polling charts'
+                },
+                series: [{
+                    name: 'AJAX data (series)',
+                    data: []
+                }]
+            };
+            $('#example').highcharts(options);
+        });
+    </script>
+
+
+
+
   </div>
 
 {% endblock %}

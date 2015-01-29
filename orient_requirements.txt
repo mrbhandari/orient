@@ -9,7 +9,7 @@ mysql -u root -p
 
 
 python manage.py migrate
-
+python manage.py createsuperuser
 
 
 
@@ -59,3 +59,4 @@ sudo apt-get install git
 sudo git clone https://github.com/mrbhandari/orient.git
 cd orient/mysite
 sudo python manage.py migrate
+python manage.py createsuperuser
