@@ -49,6 +49,58 @@ def series(request):
         results.append({
             'y': randint(0, 100)
         })
-        
+    
+    print results
+    
     json_results = json.dumps(results)
+    print json_results
     return HttpResponse(json_results)
+
+import os
+import os.path
+import csv
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+def set_post_status_series(request):
+  results = []
+  results_object = []
+  print "blue"
+  path = os.path.join(PROJECT_ROOT, '../../static/data/set_post_status.csv')
+  with open(path, 'rU') as f:
+      reader = csv.reader(f)
+      for row in reader:
+          results.append(row)
+  print results
+  
+  header_row = 1
+  if header_row == 1:
+    for i in results[0]:
+      results_object.append(
+        {"name": i,
+        "data": []}
+      )
+    for i in results[1:]:
+      n = 0 
+      for x in i:
+        results_object[n]['data'].append([float(i[0]),float(x)])
+        n +=1
+  print results_object
+  
+  json_results = json.dumps(results_object)
+  print json_results
+  
+  return HttpResponse(json_results)
+
+#[{
+#    "name": "Month",
+#    "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+#}, {
+#    "name": "Revenue",
+#    "data": [23987, 24784, 25899, 25569, 25897, 25668, 24114, 23899, 24987, 25111, 25899, 23221]
+#}, {
+#    "name": "Overhead",
+#    "data": [21990, 22365, 21987, 22369, 22558, 22987, 23521, 23003, 22756, 23112, 22987, 22897]
+#}]
+  

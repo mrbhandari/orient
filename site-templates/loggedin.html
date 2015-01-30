@@ -1,44 +1,116 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+
+
 {% block content %}
+    <script src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
   <div class="container">
   <h2>Hi {{full_name}} you are now logged in!</h2>
   <p>Click <a href="/accounts/logout/">here</a> to logout.</p>
   
   <p>Click <a href="/accounts/profile/">here</a> to edit your profile information</p>
   
-  </div>
   
-  <div class='example' id='example'></div>
+  
+  <div class='container' id='container'></div>
     
-    <script src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
-    
+  </div>  
     <script type='text/javascript'>
         $(document).ready(function() {
-            var options = {
-                chart: {
-                    type: 'bar',
-                    events: {
-                        load: function () {
-                            var self = this;
-                            setInterval(function() {
-                                $.getJSON('/ajax/series', function(data) {
-                                    var series = self.series[0];
-                                    series.setData(data);
-                                });
-                            }, 2000);
+            
+    
+    $.getJSON('/ajax/set_post_status_series', function(data) {
+        $('#container').highcharts({
+            chart: {
+                type: 'spline'
+            },
+            title: {
+                text: 'SET_POST_STATUS Event vs. Goal'
+            },
+            subtitle: {
+                text: 'Correlation of # of SET_POST_STATUS events vs. Goal'
+            },
+            xAxis: {
+                type: 'linear',
+                labels: {
+                    overflow: 'justify'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Correlation'
+                },
+                min: 0,
+                max: 1,
+                minorGridLineWidth: 0,
+                gridLineWidth: 0,
+                alternateGridColor: null,
+                plotBands: [{ // No correlation
+                    from: 0.0,
+                    to: 0.1,
+                    color: 'rgba(68, 170, 213, 0.1)',
+                    label: {
+                        text: 'No correlation',
+                        style: {
+                            color: '#606060'
                         }
                     }
-                },
-                title: {
-                    text: 'Using AJAX for polling charts'
-                },
-                series: [{
-                    name: 'AJAX data (series)',
-                    data: []
+                }, { // Weak
+                    from: 0.1,
+                    to: 0.25,
+                    color: 'rgba(0, 0, 0, 0)',
+                    label: {
+                        text: 'Weak',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }, { // Strong
+                    from: 0.25,
+                    to: 0.5,
+                    color: 'rgba(68, 170, 213, 0.1)',
+                    label: {
+                        text: 'Strong',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }, { // Very Strong
+                    from: 0.5,
+                    to: 1,
+                    color: 'rgba(0, 0, 0, 0)',
+                    label: {
+                        text: 'Very Strong',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
                 }]
-            };
-            $('#example').highcharts(options);
+            },
+            tooltip: {
+                valueSuffix: ' correlation coefficient'
+            },
+            plotOptions: {
+                spline: {
+                    lineWidth: 4,
+                    states: {
+                        hover: {
+                            lineWidth: 5
+                        }
+                    },
+                    marker: {
+                        enabled: true
+                    },
+                }
+            },
+            series: [data[6]],
+            navigation: {
+                menuItemStyle: {
+                    fontSize: '10px'
+                }
+            }
+    });
+});
         });
     </script>
 
