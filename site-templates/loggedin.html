@@ -12,106 +12,121 @@
   
   
   
-  <div class='container' id='container'></div>
-    
+  <div class='container' id='container0'></div>
+  <div class='container' id='container1'></div>
+  <div class='container' id='container2'></div>
+  <div class='container' id='container3'></div>
+  <div class='container' id='container4'></div>
+  <div class='container' id='container5'></div>
+  <div class='container' id='container6'></div>
+  <div class='container' id='container7'></div>
+  <div class='container' id='container8'></div>
+  <div class='container' id='container9'></div>
+  <div class='container' id='container10'></div>
+  
+  
   </div>  
     <script type='text/javascript'>
         $(document).ready(function() {
             
     
-    $.getJSON('/ajax/set_post_status_series', function(data) {
-        $('#container').highcharts({
-            chart: {
-                type: 'spline'
-            },
-            title: {
-                text: 'SET_POST_STATUS Event vs. Goal'
-            },
-            subtitle: {
-                text: 'Correlation of # of SET_POST_STATUS events vs. Goal'
-            },
-            xAxis: {
-                type: 'linear',
-                labels: {
-                    overflow: 'justify'
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Correlation'
-                },
-                min: 0,
-                max: 1,
-                minorGridLineWidth: 0,
-                gridLineWidth: 0,
-                alternateGridColor: null,
-                plotBands: [{ // No correlation
-                    from: 0.0,
-                    to: 0.1,
-                    color: 'rgba(68, 170, 213, 0.1)',
-                    label: {
-                        text: 'No correlation',
-                        style: {
-                            color: '#606060'
+            $.getJSON('/ajax/set_post_status_series', function(datacollection) {
+                for (counter = 0; counter < datacollection.length; counter++) {
+                    var data = datacollection[counter]
+                    console.log(data[6])
+                    $('#container' + counter).highcharts({
+                        chart: {
+                            type: 'spline'
+                        },
+                        title: {
+                            text: 'SET_POST_STATUS Event vs. Goal'
+                        },
+                        subtitle: {
+                            text: 'Correlation of # of SET_POST_STATUS events vs. Goal'
+                        },
+                        xAxis: {
+                            type: 'linear',
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Correlation'
+                            },
+                            min: 0,
+                            max: 1,
+                            minorGridLineWidth: 0,
+                            gridLineWidth: 0,
+                            alternateGridColor: null,
+                            plotBands: [{ // No correlation
+                                from: 0.0,
+                                to: 0.1,
+                                color: 'rgba(68, 170, 213, 0.1)',
+                                label: {
+                                    text: 'No correlation',
+                                    style: {
+                                        color: '#606060'
+                                    }
+                                }
+                            }, { // Weak
+                                from: 0.1,
+                                to: 0.25,
+                                color: 'rgba(0, 0, 0, 0)',
+                                label: {
+                                    text: 'Weak',
+                                    style: {
+                                        color: '#606060'
+                                    }
+                                }
+                            }, { // Strong
+                                from: 0.25,
+                                to: 0.5,
+                                color: 'rgba(68, 170, 213, 0.1)',
+                                label: {
+                                    text: 'Strong',
+                                    style: {
+                                        color: '#606060'
+                                    }
+                                }
+                            }, { // Very Strong
+                                from: 0.5,
+                                to: 1,
+                                color: 'rgba(0, 0, 0, 0)',
+                                label: {
+                                    text: 'Very Strong',
+                                    style: {
+                                        color: '#606060'
+                                    }
+                                }
+                            }]
+                        },
+                        tooltip: {
+                            valueSuffix: ' correlation coefficient'
+                        },
+                        plotOptions: {
+                            spline: {
+                                lineWidth: 4,
+                                states: {
+                                    hover: {
+                                        lineWidth: 5
+                                    }
+                                },
+                                marker: {
+                                    enabled: true
+                                },
+                            }
+                        },
+                        series: [data[6]],
+                        navigation: {
+                            menuItemStyle: {
+                                fontSize: '10px'
+                            }
                         }
-                    }
-                }, { // Weak
-                    from: 0.1,
-                    to: 0.25,
-                    color: 'rgba(0, 0, 0, 0)',
-                    label: {
-                        text: 'Weak',
-                        style: {
-                            color: '#606060'
-                        }
-                    }
-                }, { // Strong
-                    from: 0.25,
-                    to: 0.5,
-                    color: 'rgba(68, 170, 213, 0.1)',
-                    label: {
-                        text: 'Strong',
-                        style: {
-                            color: '#606060'
-                        }
-                    }
-                }, { // Very Strong
-                    from: 0.5,
-                    to: 1,
-                    color: 'rgba(0, 0, 0, 0)',
-                    label: {
-                        text: 'Very Strong',
-                        style: {
-                            color: '#606060'
-                        }
-                    }
-                }]
-            },
-            tooltip: {
-                valueSuffix: ' correlation coefficient'
-            },
-            plotOptions: {
-                spline: {
-                    lineWidth: 4,
-                    states: {
-                        hover: {
-                            lineWidth: 5
-                        }
-                    },
-                    marker: {
-                        enabled: true
-                    },
-                }
-            },
-            series: [data[6]],
-            navigation: {
-                menuItemStyle: {
-                    fontSize: '10px'
-                }
-            }
-    });
-});
-        });
+                    }); //end highcharts container
+                };//end for datacollection loop
+            }); //end getJSON
+        }); //end document ready
     </script>
 
 

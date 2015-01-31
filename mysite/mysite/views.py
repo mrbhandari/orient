@@ -5,6 +5,12 @@ from django.core.context_processors import csrf
 from random import randint
 import json
 
+FILELIST = ['BROWSE_INDUSTRY', 'BROWSE_PRODUCT_GALLERY',
+  'COMPANY_PROFILE', 'EDIT_POST', 'FAQ_VISIT', 'MY_POSTS',
+  'MYPOST_SUPPLIER_NAV', 'PRODUCT_GROUP_VIEWED', 'SENT_MESSAGE',
+  'set_post_status', 'VIEWED_QUOTE']
+
+
 def render_home(request):
   error = None
   if 'error' in request.GET:
@@ -33,7 +39,8 @@ def auth_view(request):
     
 def loggedin(request):
     return render_to_response('loggedin.html',
-                              {'full_name': request.user.username})
+                              {'full_name': request.user.username,
+                               'FILELIST': FILELIST})
 
 def invalid_login(request):
     return render_to_response('invalid_login.html')
@@ -63,32 +70,43 @@ import csv
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
+
+
+
 def set_post_status_series(request):
-  results = []
-  results_object = []
-  print "blue"
-  path = os.path.join(PROJECT_ROOT, '../../static/data/set_post_status.csv')
-  with open(path, 'rU') as f:
-      reader = csv.reader(f)
-      for row in reader:
-          results.append(row)
-  print results
   
-  header_row = 1
-  if header_row == 1:
-    for i in results[0]:
-      results_object.append(
-        {"name": i,
-        "data": []}
-      )
-    for i in results[1:]:
-      n = 0 
-      for x in i:
-        results_object[n]['data'].append([float(i[0]),float(x)])
-        n +=1
-  print results_object
-  
-  json_results = json.dumps(results_object)
+  results_collection = []
+  for filename in FILELIST:
+    results = []
+    results_object = []
+    path = os.path.join(PROJECT_ROOT, '../../static/data/' + filename + '.csv')
+    with open(path, 'rU') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if row[0] != '':
+              results.append(row)
+    #print results
+    
+    header_row = 1
+    if header_row == 1:
+      for i in results[0]:
+        results_object.append(
+          {"name": i,
+          "data": []}
+        )
+      for i in results[1:]:
+        n = 0 
+        for x in i:
+          try:
+            results_object[n]['data'].append([float(i[0]),float(x)])
+          except ValueError:
+            pass
+          n +=1
+    #print results_object
+    
+    results_collection.append(results_object)
+    
+  json_results = json.dumps(results_collection)
   print json_results
   
   return HttpResponse(json_results)
