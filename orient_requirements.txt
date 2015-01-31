@@ -4,13 +4,16 @@ bash <(curl -Ls http://git.io/eUx7rg)
 sudo pip install mysql-python
 
 /usr/local/mysql-5.6.22-osx10.8-x86_64/support-files/mysql.server start
+mysqladmin -u root -p'WCYBVBK6' password thebakery
 mysql -u root -p
     CREATE DATABASE orient;
 
 
-python manage.py migrate
-python manage.py createsuperuser
 
+
+python manage.py migrate
+
+python manage.py createsuperuser
 
 
 
@@ -58,5 +61,8 @@ sudo /etc/init.d/apparmor reload
 sudo apt-get install git
 sudo git clone https://github.com/mrbhandari/orient.git
 cd orient/mysite
+mysql -u root -p
+    CREATE DATABASE orient;
 sudo python manage.py migrate
+
 python manage.py createsuperuser

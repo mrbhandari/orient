@@ -76,29 +76,34 @@ PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 def set_post_status_series(request):
   
   results_collection = []
+  
   for filename in FILELIST:
-    results = []
-    results_object = []
+    read_results = []
+    results_object = {}
     path = os.path.join(PROJECT_ROOT, '../../static/data/' + filename + '.csv')
+    
+    #open the file
     with open(path, 'rU') as f:
         reader = csv.reader(f)
         for row in reader:
             if row[0] != '':
-              results.append(row)
+              read_results.append(row)
     #print results
     
     header_row = 1
     if header_row == 1:
-      for i in results[0]:
-        results_object.append(
+      results_object = {"series": [],
+        "title": filename}
+      for i in read_results[0]:
+        results_object['series'].append(
           {"name": i,
           "data": []}
         )
-      for i in results[1:]:
+      for i in read_results[1:]:
         n = 0 
         for x in i:
           try:
-            results_object[n]['data'].append([float(i[0]),float(x)])
+            results_object['series'][n]['data'].append([float(i[0]),float(x)])
           except ValueError:
             pass
           n +=1
