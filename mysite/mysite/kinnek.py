@@ -22,7 +22,7 @@ with con:
     #cur.execute("SELECT VERSION()")
     cur.execute("""
                 CREATE TEMPORARY TABLE segment_user_events
-        select segment_user_events.* from segment_user_events where start_hc <=5;
+        select user_events.* from user_events where start_hc <=5;
                 """)
     
     cur.execute("""
