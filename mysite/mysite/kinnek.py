@@ -164,7 +164,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 """)
     
     cur.execute("""
-                SELECT * from all_uid_events_cnt;
+                SELECT * from all_uid_events_cnt order by uid;
                 """)
     conv_events = {}
     nc_events = {}
@@ -216,7 +216,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             conv_events[event].extend([0] * num_conv_with_zero)
             nc_events[event].extend([0] * num_nc_with_zero)
             
-            filename = "event" + str(ctr) + ".txt"
+            filename = "/data/event" + str(ctr) + ".txt"
             x,mcc_arr = get_matthew_corr_coef(event,filename)
             print event, mcc_arr
             ctr += 1
