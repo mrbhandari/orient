@@ -11,8 +11,10 @@ import os.path
 import csv
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-MYPATH = os.path.join(PROJECT_ROOT, '../../static/data/')
-FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(".csv"))]
+MYPATH = os.path.join(PROJECT_ROOT, '../../../../../../../data/')
+FILETYPE = ".txt"
+FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
+
 
 
 def render_home(request):
@@ -74,17 +76,17 @@ def series(request):
 def set_post_status_series(request):
   
   results_collection = []
-  
 
-  
+  print FILELIST
   for filename in FILELIST:
     read_results = []
     results_object = {}
-    path = os.path.join(PROJECT_ROOT, '../../static/data/' + filename)
+    path = os.path.join(PROJECT_ROOT, '../../../../../../../data/' + filename)
     
+    print
     #open the file
     with open(path, 'rU') as f:
-        reader = csv.reader(f)
+        reader = csv.reader(f, delimiter='\t')
         for row in reader:
             if row[0] != '':
               read_results.append(row)
