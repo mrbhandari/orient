@@ -1,6 +1,7 @@
 import sys
 import os
 import numpy as np
+
 from collections import Counter
 #your_djangoproject_home="/Users/tempuser/orient/mysite/"
 #
@@ -17,51 +18,62 @@ import MySQLdb as mdb
 
 
 
-def get_cumsum_counts1(feature,array):
+def get_cumsum_counts1(feature,array,min_ctr,max_ctr):
     total = len(array[feature])
     ctr = Counter(array[feature])
-    min_cnt = np.min(array[feature])
-    max_cnt = np.max(array[feature])
 
     arr1 = {}
-    arr1[0] = total
-    for i in range(1,max_cnt+1):
+    arr1[min_ctr - 1] = total
+    for i in range(min_ctr,max_ctr+1):
         arr1[i] = arr1[i-1] - ctr[i-1]
     return arr1
-def get_cumsum_counts2(feature,array):
-    ctr = Counter(array[feature])
-    min_cnt = np.min(array[feature])
-    max_cnt = np.max(array[feature])
 
+def get_cumsum_counts2(feature,array,min_ctr,max_ctr):
+    ctr = Counter(array[feature])
+    total = len(array[feature])
     arr1 = {}
-    arr1[max_cnt] = np.sum(np.array(array[feature] < max_cnt))
-    for i in range(max_cnt-1,-1,-1):
+    arr1[max_ctr] = total - ctr[max_ctr]
+    for i in range(max_ctr -1,min_ctr - 1,-1):
         arr1[i] = arr1[i+1] - ctr[i]
     return arr1
 
-def get_matthew_corr_coef(feature,log_values=0):
-    tp = get_cumsum_counts1(feature,conv_events)
-    fp = get_cumsum_counts1(feature,nc_events)
+def get_matthew_corr_coef(feature,fname, log_values=0):
+    writer = open(fname,"wb")
+    min_ctr = min(min(conv_events[feature]),min(nc_events[feature]))
+    max_ctr = max(max(conv_events[feature]),max(nc_events[feature]))
+    print "MIN AND MAX",min_ctr,max_ctr
+
+    tp = get_cumsum_counts1(feature,conv_events,min_ctr, max_ctr)
+    fp = get_cumsum_counts1(feature,nc_events,min_ctr, max_ctr)
     
-    fn = get_cumsum_counts2(feature,conv_events)
-    tn = get_cumsum_counts2(feature,nc_events)
+    fn = get_cumsum_counts2(feature,conv_events,min_ctr, max_ctr)
+    tn = get_cumsum_counts2(feature,nc_events, min_ctr, max_ctr)
     min_cnt = np.min([np.min(tp.keys()),np.min(fp.keys()),np.min(tn.keys()),np.min(fn.keys())])
-    max_cnt = np.min([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
+    max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
     mcc_arr = []
-    for i in range(min_cnt,max_cnt):
+    writer.write(feature)
+    writer.write("\n");
+    writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\n");
+    for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
         fpv = fp[i]
         tnv = tn[i]
         fnv = fn[i]
         total = tpv + fpv + tnv + fnv
+        print i,tpv,fpv,tnv,fnv
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
+
         significance = mcc * mcc * total
+        writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")
         if log_values == 1:
-            print mcc
+            pass
+            #print mcc
         elif log_values == 2:
-            print i,"\t",tpv,"\t",fpv,"\t",fnv,"\t",tnv,"\t",mcc,"\t",significance
+            pass
+            #print i,"\t",tpv,"\t",fpv,"\t",fnv,"\t",tnv,"\t",mcc,"\t",significance
             #print i, "\t", tpv/(tpv + fpv + 0.0), "\t", fnv/(tnv + fnv + 0.0)
         mcc_arr.append(mcc)
+    writer.close()
     return range(min_cnt,max_cnt),mcc_arr
 
 
@@ -167,17 +179,21 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 conv_events[event_signature] = []
             conv_events[event_signature].append(row[-2])
         else:
-            print "not a conversion"
             if event_signature not in conv_events:
                 nc_events[event_signature] = []
             nc_events[event_signature].append(row[-2])
 
+    ctr = 0
     for event in event_metadata:
         
         if event in conv_events and event in nc_events:
-            print event
-            x,mcc_arr = get_matthew_corr_coef(event)
+            print "Event signature: ",event
+            print "conv events", conv_events[event]
+            print "nc events", nc_events[event]
+            filename = "/data/event" + str(ctr) + ".txt"
+            x,mcc_arr = get_matthew_corr_coef(event,filename)
             print event, mcc_arr
+            ctr += 1
 
 
 def my_custom_sql():
