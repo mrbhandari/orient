@@ -72,50 +72,57 @@ with con:
     cur = con.cursor()
     #cur.execute("SELECT VERSION()")
     cur.execute("""
-                   CREATE TEMPORARY TABLE success_uids
-SELECT DISTINCT uid FROM user_events WHERE
+                CREATE TEMPORARY TABLE segment_user_events
+        select segment_user_events.* from segment_user_events where start_hc <=5;
+                """)
+    
+    cur.execute("""
+                CREATE TEMPORARY TABLE success_uids
+SELECT DISTINCT uid FROM segment_user_events WHERE
 path = 'BODY|DIV#container|DIV.row|DIV.col-md-8|DIV.shelf-main|FORM#profile_submit|DIV#npcShelfFormApp_content|DIV#form_view|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD|DIV.row|DIV.col-md-6 col-xs-6|DIV.submit text-right|A.fields submit standard|IMG' OR 
-path = 'BODY|DIV.container|DIV.row|DIV.col-md-8 col-sm-8|DIV.block-grey|DIV#npcShelfFormApp_content|DIV#form_view|FORM#profile_submit|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD.submit|A.fields submit pull-right standard|IMG';""")
-
+path = 'BODY|DIV.container|DIV.row|DIV.col-md-8 col-sm-8|DIV.block-grey|DIV#npcShelfFormApp_content|DIV#form_view|FORM#profile_submit|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD.submit|A.fields submit pull-right standard|IMG';
+                """)
+    
     cur.execute("""
 CREATE TEMPORARY TABLE failure_uids
-SELECT distinct A.uid from user_events as A
+SELECT distinct A.uid from segment_user_events as A
     LEFT JOIN 
 success_uids
 as B
 ON (A.uid = B.uid)
-WHERE B.uid IS NULL;""")
+WHERE B.uid IS NULL;
+""")
 
     cur.execute("""
                 CREATE TEMPORARY TABLE failure_uids_events
-                Select user_events.* from user_events,
-                failure_uids as b
-                where user_events.uid = b.uid;
+Select segment_user_events.* from segment_user_events,
+failure_uids as b
+where segment_user_events.uid = b.uid;
                 """)
     
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids_events
-Select user_events.* from user_events,
+Select segment_user_events.* from segment_user_events,
 success_uids as b
-where user_events.uid = b.uid;
+where segment_user_events.uid = b.uid;
 """)
     
     
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids_events_cnt
-SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title,
+SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
       COUNT(*) AS cnt
 FROM success_uids_events
-GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title order by cnt desc;
+GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href order by cnt desc;
                 """)
     
         
     cur.execute("""
                 CREATE TEMPORARY TABLE failure_uids_events_cnt
-SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title,
+SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
       COUNT(*) AS cnt
 FROM failure_uids_events
-GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title order by cnt desc;
+GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href order by cnt desc;
                 """)
     
     
