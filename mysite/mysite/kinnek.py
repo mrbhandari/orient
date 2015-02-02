@@ -169,32 +169,54 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     conv_events = {}
     nc_events = {}
     event_metadata = {}
+    total_conv = 0
+    total_nc = 0
+    conv_uids = set()
+    nc_uids = set()
+    
     for row in cur.fetchall():
+        print "OUTPUT:" +  str(row)
         is_conv = row[-1]
-        event_signature = ""
+        event_signatures = set()
+        event_signature_str = ""
         for i in range(1,len(row) - 2):
-            event_signature = event_signature + " " + str(row[i])
-        if event_signature in event_metadata:
-            event_metadata[event_signature] += 1
-        else:
-            event_metadata[event_signature] = 1
-        if is_conv == 0:
-            if event_signature not in conv_events:
-                conv_events[event_signature] = []
-            conv_events[event_signature].append(row[-2])
-        else:
-            if event_signature not in conv_events:
-                nc_events[event_signature] = []
-            nc_events[event_signature].append(row[-2])
+            event_signature_str = event_signature_str + " " + str(row[i])
+            if str(row[i]):
+                pass
+                #event_signatures.add(str(row[i]))
+        event_signatures.add(event_signature_str)
+        for event_signature in event_signatures:
+            if event_signature in event_metadata:
+                event_metadata[event_signature] += 1
+            else:
+                event_metadata[event_signature] = 1
+            if is_conv == 0:
+                conv_uids.add(row[0])
+                if event_signature not in conv_events:
+                    conv_events[event_signature] = []
+                conv_events[event_signature].append(row[-2])
+            else:
+                nc_uids.add(row[0])
+                if event_signature not in nc_events:
+                    nc_events[event_signature] = []
+                nc_events[event_signature].append(row[-2])
 
     ctr = 0
+    total_conv = len(conv_uids)
+    total_nc = len(nc_uids)
+    print "Conv events", total_conv
+    print "NC events", total_nc
     for event in event_metadata:
-        
         if event in conv_events and event in nc_events:
             print "Event signature: ",event
-            print "conv events", conv_events[event]
-            print "nc events", nc_events[event]
-            filename = "/data/event" + str(ctr) + ".txt"
+            print "Num users with non-zero counts and converted: ", len(conv_events[event])
+            print "Num users with non-zero counts and did not convert: ", len(nc_events[event])
+            num_conv_with_zero = total_conv - len(conv_events[event])
+            num_nc_with_zero = total_nc - len(nc_events[event])
+            conv_events[event].extend([0] * num_conv_with_zero)
+            nc_events[event].extend([0] * num_nc_with_zero)
+            
+            filename = "event" + str(ctr) + ".txt"
             x,mcc_arr = get_matthew_corr_coef(event,filename)
             print event, mcc_arr
             ctr += 1
