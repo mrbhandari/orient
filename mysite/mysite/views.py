@@ -75,7 +75,7 @@ def set_post_status_series(request):
   
   results_collection = []
   
-  
+
   
   for filename in FILELIST:
     read_results = []
@@ -88,12 +88,17 @@ def set_post_status_series(request):
         for row in reader:
             if row[0] != '':
               read_results.append(row)
-    #print results
     
+    #format expects title first and then header in terms of order
+    if len(read_results[0]) == 1:
+      graph_title = read_results[0][0]
+      read_results.pop(0) #remove it
+      
     header_row = 1
+    
     if header_row == 1:
       results_object = {"series": [],
-        "title": filename}
+        "title": graph_title}
       for i in read_results[0]:
         results_object['series'].append(
           {"name": i,
