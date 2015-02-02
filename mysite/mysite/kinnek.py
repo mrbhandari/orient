@@ -2,6 +2,9 @@ import sys
 import os
 import numpy as np
 from collections import Counter
+
+
+
 #your_djangoproject_home="/Users/tempuser/orient/mysite/"
 #
 #sys.path.append(your_djangoproject_home)
@@ -16,6 +19,7 @@ import math
 import MySQLdb as mdb
 
 
+#TODO: for users with 0 events
 
 def get_cumsum_counts1(feature,array):
     total = len(array[feature])
@@ -179,32 +183,6 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             x,mcc_arr = get_matthew_corr_coef(event)
             print event, mcc_arr
 
-
-def my_custom_sql():
-    cursor = connection.cursor()
-
-    #cursor.execute("UPDATE bar SET foo = 1 WHERE baz = %s", [self.baz])
-
-    cursor.execute("""
-                   CREATE TEMPORARY TABLE success_uids
-SELECT DISTINCT uid FROM user_events WHERE
-path = 'BODY|DIV#container|DIV.row|DIV.col-md-8|DIV.shelf-main|FORM#profile_submit|DIV#npcShelfFormApp_content|DIV#form_view|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD|DIV.row|DIV.col-md-6 col-xs-6|DIV.submit text-right|A.fields submit standard|IMG' OR 
-path = 'BODY|DIV.container|DIV.row|DIV.col-md-8 col-sm-8|DIV.block-grey|DIV#npcShelfFormApp_content|DIV#form_view|FORM#profile_submit|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD.submit|A.fields submit pull-right standard|IMG';
-
-CREATE TEMPORARY TABLE failure_uids
-SELECT distinct A.uid from user_events as A
-    LEFT JOIN 
-success_uids
-as B
-ON (A.uid = B.uid)
-WHERE B.uid IS NULL;
-
-select count(*) from success_uids; 
-select count(*) from failure_uids;                     
-                   """)
-    rows = cursor.fetchall()
-    print rows
-    return rows
 
 
 def generate_output():

@@ -4,11 +4,15 @@ from django.contrib import auth
 from django.core.context_processors import csrf
 from random import randint
 import json
+from os import listdir
+from os.path import isfile, join
+import os
+import os.path
+import csv
 
-FILELIST = ['BROWSE_INDUSTRY', 'BROWSE_PRODUCT_GALLERY',
-  'COMPANY_PROFILE', 'EDIT_POST', 'FAQ_VISIT', 'MY_POSTS',
-  'MYPOST_SUPPLIER_NAV', 'PRODUCT_GROUP_VIEWED', 'SENT_MESSAGE',
-  'set_post_status', 'VIEWED_QUOTE']
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+MYPATH = os.path.join(PROJECT_ROOT, '../../static/data/')
+FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(".csv"))]
 
 
 def render_home(request):
@@ -63,12 +67,6 @@ def series(request):
     print json_results
     return HttpResponse(json_results)
 
-import os
-import os.path
-import csv
-
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
 
@@ -77,10 +75,12 @@ def set_post_status_series(request):
   
   results_collection = []
   
+  
+  
   for filename in FILELIST:
     read_results = []
     results_object = {}
-    path = os.path.join(PROJECT_ROOT, '../../static/data/' + filename + '.csv')
+    path = os.path.join(PROJECT_ROOT, '../../static/data/' + filename)
     
     #open the file
     with open(path, 'rU') as f:
@@ -112,7 +112,7 @@ def set_post_status_series(request):
     results_collection.append(results_object)
     
   json_results = json.dumps(results_collection)
-  print json_results
+  #print json_results
   
   return HttpResponse(json_results)
 
