@@ -15,6 +15,34 @@ python manage.py migrate
 
 python manage.py createsuperuser
 
+sudo cp ~/Downloads/all_visits.tsv all_visits.tsv
+
+CREATE TABLE `user_events` (
+  `uid` varchar(100) DEFAULT NULL,
+  `start_time` bigint(20) DEFAULT NULL,
+  `visit_id` int(11) DEFAULT NULL,
+  `etype` varchar(100) DEFAULT NULL,
+  `url` varchar(2048) DEFAULT NULL,
+  `is_conversion` tinyint(1) DEFAULT NULL,
+  `referrer` varchar(2048) DEFAULT NULL,
+  `ip_address` varchar(100) DEFAULT NULL,
+  `user_agent` varchar(1000) DEFAULT NULL,
+  `element` varchar(1000) DEFAULT NULL,
+  `element_txt` varchar(1000) DEFAULT NULL,
+  `css_class` varchar(1000) DEFAULT NULL,
+  `path` varchar(1000) DEFAULT NULL,
+  `log_time` bigint(20) DEFAULT NULL,
+  `title` varchar(1000) DEFAULT NULL,
+  `ref_domain` varchar(500) DEFAULT NULL,
+  `img_src` varchar(1000) DEFAULT NULL,
+  `label` varchar(1000) DEFAULT NULL,
+  `start_hc` int(11) DEFAULT NULL,
+  `href` varchar(1000) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path);
+
 
 
 #on ubuntu server
@@ -66,3 +94,8 @@ mysql -u root -p
 sudo python manage.py migrate
 
 python manage.py createsuperuser
+
+#load data
+ mysql -u root -p --local-infile
+ use orient;
+LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path);
