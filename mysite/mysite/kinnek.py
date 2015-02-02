@@ -1,5 +1,7 @@
 import sys
 import os
+import numpy as np
+from collections import Counter
 #your_djangoproject_home="/Users/tempuser/orient/mysite/"
 #
 #sys.path.append(your_djangoproject_home)
@@ -12,6 +14,55 @@ import math
 #from django.db import connection
 
 import MySQLdb as mdb
+
+
+
+def get_cumsum_counts1(feature,array):
+    total = len(array[feature])
+    ctr = Counter(array[feature])
+    min_cnt = np.min(array[feature])
+    max_cnt = np.max(array[feature])
+
+    arr1 = {}
+    arr1[0] = total
+    for i in range(1,max_cnt+1):
+        arr1[i] = arr1[i-1] - ctr[i-1]
+    return arr1
+def get_cumsum_counts2(feature,array):
+    ctr = Counter(array[feature])
+    min_cnt = np.min(array[feature])
+    max_cnt = np.max(array[feature])
+
+    arr1 = {}
+    arr1[max_cnt] = np.sum(np.array(array[feature] < max_cnt))
+    for i in range(max_cnt-1,-1,-1):
+        arr1[i] = arr1[i+1] - ctr[i]
+    return arr1
+
+def get_matthew_corr_coef(feature,log_values=0):
+    tp = get_cumsum_counts1(feature,conv_events)
+    fp = get_cumsum_counts1(feature,nc_events)
+    
+    fn = get_cumsum_counts2(feature,conv_events)
+    tn = get_cumsum_counts2(feature,nc_events)
+    min_cnt = np.min([np.min(tp.keys()),np.min(fp.keys()),np.min(tn.keys()),np.min(fn.keys())])
+    max_cnt = np.min([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
+    mcc_arr = []
+    for i in range(min_cnt,max_cnt):
+        tpv = tp[i]
+        fpv = fp[i]
+        tnv = tn[i]
+        fnv = fn[i]
+        total = tpv + fpv + tnv + fnv
+        mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
+        significance = mcc * mcc * total
+        if log_values == 1:
+            print mcc
+        elif log_values == 2:
+            print i,"\t",tpv,"\t",fpv,"\t",fnv,"\t",tnv,"\t",mcc,"\t",significance
+            #print i, "\t", tpv/(tpv + fpv + 0.0), "\t", fnv/(tnv + fnv + 0.0)
+        mcc_arr.append(mcc)
+    return range(min_cnt,max_cnt),mcc_arr
 
 
 
@@ -65,7 +116,7 @@ FROM success_uids_events
 GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href order by cnt desc;
                 """)
     
-    
+        
     cur.execute("""
                 CREATE TEMPORARY TABLE failure_uids_events_cnt
 SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
@@ -97,11 +148,36 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 """)
     
     cur.execute("""
-                SELECT * from all_uid_events_cnt limit 2;
+                SELECT * from all_uid_events_cnt;
                 """)
-    output = cur.fetchall()
-    print output
-    
+    conv_events = {}
+    nc_events = {}
+    event_metadata = {}
+    for row in cur.fetchall():
+        is_conv = row[-1]
+        event_signature = ""
+        for i in range(1,len(row) - 2):
+            event_signature = event_signature + " " + str(row[i])
+        if event_signature in event_metadata:
+            event_metadata[event_signature] += 1
+        else:
+            event_metadata[event_signature] = 1
+        if is_conv == 0:
+            if event_signature not in conv_events:
+                conv_events[event_signature] = []
+            conv_events[event_signature].append(row[-2])
+        else:
+            print "not a conversion"
+            if event_signature not in conv_events:
+                nc_events[event_signature] = []
+            nc_events[event_signature].append(row[-2])
+
+    for event in event_metadata:
+        
+        if event in conv_events and event in nc_events:
+            print event
+            x,mcc_arr = get_matthew_corr_coef(event)
+            print event, mcc_arr
 
 
 def my_custom_sql():
@@ -165,11 +241,11 @@ def generate_output():
                     
                     if count_of_event >= x and conversion_event == 1:
                         TP +=1
-                    if count_of_event >= x and conversion_event == 0:	
+                    if count_of_event >= x and conversion_event == 0:    
                         FP +=1
-                    if count_of_event < x and conversion_event == 1:	
+                    if count_of_event < x and conversion_event == 1:    
                         FN +=1
-                    if count_of_event < x and conversion_event == 0:	
+                    if count_of_event < x and conversion_event == 0:    
                         TN +=1
             try:
                 phi = (TP * TN - FP * FN) / math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
