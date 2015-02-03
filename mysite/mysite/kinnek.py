@@ -190,7 +190,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                         event_metadata[event_signature] += 1
                     else:
                         event_metadata[event_signature] = 1
-                    if prev_conv == 0:
+                    if prev_conv != 0:
                         if event_signature not in conv_events:
                             conv_events[event_signature] = []
                         conv_events[event_signature].append(agg_event_ctr[event_signature])
@@ -220,7 +220,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 event_metadata[event_signature] += 1
             else:
                 event_metadata[event_signature] = 1
-            if is_conv == 0:
+            if is_conv != 0:
                 conv_uids.add(row[0])
                 if event_signature not in conv_events:
                     conv_events[event_signature] = []
