@@ -173,17 +173,47 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     total_nc = 0
     conv_uids = set()
     nc_uids = set()
-    
+    prev_uid = ""
+    prev_conv = 0
+    agg_event_ctr = {}
     for row in cur.fetchall():
         print "OUTPUT:" +  str(row)
+        uid = row[0]
+        if prev_uid != uid:
+            if prev_uid != "":
+                print "going to output canonicalized events for ", prev_uid
+                print "prev_conv ", prev_conv
+
+                for event_signature in agg_event_ctr.keys():
+                    print "outputting ", event_signature, agg_event_ctr[event_signature]
+                    if event_signature in event_metadata:
+                        event_metadata[event_signature] += 1
+                    else:
+                        event_metadata[event_signature] = 1
+                    if prev_conv == 0:
+                        if event_signature not in conv_events:
+                            conv_events[event_signature] = []
+                        conv_events[event_signature].append(agg_event_ctr[event_signature])
+                    else:
+                        if event_signature not in nc_events:
+                            nc_events[event_signature] = []
+                        nc_events[event_signature].append(agg_event_ctr[event_signature])
+            agg_event_ctr = {} 
+       
+        prev_conv = row[-1]
+        prev_uid = uid
+       
         is_conv = row[-1]
         event_signatures = set()
         event_signature_str = ""
         for i in range(1,len(row) - 2):
             event_signature_str = event_signature_str + " " + str(row[i])
-            if str(row[i]):
-                pass
-                #event_signatures.add(str(row[i]))
+            event_signature_temp = str(row[i])
+            if event_signature_temp:
+                if event_signature_temp in agg_event_ctr:
+                    agg_event_ctr[event_signature_temp] = agg_event_ctr[event_signature_temp] + row[-2]
+                else:
+                    agg_event_ctr[event_signature_temp] = row[-2]
         event_signatures.add(event_signature_str)
         for event_signature in event_signatures:
             if event_signature in event_metadata:
@@ -207,6 +237,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     print "Conv events", total_conv
     print "NC events", total_nc
     for event in event_metadata:
+        print "ALL EVENT", event
         if event in conv_events and event in nc_events:
             print "Event signature: ",event
             print "Num users with non-zero counts and converted: ", len(conv_events[event])
