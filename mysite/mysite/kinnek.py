@@ -66,7 +66,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
         significance = mcc * mcc * total
-        if significance >= 2.5:
+        if significance >= 2.5 and abs(mcc) >= 0.2:
             significance_higher = True
         output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance))
         #writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")
@@ -185,7 +185,8 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     prev_uid = ""
     prev_conv = 0
     agg_event_ctr = {}
-    for row in cur.fetchall():
+    column_names = cur.description
+    for row in cur.fetchall(): 
         print "OUTPUT:" +  str(row)
         uid = row[0]
         if prev_uid != uid:
@@ -216,13 +217,20 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
         event_signatures = set()
         event_signature_str = ""
         for i in range(1,len(row) - 2):
-            event_signature_str = event_signature_str + " " + str(row[i])
-            event_signature_temp = str(row[i])
+            field_name = column_names[i][0]
+            if str(row[i]).strip() == "":
+                continue
+            if event_signature_str == "":
+                event_signature_str = field_name+ "=" + str(row[i])
+            else:
+                event_signature_str = event_signature_str + " " + field_name + "=" + str(row[i])
+            event_signature_temp = field_name + "=" + str(row[i])
             if event_signature_temp:
                 if event_signature_temp in agg_event_ctr:
                     agg_event_ctr[event_signature_temp] = agg_event_ctr[event_signature_temp] + row[-2]
                 else:
                     agg_event_ctr[event_signature_temp] = row[-2]
+        print "EVENT SIGNATURE",event_signature_str
         event_signatures.add(event_signature_str)
         for event_signature in event_signatures:
             if event_signature in event_metadata:
