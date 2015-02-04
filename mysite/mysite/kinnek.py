@@ -42,7 +42,6 @@ def get_cumsum_counts2(feature,array,min_ctr,max_ctr):
     return arr1
 
 def get_matthew_corr_coef(feature,fname, log_values=0):
-    writer = open(fname,"wb")
     min_ctr = min(min(conv_events[feature]),min(nc_events[feature]))
     max_ctr = max(max(conv_events[feature]),max(nc_events[feature]))
     print "MIN AND MAX",min_ctr,max_ctr
@@ -55,9 +54,8 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     min_cnt = np.min([np.min(tp.keys()),np.min(fp.keys()),np.min(tn.keys()),np.min(fn.keys())])
     max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
     mcc_arr = []
-    writer.write(feature)
-    writer.write("\n");
-    writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\n");
+    output_tuples = []
+    significance_higher = False
     for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
         fpv = fp[i]
@@ -68,7 +66,10 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
         significance = mcc * mcc * total
-        writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")
+        if significance >= 2.5:
+            significance_higher = True
+        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance))
+        #writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")
         if log_values == 1:
             pass
             #print mcc
@@ -77,7 +78,15 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
             #print i,"\t",tpv,"\t",fpv,"\t",fnv,"\t",tnv,"\t",mcc,"\t",significance
             #print i, "\t", tpv/(tpv + fpv + 0.0), "\t", fnv/(tnv + fnv + 0.0)
         mcc_arr.append(mcc)
-    writer.close()
+    if significance_higher:
+        writer = open(fname,"wb")
+        writer.write(feature)
+        writer.write("\n");
+        writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\n");
+        for row in output_tuples:
+            writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]))
+            writer.write("\n")
+        writer.close()
     return range(min_cnt,max_cnt),mcc_arr
 
 
