@@ -105,3 +105,7 @@ python manage.py createsuperuser
  mysql -u root -p --local-infile
  use orient;
 LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path);
+
+
+sudo apt-get install python-dev
+sudo pip install numpy
