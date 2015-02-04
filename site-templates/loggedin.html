@@ -3,7 +3,10 @@
 
 
 {% block content %}
-    <script src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
+    <script type='text/javascript' src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
+    <script type='text/javascript' src="{% static 'highslide-4.1.13/highslide/highslide-full.js' %}"></script>
+    <script type='text/javascript' src="http://highcharts.com/highslide/highslide.config.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://highcharts.com/highslide/highslide.css"/>
   <div class="container">
   <h2>Hi {{full_name}} you are now logged in!</h2>
   <p>Click <a href="/accounts/logout/">here</a> to logout.</p>
@@ -22,17 +25,21 @@
             $.getJSON('/ajax/set_post_status_series', function(datacollection) {
                 for (counter = 0; counter < datacollection.length; counter++) {
                     var data = datacollection[counter]
-                    $('#graphs').append( "<div class='container' id='container" + counter +"'></div>" )
-                    console.log(data.series[6])
+                    $('#graphs').append("<h3 class='container'>" +data.title+ "</h3>")
+                    $('#graphs').append( "<div  id='container" + counter + "' counter='" + counter + "'></div>" )
+                    console.log(data.series[6]);
                     $('#container' + counter).highcharts({
                         chart: {
                             type: 'spline'
                         },
                         title: {
-                            text: data.title
+                            text: '',
+                            style: {
+                            display: 'none'
+                        }
                         },
-                        subtitle: {
-                            text: 'Correlation of # of SET_POST_STATUS events vs. Goal'
+                        counter_no: {
+                            value: counter
                         },
                         xAxis: {
                             type: 'linear',
@@ -92,7 +99,9 @@
                             }]
                         },
                         tooltip: {
-                            valueSuffix: ' correlation coefficient'
+                            valueSuffix: ' correlation coefficient',
+                            shared: true,
+                            crosshairs: true,
                         },
                         plotOptions: {
                             spline: {
@@ -102,9 +111,40 @@
                                         lineWidth: 5
                                     }
                                 },
-                                marker: {
+                        allowPointSelect: true,
+                                
+                        point: {
+                            events: {
+                                click: function (e) {
+                                    
+                                    
+                                    var target = $( e.target )
+                                    var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
+                                    var tp = datacollection[graph_no].series[1].data[this.category][1]
+                                    var fp = datacollection[graph_no].series[2].data[this.category][1]
+                                    var tn = datacollection[graph_no].series[3].data[this.category][1]
+                                    var fn = datacollection[graph_no].series[4].data[this.category][1]
+                                    var mcc = datacollection[graph_no].series[5].data[this.category][1]
+                                    var chi_squared = datacollection[graph_no].series[6].data[this.category][1]
+                                    var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
+                                    var row2 = "<tr><td> + (Actual)</td><td>" + tp + "</td><td>"+fn+"</td></tr>"
+                                    var row3 = "<tr><td> - (Actual)</td><td>" + fp + "</td><td>"+tn+"</td></tr></table>"
+                                    var row4 = "<br>Chi squared: " + chi_squared
+                                    var row5 = "<br>MCC: " + mcc
+                                    hs.htmlExpand(null, {
+                                        headingText: 'Details',
+                                        maincontentText:  row1 + row2 + row3 + row4 + row5,
+                                        width: 300
+                                    });
+                                }
+                            },
+                            marker: {
                                     enabled: true
-                                },
+                            },
+                        },
+                                
+                                                                
+                                
                             }
                         },
                         series: [data.series[5]],
