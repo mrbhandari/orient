@@ -11,7 +11,8 @@ import os.path
 import csv
 
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-MYPATH = os.path.join(PROJECT_ROOT, '../../../../../../../data/')
+MYPATH = '/data/'
+#MYPATH = os.path.join(PROJECT_ROOT, '../../../../../../../data/')
 FILETYPE = ".txt"
 FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
 
