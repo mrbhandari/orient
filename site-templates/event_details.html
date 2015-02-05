@@ -12,16 +12,18 @@
 
 <br>
 <br>
-    <table>
-    {% for o in sql_results %}
-    
-       {{ o }}
-    <br>
-    <br>
-    
-    {% endfor %}
-    </table>
+  
 
+
+<table class="table table-bordered table-condensed table-hover table-striped">
+  {% for row in sql_results %}
+    {% for cell in row %}
+        {% cycle '<tr>' '' '' '' '' '' '' %}
+          <td>{{ cell }}</td>
+        {% cycle '' '' '' '' '' '' '</tr>' %}
+    {% endfor %}
+  {% endfor %}
+</table>
 
 </div>
 {% endblock %}

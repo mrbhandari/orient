@@ -131,9 +131,9 @@ def return_event_detail(request):
   
   mydict = dict(request.GET._iterlists())
   sql_query = create_sql_query(mydict)
-  sql_results =  get_sql_data(sql_query)
+  sql_results =  list(get_sql_data(sql_query))
   print sql_results
-  
+  sql_results.insert(0, ['cnt', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src'])
   
   return render_to_response('event_details.html', {
           'mydict': mydict,
@@ -147,14 +147,14 @@ import urllib2
 def create_sql_query(query_dict):
     #str = urllib2.unquote(str)
     #fields = str.split("::")
-    sql_query = "select count(*) as cnt, url, css_class, element, element_txt, label  from user_events where "
+    sql_query = "select count(*) as cnt, url, css_class, element, element_txt, label, img_src  from user_events where "
     i = 0
     for key, value in query_dict.iteritems():
         sql_query = sql_query + " " + key + "= '" + value[0] + "'"
         if i < len(query_dict) - 1:
             sql_query = sql_query + " and "
         i +=1
-    sql_query += "group by url, css_class, element, element_txt, label order by cnt desc"
+    sql_query += "group by url, css_class, element, element_txt, label, img_src order by cnt desc"
     return sql_query
 
 
