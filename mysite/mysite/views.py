@@ -126,6 +126,8 @@ def set_post_status_series(request):
   
   return HttpResponse(json_results)
 
+def get_graph_data(request):
+  return set_post_status_series(request)
 
 def return_event_detail(request):
   

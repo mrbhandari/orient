@@ -8,28 +8,73 @@
     <script type='text/javascript' src="http://highcharts.com/highslide/highslide.config.js"></script>
     <link rel="stylesheet" type="text/css" href="http://highcharts.com/highslide/highslide.css"/>
   <div class="container">
-  <h2>Hi {{full_name}} you are now logged in!</h2>
+  <h4>Welcome {{full_name}}!</h4>
   <p>Click <a href="/accounts/logout/">here</a> to logout.</p>
   
-  <p>Click <a href="/accounts/profile/">here</a> to edit your profile information</p>
+  <form id='update_graphs' action='/get'>
+    Filter Query
+    <textarea name='filter_query' id= 'filter_query'></textarea>
+    Success Query
+    <textarea name='success_query' id = 'success_query'></textarea>
+    <button >Submit</button>
+  </form>
+  
   
   
   <div id = 'graphs'></div>
   
   
-  </div>  
+  </div>
     <script type='text/javascript'>
-        function addItem(detailed_events_url) {
-                    console.log(detailed_events_url)
-                    $.post("http://test.com/test.php",{username:'username', password:'pword', item:'item'},        
-                    function(data) {
-                       alert("blue")
-                    });
-                }
+        
         $(document).ready(function() {
+            (function ($) {
+                $.fn.serializeFormJSON = function () {
+            
+                    var o = {};
+                    var a = this.serializeArray();
+                    $.each(a, function () {
+                        if (o[this.name]) {
+                            if (!o[this.name].push) {
+                                o[this.name] = [o[this.name]];
+                            }
+                            o[this.name].push(this.value || '');
+                        } else {
+                            o[this.name] = this.value || '';
+                        }
+                    });
+                    return o;
+                };
+            })(jQuery);
+            
+                $('form').submit(function (e) {
+                    e.preventDefault();
+                    var dataToBeSent = $(this).serializeFormJSON();
+                    console.log(dataToBeSent);
+                
+                    $.post('get_graph_data/', dataToBeSent, function(data) {
+                        //data contains the JSON object
+                        //textStatus contains the status: success, error, etc
+                        
+                        console.log(data)
+                      }, "json");
+                });
+            
+                //$('#update_graphs').submit( function(e) {
+                //    var filter_query = $("#filter_query").val()
+                //    var success_query = $("#success_query").val()
+                //    //alert('you clicked' + filter_query + success_query);
+                //    e.preventDefault();
+                //    var dataToBeSent = $("form").serialize();
+                //    console.log($("form"))
+                //    
+                //    
+                //    
+                //});
             
             
             $.getJSON('/ajax/set_post_status_series', function(datacollection) {
+                
                 
                 
                 for (counter = 0; counter < datacollection.length; counter++) {
