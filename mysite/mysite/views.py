@@ -147,13 +147,14 @@ import urllib2
 def create_sql_query(query_dict):
     #str = urllib2.unquote(str)
     #fields = str.split("::")
-    sql_query = "select * from user_events where "
+    sql_query = "select count(*) as cnt, url, css_class, element, element_txt, label  from user_events where "
     i = 0
     for key, value in query_dict.iteritems():
         sql_query = sql_query + " " + key + "= '" + value[0] + "'"
         if i < len(query_dict) - 1:
             sql_query = sql_query + " and "
         i +=1
+    sql_query += "group by url, css_class, element, element_txt, label order by cnt desc"
     return sql_query
 
 
