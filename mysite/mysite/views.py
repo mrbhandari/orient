@@ -99,6 +99,8 @@ def set_post_status_series(request):
       
     header_row = 1
     
+    
+    
     if header_row == 1:
       results_object = {"series": [],
         "title": graph_title}
@@ -124,6 +126,49 @@ def set_post_status_series(request):
   
   return HttpResponse(json_results)
 
+
+def return_event_detail(request):
+  
+  mydict = dict(request.GET._iterlists())
+  sql_query = create_sql_query(mydict)
+  sql_results =  get_sql_data(sql_query)
+  print sql_results
+  
+  
+  return render_to_response('event_details.html', {
+          'mydict': mydict,
+          'sql_query': sql_query,
+          'sql_results': sql_results
+  })
+
+
+import urllib2
+
+def create_sql_query(query_dict):
+    #str = urllib2.unquote(str)
+    #fields = str.split("::")
+    sql_query = "select * from user_events where "
+    i = 0
+    for key, value in query_dict.iteritems():
+        sql_query = sql_query + " " + key + "= '" + value[0] + "'"
+        if i < len(query_dict) - 1:
+            sql_query = sql_query + " and "
+        i +=1
+    return sql_query
+
+
+import MySQLdb as mdb
+
+def get_sql_data(sql_query):
+  con = mdb.connect("localhost", "root", "thebakery", "orient")
+  
+  with con:
+      cur = con.cursor()
+      #cur.execute("SELECT VERSION()")
+      cur.execute(sql_query)
+      return cur.fetchall() 
+      
+  
 #[{
 #    "name": "Month",
 #    "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+<div class="container">
+    
+
+<br>
+    
+{{ sql_query }}
+
+<br>
+<br>
+    <table>
+    {% for o in sql_results %}
+    
+       {{ o }}
+    <br>
+    <br>
+    
+    {% endfor %}
+    </table>
+
+
+</div>
+{% endblock %}

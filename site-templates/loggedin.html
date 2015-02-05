@@ -19,13 +19,23 @@
   
   </div>  
     <script type='text/javascript'>
+        function addItem(detailed_events_url) {
+                    console.log(detailed_events_url)
+                    $.post("http://test.com/test.php",{username:'username', password:'pword', item:'item'},        
+                    function(data) {
+                       alert("blue")
+                    });
+                }
         $(document).ready(function() {
             
-    
+            
             $.getJSON('/ajax/set_post_status_series', function(datacollection) {
+                
+                
                 for (counter = 0; counter < datacollection.length; counter++) {
                     var data = datacollection[counter]
-                    $('#graphs').append("<h3 class='container'>" +data.title+ "</h3>")
+                    var detail_url = encodeURI(data.title.replace(/::/g, "&"))
+                    $('#graphs').append(["<h3 class='container'>", data.title, "</h3>", "<a target='_blank' href='\getdetails?", detail_url, "'>Detail</a>"].join(''))
                     $('#graphs').append( "<div  id='container" + counter + "' counter='" + counter + "'></div>" )
                     console.log(data.series[6]);
                     $('#container' + counter).highcharts({
