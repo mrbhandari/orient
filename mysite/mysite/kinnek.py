@@ -22,6 +22,20 @@ import MySQLdb as mdb
 
 #TODO: for users with 0 events
 
+
+import urllib2
+
+def create_sql_query(str):
+    str = urllib2.unquote(str)
+    fields = str.split("::")
+    sql_query = "select * from user_events where "
+    for i in range(0,len(fields)):
+        f = fields[i]
+        sql_query = sql_query + " " + f.split("=")[0] + "= '" + f.split("=")[1] + "'"
+        if i < len(fields) - 1:
+            sql_query = sql_query + " and "
+    print sql_query
+
 def get_cumsum_counts1(feature,array,min_ctr,max_ctr):
     total = len(array[feature])
     ctr = Counter(array[feature])
