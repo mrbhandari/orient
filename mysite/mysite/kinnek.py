@@ -97,44 +97,39 @@ with con:
     cur = con.cursor()
     #cur.execute("SELECT VERSION()")
     cur.execute("""
-                CREATE TEMPORARY TABLE segment_user_events
-        select user_events.* from user_events where start_hc <=5;
+                CREATE TEMPORARY TABLE user_segment
+        select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';
                 """)
     
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
-SELECT DISTINCT uid FROM segment_user_events WHERE
+SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
 path = 'BODY|DIV#container|DIV.row|DIV.col-md-8|DIV.shelf-main|FORM#profile_submit|DIV#npcShelfFormApp_content|DIV#form_view|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD|DIV.row|DIV.col-md-6 col-xs-6|DIV.submit text-right|A.fields submit standard|IMG' OR 
 path = 'BODY|DIV.container|DIV.row|DIV.col-md-8 col-sm-8|DIV.block-grey|DIV#npcShelfFormApp_content|DIV#form_view|FORM#profile_submit|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD.submit|A.fields submit pull-right standard|IMG';
                 """)
     
     cur.execute("""
 CREATE TEMPORARY TABLE failure_uids
-SELECT distinct A.uid from segment_user_events as A
-    LEFT JOIN 
-success_uids
-as B
-ON (A.uid = B.uid)
-WHERE B.uid IS NULL;
+SELECT distinct A.uid from user_segment A where A.uid not in (select uid from success_uids);
 """)
 
     cur.execute("""
-                CREATE TEMPORARY TABLE failure_uids_events
-Select segment_user_events.* from segment_user_events,
+                CREATE TEMPORARY  TABLE failure_uids_events
+Select a.* from user_events a,
 failure_uids as b
-where segment_user_events.uid = b.uid;
+where a.uid = b.uid;
                 """)
     
     cur.execute("""
-                CREATE TEMPORARY TABLE success_uids_events
-Select segment_user_events.* from segment_user_events,
+                CREATE TEMPORARY  TABLE success_uids_events
+Select a.* from user_events a,
 success_uids as b
-where segment_user_events.uid = b.uid;
+where a.uid = b.uid and a.log_time < b.log_time;
 """)
     
     
     cur.execute("""
-                CREATE TEMPORARY TABLE success_uids_events_cnt
+                CREATE TEMPORARY  TABLE success_uids_events_cnt
 SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
       COUNT(*) AS cnt
 FROM success_uids_events
@@ -143,7 +138,7 @@ GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, 
     
         
     cur.execute("""
-                CREATE TEMPORARY TABLE failure_uids_events_cnt
+                CREATE TEMPORARY  TABLE failure_uids_events_cnt
 SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
       COUNT(*) AS cnt
 FROM failure_uids_events
@@ -162,7 +157,7 @@ GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, 
     
     
     cur.execute("""
-                Create TEMPORARY table all_uid_events_cnt
+                CREATE TEMPORARY table all_uid_events_cnt
 SELECT success_uids_events_cnt.* FROM success_uids_events_cnt
 UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 """)
@@ -223,7 +218,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             if event_signature_str == "":
                 event_signature_str = field_name+ "=" + str(row[i])
             else:
-                event_signature_str = event_signature_str + " " + field_name + "=" + str(row[i])
+                event_signature_str = event_signature_str + "::" + field_name + "=" + str(row[i])
             event_signature_temp = field_name + "=" + str(row[i])
             if event_signature_temp:
                 if event_signature_temp in agg_event_ctr:
