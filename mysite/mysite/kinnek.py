@@ -23,7 +23,7 @@ import MySQLdb as mdb
 #TODO: for users with 0 events
 
 
-
+MINCORRELATION = .2
 
 def get_cumsum_counts1(feature,array,min_ctr,max_ctr):
     total = len(array[feature])
@@ -69,7 +69,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
         significance = mcc * mcc * total
-        if significance >= 2.5 and abs(mcc) >= 0.2:
+        if significance >= 2.5 and abs(mcc) >= MINCORRELATION:
             significance_higher = True
         output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance))
         #writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")

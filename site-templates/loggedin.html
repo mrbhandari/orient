@@ -136,14 +136,16 @@
                                     var fn = datacollection[graph_no].series[4].data[this.category][1]
                                     var mcc = datacollection[graph_no].series[5].data[this.category][1]
                                     var chi_squared = datacollection[graph_no].series[6].data[this.category][1]
+                                    var expected_value = 10* tp + -1*fp
                                     var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
                                     var row2 = "<tr><td> + (Actual)</td><td>" + tp + "</td><td>"+fn+"</td></tr>"
                                     var row3 = "<tr><td> - (Actual)</td><td>" + fp + "</td><td>"+tn+"</td></tr></table>"
                                     var row4 = "<br>Chi squared: " + chi_squared
                                     var row5 = "<br>MCC: " + mcc
+                                    var row6 = "<br>Expected value: " + expected_value
                                     hs.htmlExpand(null, {
                                         headingText: 'Details',
-                                        maincontentText:  row1 + row2 + row3 + row4 + row5,
+                                        maincontentText:  row1 + row2 + row3 + row4 + row5 + row6,
                                         width: 300
                                     });
                                 }

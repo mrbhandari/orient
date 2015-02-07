@@ -82,7 +82,7 @@ def set_post_status_series(request):
   for filename in FILELIST:
     read_results = []
     results_object = {}
-    path = os.path.join(PROJECT_ROOT, '../../../../../../../data/' + filename)
+    path = os.path.join(PROJECT_ROOT, '/data/' + filename)
     
     print
     #open the file
