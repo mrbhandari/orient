@@ -71,23 +71,19 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         significance = mcc * mcc * total
         if significance >= 2.5 and abs(mcc) >= MINCORRELATION:
             significance_higher = True
-        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance))
-        #writer.write(str(i) + "\t" + str(tpv) + "\t" + str(fpv) + "\t" + str(tnv) + "\t" + str(fnv) + "\t" + str(mcc) + "\t" + str(significance) + "\n")
-        if log_values == 1:
-            pass
-            #print mcc
-        elif log_values == 2:
-            pass
-            #print i,"\t",tpv,"\t",fpv,"\t",fnv,"\t",tnv,"\t",mcc,"\t",significance
-            #print i, "\t", tpv/(tpv + fpv + 0.0), "\t", fnv/(tnv + fnv + 0.0)
+	    precision = tpv/(tpv + fpv + 1.00)
+	    recall = tpv/(tpv + fnv + 1.00)
+	    cost = 10 * tpv - fpv
+	    print "PRC",precision,recall,cost
+	    output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost))
         mcc_arr.append(mcc)
     if significance_higher:
         writer = open(fname,"wb")
         writer.write(feature)
         writer.write("\n");
-        writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\n");
+        writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\n");
         for row in output_tuples:
-            writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]))
+            writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) )
             writer.write("\n")
         writer.close()
     return range(min_cnt,max_cnt),mcc_arr
