@@ -23,7 +23,6 @@ import MySQLdb as mdb
 #TODO: for users with 0 events
 
 
-MINCORRELATION = .2
 
 def get_cumsum_counts1(feature,array,min_ctr,max_ctr):
     total = len(array[feature])
@@ -58,6 +57,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
     mcc_arr = []
     output_tuples = []
+    MINCORRELATION = 0.2
     significance_higher = False
     for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
@@ -71,11 +71,11 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         significance = mcc * mcc * total
         if significance >= 2.5 and abs(mcc) >= MINCORRELATION:
             significance_higher = True
-	    precision = tpv/(tpv + fpv + 1.00)
-	    recall = tpv/(tpv + fnv + 1.00)
-	    cost = 10 * tpv - fpv
-	    print "PRC",precision,recall,cost
-	    output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost))
+        precision = tpv/(tpv + fpv + 1.00)
+        recall = tpv/(tpv + fnv + 1.00)
+        cost = 10 * tpv - fpv
+        print "PRC",precision,recall,cost
+        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost))
         mcc_arr.append(mcc)
     if significance_higher:
         writer = open(fname,"wb")
@@ -103,8 +103,7 @@ with con:
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
 SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-path = 'BODY|DIV#container|DIV.row|DIV.col-md-8|DIV.shelf-main|FORM#profile_submit|DIV#npcShelfFormApp_content|DIV#form_view|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD|DIV.row|DIV.col-md-6 col-xs-6|DIV.submit text-right|A.fields submit standard|IMG' OR 
-path = 'BODY|DIV.container|DIV.row|DIV.col-md-8 col-sm-8|DIV.block-grey|DIV#npcShelfFormApp_content|DIV#form_view|FORM#profile_submit|DIV#npcShelfFormApp_fields|TABLE.fields submit|TBODY|TR|TD.submit|A.fields submit pull-right standard|IMG';
+etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png'
                 """)
     
     cur.execute("""
