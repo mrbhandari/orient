@@ -73,7 +73,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
         significance = mcc * mcc * total
-        if significance >= 2.5 and abs(mcc) >= MINCORRELATION:
+        if significance >= 2.5:
             significance_higher = True
         precision = tpv/(tpv + fpv + 1.00)
         recall = tpv/(tpv + fnv + 1.00)
@@ -83,7 +83,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
         output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score))
-        mcc_max = max(mcc_max,mcc)
+        mcc_max = max(mcc_max,abs(mcc))
         precision_max = max(precision_max,precision)
         recall_max = max(recall_max, recall)
         cost_max = max(cost_max,cost)
