@@ -45,9 +45,11 @@ def auth_view(request):
         return HttpResponseRedirect('/accounts/invalid')
     
 def loggedin(request):
+    requestdict = dict(request.GET._iterlists())
     return render_to_response('loggedin.html',
                               {'full_name': request.user.username,
-                               'FILELIST': FILELIST})
+                               'FILELIST': FILELIST,
+                               'requestdict': requestdict})
 
 def invalid_login(request):
     return render_to_response('invalid_login.html')
@@ -56,19 +58,19 @@ def logout(request):
     auth.logout(request)
     return render_to_response('logout.html')
   
-def series(request):
-    results = []
-    
-    for i in xrange(1, 11):
-        results.append({
-            'y': randint(0, 100)
-        })
-    
-    print results
-    
-    json_results = json.dumps(results)
-    print json_results
-    return HttpResponse(json_results)
+#def series(request):
+#    results = []
+#    
+#    for i in xrange(1, 11):
+#        results.append({
+#            'y': randint(0, 100)
+#        })
+#    
+#    print results
+#    
+#    json_results = json.dumps(results)
+#    print json_results
+#    return HttpResponse(json_results)
 
 
 

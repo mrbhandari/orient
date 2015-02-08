@@ -13,19 +13,19 @@
   
   <p>Click <a href="/accounts/profile/">here</a> to edit your profile information</p>
   
-  
+  {{ requestdict }}
   <div id = 'graphs'></div>
   
   
   </div>  
     <script type='text/javascript'>
-        function addItem(detailed_events_url) {
-                    console.log(detailed_events_url)
-                    $.post("http://test.com/test.php",{username:'username', password:'pword', item:'item'},        
-                    function(data) {
-                       alert("blue")
-                    });
-                }
+        //function addItem(detailed_events_url) {
+        //            console.log(detailed_events_url)
+        //            $.post("http://test.com/test.php",{username:'username', password:'pword', item:'item'},        
+        //            function(data) {
+        //               alert("blue")
+        //            });
+        //        }
         $(document).ready(function() {
             
             
@@ -37,7 +37,7 @@
                     var detail_url = encodeURI(data.title.replace(/::/g, "&"))
                     $('#graphs').append(["<h3 class='container'>", data.title, "</h3>", "<a target='_blank' href='\getdetails?", detail_url, "'>Detail</a>"].join(''))
                     $('#graphs').append( "<div  id='container" + counter + "' counter='" + counter + "'></div>" )
-                    console.log(data.series[6]);
+                    //console.log(data.series[6]);
                     $('#container' + counter).highcharts({
                         chart: {
                             type: 'spline'
