@@ -116,7 +116,7 @@ LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS ter
 
 sudo apt-get install python-dev
 sudo pip install numpy
-
+sudo pip install pandas
 
 
 #Need to not select * from need to do use create temp table in filter events
