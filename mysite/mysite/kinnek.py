@@ -45,7 +45,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     min_ctr = min(min(conv_events[feature]),min(nc_events[feature]))
     max_ctr = max(max(conv_events[feature]),max(nc_events[feature]))
     #print "MIN AND MAX",min_ctr,max_ctr
-    print feature
+    #print feature
     tp = get_cumsum_counts1(feature,conv_events,min_ctr, max_ctr)
     fp = get_cumsum_counts1(feature,nc_events,min_ctr, max_ctr)
     
@@ -100,7 +100,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
         #writer.write("\n");
         str_output = str_output + "\n"
         #writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n");
-        str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n"
+        str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n"
         for row in output_tuples:
             #writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) )
             str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11])
