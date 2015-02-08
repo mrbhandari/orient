@@ -28,7 +28,8 @@
         //        }
         $(document).ready(function() {
             
-            
+            var graph_param = {{graph_num}};
+            console.log(graph_param)
             $.getJSON('/ajax/set_post_status_series', function(datacollection) {
                 
                 
@@ -59,7 +60,7 @@
                         },
                         yAxis: {
                             title: {
-                                text: 'Correlation'
+                                text: data.series[graph_param].name
                             },
                             //min: 0,
                             //max: 1,
@@ -109,7 +110,7 @@
                             }]
                         },
                         tooltip: {
-                            valueSuffix: ' correlation coefficient',
+                            //valueSuffix: '',
                             shared: true,
                             crosshairs: true,
                         },
@@ -159,7 +160,7 @@
                                 
                             }
                         },
-                        series: [data.series[5]],
+                        series: [data.series[graph_param]],
                         navigation: {
                             menuItemStyle: {
                                 fontSize: '10px'

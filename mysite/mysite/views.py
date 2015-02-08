@@ -46,10 +46,14 @@ def auth_view(request):
     
 def loggedin(request):
     requestdict = dict(request.GET._iterlists())
+    try:
+        graph_num = requestdict['graph'][0]
+    except KeyError, e:
+        graph_num = 5
     return render_to_response('loggedin.html',
                               {'full_name': request.user.username,
                                'FILELIST': FILELIST,
-                               'requestdict': requestdict})
+                               'graph_num': graph_num})
 
 def invalid_login(request):
     return render_to_response('invalid_login.html')
