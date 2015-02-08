@@ -16,10 +16,13 @@ python manage.py migrate
 python manage.py createsuperuser
 
 
-sudo scp -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com:/data/visits_20150128.tsv visits_20150128.tsv
+sudo scp -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com:/data/visits_2015*.tsv
 
 mysql -u root -p --local-infile
 use orient;
+
+drop table user_events;
+
 
 CREATE TABLE `user_events` (
   `uid` varchar(100) DEFAULT NULL,
@@ -42,9 +45,17 @@ CREATE TABLE `user_events` (
   `label` varchar(1000) DEFAULT NULL,
   `start_hc` int(11) DEFAULT NULL,
   `href` varchar(1000) DEFAULT NULL,
-  `landing_url` varchar(1000) DEFAULT NULL
-  `name` varchar(1000) DEFAULT NULL
+  `landing_url` varchar(1000) DEFAULT NULL,
+  `name_attr` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
+
+
+
+
+
 
 
 #on ubuntu server
@@ -112,4 +123,4 @@ sudo pip install numpy
 
 #path=body|div#skrollr-body|div.unified_header|div.container|div.row row-marginless|div.col-md-4 hidden-sm hidden-xs|form.navbar-form navbar-left search search-wide|input#headersearch
 
-LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name);
+LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
