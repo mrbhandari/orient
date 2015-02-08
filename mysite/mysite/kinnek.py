@@ -101,7 +101,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
             writer = open(fname,"wb")
             writer.write(feature)
             writer.write("\n");
-            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n");
+            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n");
         else:
             str_output = feature
             str_output = str_output + "\n"
