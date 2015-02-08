@@ -41,11 +41,12 @@ def get_cumsum_counts2(feature,array,min_ctr,max_ctr):
         arr1[i] = arr1[i+1] - ctr[i]
     return arr1
 
-def get_matthew_corr_coef(feature,fname, log_values=0):
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+
+def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
     min_ctr = min(min(conv_events[feature]),min(nc_events[feature]))
     max_ctr = max(max(conv_events[feature]),max(nc_events[feature]))
-    #print "MIN AND MAX",min_ctr,max_ctr
-    #print feature
     tp = get_cumsum_counts1(feature,conv_events,min_ctr, max_ctr)
     fp = get_cumsum_counts1(feature,nc_events,min_ctr, max_ctr)
     
@@ -55,8 +56,7 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
     mcc_arr = []
     output_tuples = []
-    MINCORRELATION = 0.2
-    significance_higher = True
+    significance_higher = False
     mcc_max = 0
     precision_max = 0
     recall_max = 0
@@ -74,7 +74,10 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
 
         significance = mcc * mcc * total
         if significance >= 2.5:
-            significance_higher = True
+            if print_all:
+                significance_higher = significance_higher | (mcc >= MIN_CORRELATION)
+            else:
+                significance_higher = True
         precision = tpv/(tpv + fpv + 1.00)
         recall = tpv/(tpv + fnv + 1.00)
         negative_predictive_value = tnv/(tnv + fnv + 1.00)
@@ -94,21 +97,27 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     str_output = ""
     if significance_higher:
         event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max}
-        #writer = open(fname,"wb")
-        #writer.write(feature)
-        str_output = feature
-        #writer.write("\n");
-        str_output = str_output + "\n"
-        #writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n");
-        str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n"
-        for row in output_tuples:
-            #writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) )
-            str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11])
+        if print_all:
+            writer = open(fname,"wb")
+            writer.write(feature)
+            writer.write("\n");
+            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n");
+        else:
+            str_output = feature
             str_output = str_output + "\n"
-            #writer.write("\n")
-        #writer.close()
-        event_data[feature] = str_output 
-    return range(min_cnt,max_cnt),mcc_arr
+            str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n"
+        for row in output_tuples:
+            if print_all:
+                writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) )
+                writer.write("\n")
+            else:
+                str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11])
+                str_output = str_output + "\n"
+        if print_all:
+            writer.close()
+        else:
+            event_data[feature] = str_output 
+    return
 
 
 
@@ -190,6 +199,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     cur.execute("""
                 SELECT * from all_uid_events_cnt order by uid;
                 """)
+    print "HERE"
     conv_events = {}
     nc_events = {}
     event_metadata = {}
@@ -266,8 +276,12 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     ctr = 0
     total_conv = len(conv_uids)
     total_nc = len(nc_uids)
-    #print "Conv events", total_conv
-    #print "NC events", total_nc
+    print len(sys.argv), "\t",sys.argv
+    print_all = str2bool(sys.argv[1])
+    MIN_CORRELATION = 0.2
+    if len(sys.argv) == 3:
+        MIN_CORRELATION = float(sys.argv[2])
+    print "print_all", print_all, "min_correlation", MIN_CORRELATION + 0.1
     for event in event_metadata:
         #print "ALL EVENT", event
         if event in conv_events and event in nc_events:
@@ -280,22 +294,25 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             nc_events[event].extend([0] * num_nc_with_zero)
             
             filename = "/data/event" + str(ctr) + ".txt"
-            x,mcc_arr = get_matthew_corr_coef(event,filename)
+            get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION)
             #print event, mcc_arr
             ctr += 1
 
-    metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
-    df = pd.DataFrame(event_max_column_values).transpose()
-    ctr = 0
-    for metric in metrics:
-        print metric
-        for ind in df.sort(metric,ascending=False)[:10].index:
-            fname = "/data/event" + str(ctr+1) + ".txt"
-            
-            writer = open(fname,"wb")
-            writer.write(event_data[ind])
-            writer.close()
-            ctr += 1
+    if not print_all:
+        print "got here"
+        metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
+        df = pd.DataFrame(event_max_column_values).transpose()
+        ctr = 0
+        top_k_metrics_to_print = 10
+        for metric in metrics:
+            print metric
+            for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
+                fname = "/data/event" + str(ctr+1) + ".txt"
+                print ctr + 1, " file "
+                writer = open(fname,"wb")
+                writer.write(event_data[ind])
+                writer.close()
+                ctr += 1
 
 def generate_output():
     inputtsv = []
