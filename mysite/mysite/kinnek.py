@@ -116,7 +116,6 @@ con = mdb.connect("localhost", "root", "thebakery", "orient")
 
 with con:
     cur = con.cursor()
-    #cur.execute("SELECT VERSION()")
     cur.execute("""
                 CREATE TEMPORARY TABLE user_segment
         select distinct user_events.uid from user_events where start_hc <=5 and referrer ='' and (landing_url='http://kinnek.com/' or landing_url='http://www.kinnek.com/');
@@ -125,7 +124,7 @@ with con:
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
 SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png'
+etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
                 """)
     
     cur.execute("""
@@ -150,19 +149,19 @@ where a.uid = b.uid and a.log_time < b.log_time;
     
     cur.execute("""
                 CREATE TEMPORARY  TABLE success_uids_events_cnt
-SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
+SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
       COUNT(*) AS cnt
 FROM success_uids_events
-GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href order by cnt desc;
+GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
                 """)
     
         
     cur.execute("""
                 CREATE TEMPORARY  TABLE failure_uids_events_cnt
-SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href,
+SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
       COUNT(*) AS cnt
 FROM failure_uids_events
-GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href order by cnt desc;
+GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
                 """)
     
     
