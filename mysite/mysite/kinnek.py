@@ -1,7 +1,7 @@
 import sys
 import os
 import numpy as np
-
+import pandas as pd
 from collections import Counter
 
 
@@ -20,10 +20,8 @@ import math
 import MySQLdb as mdb
 
 
-#TODO: for users with 0 events
-
-
-
+event_max_column_values = {}
+event_data = {}
 def get_cumsum_counts1(feature,array,min_ctr,max_ctr):
     total = len(array[feature])
     ctr = Counter(array[feature])
@@ -46,8 +44,8 @@ def get_cumsum_counts2(feature,array,min_ctr,max_ctr):
 def get_matthew_corr_coef(feature,fname, log_values=0):
     min_ctr = min(min(conv_events[feature]),min(nc_events[feature]))
     max_ctr = max(max(conv_events[feature]),max(nc_events[feature]))
-    print "MIN AND MAX",min_ctr,max_ctr
-
+    #print "MIN AND MAX",min_ctr,max_ctr
+    print feature
     tp = get_cumsum_counts1(feature,conv_events,min_ctr, max_ctr)
     fp = get_cumsum_counts1(feature,nc_events,min_ctr, max_ctr)
     
@@ -58,14 +56,20 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
     mcc_arr = []
     output_tuples = []
     MINCORRELATION = 0.2
-    significance_higher = False
+    significance_higher = True
+    mcc_max = 0
+    precision_max = 0
+    recall_max = 0
+    cost_max = 0
+    npv_max = 0
+    f1_max = 0
     for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
         fpv = fp[i]
         tnv = tn[i]
         fnv = fn[i]
         total = tpv + fpv + tnv + fnv
-        print i,tpv,fpv,tnv,fnv
+        #print i,tpv,fpv,tnv,fnv
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
         significance = mcc * mcc * total
@@ -73,19 +77,37 @@ def get_matthew_corr_coef(feature,fname, log_values=0):
             significance_higher = True
         precision = tpv/(tpv + fpv + 1.00)
         recall = tpv/(tpv + fnv + 1.00)
+        negative_predictive_value = tnv/(tnv + fnv + 1.00)
         cost = 10 * tpv - fpv
-        print "PRC",precision,recall,cost
-        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost))
+            
+        #print "PRC",precision,recall,cost
+        f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
+        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score))
+        mcc_max = max(mcc_max,mcc)
+        precision_max = max(precision_max,precision)
+        recall_max = max(recall_max, recall)
+        cost_max = max(cost_max,cost)
+        npv_max = max(npv_max, negative_predictive_value)
+        f1_max = max(f1_max,f1_score)
         mcc_arr.append(mcc)
+
+    str_output = ""
     if significance_higher:
-        writer = open(fname,"wb")
-        writer.write(feature)
-        writer.write("\n");
-        writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\n");
+        event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max}
+        #writer = open(fname,"wb")
+        #writer.write(feature)
+        str_output = feature
+        #writer.write("\n");
+        str_output = str_output + "\n"
+        #writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n");
+        str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\n"
         for row in output_tuples:
-            writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) )
-            writer.write("\n")
-        writer.close()
+            #writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) )
+            str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11])
+            str_output = str_output + "\n"
+            #writer.write("\n")
+        #writer.close()
+        event_data[feature] = str_output 
     return range(min_cnt,max_cnt),mcc_arr
 
 
@@ -97,7 +119,7 @@ with con:
     #cur.execute("SELECT VERSION()")
     cur.execute("""
                 CREATE TEMPORARY TABLE user_segment
-        select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';
+        select distinct user_events.uid from user_events where start_hc <=5 and referrer ='' and (landing_url='http://kinnek.com/' or landing_url='http://www.kinnek.com/');
                 """)
     
     cur.execute("""
@@ -180,15 +202,15 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     agg_event_ctr = {}
     column_names = cur.description
     for row in cur.fetchall(): 
-        print "OUTPUT:" +  str(row)
+        #print "OUTPUT:" +  str(row)
         uid = row[0]
         if prev_uid != uid:
             if prev_uid != "":
-                print "going to output canonicalized events for ", prev_uid
-                print "prev_conv ", prev_conv
+                #print "going to output canonicalized events for ", prev_uid
+                #print "prev_conv ", prev_conv
 
                 for event_signature in agg_event_ctr.keys():
-                    print "outputting ", event_signature, agg_event_ctr[event_signature]
+                    #print "outputting ", event_signature, agg_event_ctr[event_signature]
                     if event_signature in event_metadata:
                         event_metadata[event_signature] += 1
                     else:
@@ -223,7 +245,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                     agg_event_ctr[event_signature_temp] = agg_event_ctr[event_signature_temp] + row[-2]
                 else:
                     agg_event_ctr[event_signature_temp] = row[-2]
-        print "EVENT SIGNATURE",event_signature_str
+#        print "EVENT SIGNATURE",event_signature_str
         event_signatures.add(event_signature_str)
         for event_signature in event_signatures:
             if event_signature in event_metadata:
@@ -244,14 +266,14 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
     ctr = 0
     total_conv = len(conv_uids)
     total_nc = len(nc_uids)
-    print "Conv events", total_conv
-    print "NC events", total_nc
+    #print "Conv events", total_conv
+    #print "NC events", total_nc
     for event in event_metadata:
-        print "ALL EVENT", event
+        #print "ALL EVENT", event
         if event in conv_events and event in nc_events:
-            print "Event signature: ",event
-            print "Num users with non-zero counts and converted: ", len(conv_events[event])
-            print "Num users with non-zero counts and did not convert: ", len(nc_events[event])
+            #print "Event signature: ",event
+            #print "Num users with non-zero counts and converted: ", len(conv_events[event])
+            #print "Num users with non-zero counts and did not convert: ", len(nc_events[event])
             num_conv_with_zero = total_conv - len(conv_events[event])
             num_nc_with_zero = total_nc - len(nc_events[event])
             conv_events[event].extend([0] * num_conv_with_zero)
@@ -259,10 +281,21 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             
             filename = "/data/event" + str(ctr) + ".txt"
             x,mcc_arr = get_matthew_corr_coef(event,filename)
-            print event, mcc_arr
+            #print event, mcc_arr
             ctr += 1
 
-
+    metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
+    df = pd.DataFrame(event_max_column_values).transpose()
+    ctr = 0
+    for metric in metrics:
+        print metric
+        for ind in df.sort(metric,ascending=False)[:10].index:
+            fname = "/data/event" + str(ctr+1) + ".txt"
+            
+            writer = open(fname,"wb")
+            writer.write(event_data[ind])
+            writer.close()
+            ctr += 1
 
 def generate_output():
     inputtsv = []
@@ -316,3 +349,4 @@ def generate_output():
             if chisq > 2.7:
                 print ('\t').join([str(x), str(TP), str(FP), str(FN), str(TN), str(chisq), str(phi)])
         
+
