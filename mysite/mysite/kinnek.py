@@ -84,7 +84,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
         negative_predictive_value = tnv/(tnv + fnv + 1.00)
         cost = 10 * tpv - fpv
         num_users = tpv + fpv
-        scaled_mcc = num_users * mcc * mcc
+        scaled_mcc = num_users * mcc
             
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
@@ -138,8 +138,8 @@ with con:
 #select distinct user_events.uid from user_events;
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
-SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-url='http://www.kinnek.com/post/#justcreated'
+SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
+url='http://www.kinnek.com/post/#justcreated' group by t1.uid
                 """)
 #name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
