@@ -289,11 +289,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
         MIN_CORRELATION = float(sys.argv[2])
     print "print_all", print_all, "min_correlation", MIN_CORRELATION + 0.1
     for event in event_metadata:
-        #print "ALL EVENT", event
         if event in conv_events and event in nc_events:
-            #print "Event signature: ",event
-            #print "Num users with non-zero counts and converted: ", len(conv_events[event])
-            #print "Num users with non-zero counts and did not convert: ", len(nc_events[event])
             num_conv_with_zero = total_conv - len(conv_events[event])
             num_nc_with_zero = total_nc - len(nc_events[event])
             conv_events[event].extend([0] * num_conv_with_zero)
@@ -305,12 +301,11 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             ctr += 1
 
     if not print_all:
-        print "got here"
         #metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
         metrics = ["scaled_mcc_max"]
         df = pd.DataFrame(event_max_column_values).transpose()
         ctr = 0
-        top_k_metrics_to_print = 10
+        top_k_metrics_to_print = 100
         for metric in metrics:
             print metric
             for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
