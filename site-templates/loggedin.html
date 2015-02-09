@@ -131,12 +131,16 @@
                                     
                                     var target = $( e.target )
                                     var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
+                                    console.log(datacollection[graph_no].series)
+                                    console.log(datacollection[graph_no].series[5].data[this.category][1])
                                     var tp = datacollection[graph_no].series[1].data[this.category][1]
                                     var fp = datacollection[graph_no].series[2].data[this.category][1]
                                     var tn = datacollection[graph_no].series[3].data[this.category][1]
                                     var fn = datacollection[graph_no].series[4].data[this.category][1]
                                     var mcc = datacollection[graph_no].series[5].data[this.category][1]
+                                    console.log(datacollection[graph_no].series[5].data[this.category][1])
                                     var chi_squared = datacollection[graph_no].series[6].data[this.category][1]
+                                    var scaled_mcc = mcc *(tp + fp)
                                     var expected_value = 10* tp + -1*fp
                                     var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
                                     var row2 = "<tr><td> + (Actual)</td><td>" + tp + "</td><td>"+fn+"</td></tr>"
@@ -144,9 +148,10 @@
                                     var row4 = "<br>Chi squared: " + chi_squared
                                     var row5 = "<br>MCC: " + mcc
                                     var row6 = "<br>Expected value: " + expected_value
+                                    var row7 = "<br>Scaled MCC: " + scaled_mcc
                                     hs.htmlExpand(null, {
                                         headingText: 'Details',
-                                        maincontentText:  row1 + row2 + row3 + row4 + row5 + row6,
+                                        maincontentText:  row1 + row2 + row3 + row4 + row5 + row6 + row7,
                                         width: 300
                                     });
                                 }
