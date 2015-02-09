@@ -63,6 +63,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
     cost_max = 0
     npv_max = 0
     f1_max = 0
+    scaled_mcc_max = 0
     for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
         fpv = fp[i]
@@ -82,36 +83,39 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
         recall = tpv/(tpv + fnv + 1.00)
         negative_predictive_value = tnv/(tnv + fnv + 1.00)
         cost = 10 * tpv - fpv
+        num_users = tpv + fpv
+        scaled_mcc = num_users * mcc
             
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
-        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score))
+        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score,num_users,scaled_mcc))
         mcc_max = max(mcc_max,abs(mcc))
         precision_max = max(precision_max,precision)
         recall_max = max(recall_max, recall)
         cost_max = max(cost_max,cost)
         npv_max = max(npv_max, negative_predictive_value)
         f1_max = max(f1_max,f1_score)
+        scaled_mcc_max = max(scaled_mcc_max,scaled_mcc)
         mcc_arr.append(mcc)
 
     str_output = ""
     if significance_higher:
-        event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max}
+        event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max, "scaled_mcc_max":scaled_mcc_max}
         if print_all:
             writer = open(fname,"wb")
             writer.write(feature)
             writer.write("\n");
-            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n");
+            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\n")
         else:
             str_output = feature
             str_output = str_output + "\n"
-            str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\n"
+            str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\n"
         for row in output_tuples:
             if print_all:
-                writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) )
+                writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" +  str(row[13]) )
                 writer.write("\n")
             else:
-                str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11])
+                str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" + str(row[13])
                 str_output = str_output + "\n"
         if print_all:
             writer.close()
@@ -300,7 +304,8 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
 
     if not print_all:
         print "got here"
-        metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
+        #metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
+        metrics = ["scaled_mcc_max"]
         df = pd.DataFrame(event_max_column_values).transpose()
         ctr = 0
         top_k_metrics_to_print = 10
