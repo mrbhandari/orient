@@ -131,15 +131,17 @@ with con:
     cur = con.cursor()
     cur.execute("""
                 CREATE TEMPORARY TABLE user_segment
-        select distinct user_events.uid from user_events;
+        select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/');
                 """)
-#select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';    
+#select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/');    
+#select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';
+#select distinct user_events.uid from user_events;
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
 SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-name_attr='confirmpurchase' or name_attr='order';
+etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
                 """)
-
+#name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
     cur.execute("""
 CREATE TEMPORARY TABLE failure_uids
