@@ -73,7 +73,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
         #print i,tpv,fpv,tnv,fnv
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
-        significance = mcc * mcc * total
+        significance = abs(mcc) * abs(mcc) * total
         if significance >= 2.5:
             if print_all:
                 significance_higher = significance_higher | (mcc >= MIN_CORRELATION)
@@ -84,7 +84,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
         negative_predictive_value = tnv/(tnv + fnv + 1.00)
         cost = 10 * tpv - fpv
         num_users = tpv + fpv
-        scaled_mcc = num_users * mcc
+        scaled_mcc = num_users * mcc * mcc
             
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
@@ -139,7 +139,7 @@ with con:
     cur.execute("""
                 CREATE TEMPORARY TABLE success_uids
 SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
+url='http://www.kinnek.com/post/#justcreated'
                 """)
 #name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
