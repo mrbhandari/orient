@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+<div class="container">
+    
+
+<br>
+    
+{{ sql_query }}
+
+<br>
+<br>
+  
+
+
+<table class="table table-bordered table-condensed table-hover table-striped">
+  {% for row in sql_results %}
+    {% for cell in row %}
+        {% cycle '<tr>' '' '' '' '' '' '' '' '' %}
+          <td>{{ cell }}</td>
+        {% cycle '' '' '' '' '' '' '' '' '</tr>' %}
+    {% endfor %}
+  {% endfor %}
+</table>
+
+</div>
+{% endblock %}

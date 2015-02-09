@@ -129,34 +129,44 @@ con = mdb.connect("localhost", "root", "thebakery", "orient")
 
 with con:
     cur = con.cursor()
+    tablelist = ['user_segment','success_uids', 'failure_uids','failure_uids_events','success_uids_events', 'success_uids_events_cnt', 'failure_uids_events_cnt', 'all_uid_events_cnt', 'all_segment_events']
+    
+    for i in tablelist:
+        try:
+            sql_query = "drop table " + i +";"
+            print sql_query
+            cur.execute(sql_query)
+            print "success"
+        except:
+            pass
     cur.execute("""
-                CREATE TEMPORARY TABLE user_segment
+                CREATE TABLE user_segment
         select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/');
                 """)
 #select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/');    
 #select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';
 #select distinct user_events.uid from user_events;
     cur.execute("""
-                CREATE TEMPORARY TABLE success_uids
+                CREATE TABLE success_uids
 SELECT DISTINCT t1.uid,t1.log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
 url='http://www.kinnek.com/post/#justcreated'
                 """)
 #name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
     cur.execute("""
-CREATE TEMPORARY TABLE failure_uids
+CREATE TABLE failure_uids
 SELECT distinct A.uid from user_segment A where A.uid not in (select uid from success_uids);
 """)
 
     cur.execute("""
-                CREATE TEMPORARY  TABLE failure_uids_events
+                CREATE TABLE failure_uids_events
 Select a.* from user_events a,
 failure_uids as b
 where a.uid = b.uid;
                 """)
     
     cur.execute("""
-                CREATE TEMPORARY  TABLE success_uids_events
+                CREATE TABLE success_uids_events
 Select a.* from user_events a,
 success_uids as b
 where a.uid = b.uid and a.log_time < b.log_time;
@@ -164,7 +174,7 @@ where a.uid = b.uid and a.log_time < b.log_time;
     
     
     cur.execute("""
-                CREATE TEMPORARY  TABLE success_uids_events_cnt
+                CREATE TABLE success_uids_events_cnt
 SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
       COUNT(*) AS cnt
 FROM success_uids_events
@@ -173,7 +183,7 @@ GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, 
     
         
     cur.execute("""
-                CREATE TEMPORARY  TABLE failure_uids_events_cnt
+                CREATE  TABLE failure_uids_events_cnt
 SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
       COUNT(*) AS cnt
 FROM failure_uids_events
@@ -192,11 +202,16 @@ GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, 
     
     
     cur.execute("""
-                CREATE TEMPORARY table all_uid_events_cnt
+                CREATE table all_uid_events_cnt
 SELECT success_uids_events_cnt.* FROM success_uids_events_cnt
 UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 """)
-    
+
+    cur.execute("""
+            CREATE table all_segment_events
+            SELECT success_uids_events.* FROM success_uids_events
+            UNION SELECT failure_uids_events.* FROM failure_uids_events;
+                            """)    
     
     cur.execute("""
                 SELECT count(*) from all_uid_events_cnt;
