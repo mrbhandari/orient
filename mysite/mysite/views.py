@@ -17,7 +17,6 @@ FILETYPE = ".txt"
 FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
 
 
-
 def render_home(request):
   error = None
   if 'error' in request.GET:
@@ -83,9 +82,12 @@ def logout(request):
 def set_post_status_series(request):
   
   results_collection = []
-
-  print FILELIST
-  for filename in FILELIST:
+  newlist = []
+  newlist = sorted(FILELIST, key=lambda item: int(item.replace('event', '').replace('.txt', '')))
+  print newlist
+  
+  
+  for filename in newlist:
     read_results = []
     results_object = {}
     path = os.path.join(PROJECT_ROOT, '/data/' + filename)

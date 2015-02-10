@@ -36,7 +36,7 @@
                 for (counter = 0; counter < datacollection.length; counter++) {
                     var data = datacollection[counter]
                     var detail_url = encodeURI(data.title.replace(/::/g, "&").replace(/#/g, "%23"))
-                    $('#graphs').append(["<h3 class='container'>", data.title, "</h3>",
+                    $('#graphs').append(["<h3 class='container'>", (counter+1), " ", data.title, "</h3>",
                                          "<a target='_blank' href='\get_event_details?",
                                          detail_url,
                                          "'>Event Details</a>",

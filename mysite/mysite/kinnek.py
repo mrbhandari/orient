@@ -84,7 +84,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
         negative_predictive_value = tnv/(tnv + fnv + 1.00)
         cost = 10 * tpv - fpv
         num_users = tpv + fpv
-        scaled_mcc = num_users * mcc
+        scaled_mcc = num_users * mcc * mcc
             
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
@@ -141,17 +141,19 @@ with con:
             pass
     cur.execute("""
                 CREATE TABLE user_segment
-        select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%');
+        select distinct user_events.uid from user_events where title = 'my requests | kinnek.com';
                 """)
-#select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/');    
-#select distinct user_events.uid from user_events where start_hc <=5 and referrer ='';
+#select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%');
 #select distinct user_events.uid from user_events;
+#select distinct user_events.uid from user_events where etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
     cur.execute("""
                 CREATE TABLE success_uids
 SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-url='http://www.kinnek.com/post/#justcreated' group by t1.uid
+name_attr='confirmpurchase' or name_attr='order'
+group by t1.uid;
 
                 """)
+#url='http://www.kinnek.com/post/#justcreated'
 #name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
     cur.execute("""
@@ -321,7 +323,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
         metrics = ["scaled_mcc_max"]
         df = pd.DataFrame(event_max_column_values).transpose()
         ctr = 0
-        top_k_metrics_to_print = 100
+        top_k_metrics_to_print = 500
         for metric in metrics:
             print metric
             for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
