@@ -19,13 +19,11 @@
   
   </div>  
     <script type='text/javascript'>
-        //function addItem(detailed_events_url) {
-        //            console.log(detailed_events_url)
-        //            $.post("http://test.com/test.php",{username:'username', password:'pword', item:'item'},        
-        //            function(data) {
-        //               alert("blue")
-        //            });
-        //        }
+        function convert_title_to_url(graph_title, prepend_string) {
+            detail_param = encodeURI(graph_title.replace(/::/g, "&").replace(/#/g, "%23"))
+            return prepend_string + detail_param
+        }
+        
         $(document).ready(function() {
             
             var graph_param = {{graph_num}};
@@ -35,13 +33,14 @@
                 
                 for (counter = 0; counter < datacollection.length; counter++) {
                     var data = datacollection[counter]
-                    var detail_url = encodeURI(data.title.replace(/::/g, "&").replace(/#/g, "%23"))
+                    var event_detail_url = convert_title_to_url(data.title, '\get_event_details?')
+                    var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
                     $('#graphs').append(["<h3 class='container'>", (counter+1), " ", data.title, "</h3>",
-                                         "<a target='_blank' href='\get_event_details?",
-                                         detail_url,
+                                         "<a target='_blank' href='",
+                                         event_detail_url,
                                          "'>Event Details</a>",
-                                         "    <a target='_blank' href='\get_user_details?",
-                                         detail_url,
+                                         "    <a target='_blank' href='",
+                                         user_detail_url,
                                          "'>User ID List</a>",].join(''))
                     $('#graphs').append( "<div  id='container" + counter + "' counter='" + counter + "'></div>" )
                     //console.log(data.series[6]);
@@ -137,6 +136,10 @@
                                     
                                     var target = $( e.target )
                                     var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
+                                    graph_title  = datacollection[graph_no].title
+                                    var tp_detail_url = convert_title_to_url(graph_title, '\get_user_details?cnt=' + this.category.toString() + '&')
+                                    
+                                    console.log("graph name:", graph_title)
                                     console.log(datacollection[graph_no].series)
                                     console.log(datacollection[graph_no].series[5].data[this.category][1])
                                     var tp = datacollection[graph_no].series[1].data[this.category][1]
@@ -149,7 +152,7 @@
                                     var scaled_mcc = mcc *(tp + fp)
                                     var expected_value = 10* tp + -1*fp
                                     var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
-                                    var row2 = "<tr><td> + (Actual)</td><td>" + tp + "</td><td>"+fn+"</td></tr>"
+                                    var row2 = "<tr><td> + (Actual)</td><td><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td>"+fn+"</td></tr>"
                                     var row3 = "<tr><td> - (Actual)</td><td>" + fp + "</td><td>"+tn+"</td></tr></table>"
                                     var row4 = "<br>Chi squared: " + chi_squared
                                     var row5 = "<br>MCC: " + mcc

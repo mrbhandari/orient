@@ -313,7 +313,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             conv_events[event].extend([0] * num_conv_with_zero)
             nc_events[event].extend([0] * num_nc_with_zero)
             
-            filename = "/data/event" + str(ctr) + ".txt"
+            filename = "/data/kinnek/event" + str(ctr) + ".txt"
             get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION)
             #print event, mcc_arr
             ctr += 1
@@ -327,7 +327,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
         for metric in metrics:
             print metric
             for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
-                fname = "/data/event" + str(ctr+1) + ".txt"
+                fname = "/data/kinnek/event" + str(ctr+1) + ".txt"
                 print ctr + 1, " file "
                 writer = open(fname,"wb")
                 writer.write(event_data[ind])

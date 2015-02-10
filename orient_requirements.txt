@@ -1,3 +1,14 @@
+#TODO RAHUL
+#LIMIT 1000
+#User event details
+#No wifi needed for confusion matrix
+#Have kinnek.py delete old files
+#Not require server restart
+#Display query
+#User input query
+
+
+
 #Rahul's computer setup
 
 bash <(curl -Ls http://git.io/eUx7rg)
@@ -119,9 +130,7 @@ sudo pip install numpy
 sudo pip install pandas
 
 
-#Need to not select * from need to do use create temp table in filter events
 
-#path=body|div#skrollr-body|div.unified_header|div.container|div.row row-marginless|div.col-md-4 hidden-sm hidden-xs|form.navbar-form navbar-left search search-wide|input#headersearch
 
 LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
 

@@ -10,9 +10,18 @@ import os
 import os.path
 import csv
 
+
+import datetime
+
+def convert_date(timestamp):
+  return(
+      datetime.datetime.fromtimestamp(
+          int(timestamp/1000)
+      ).strftime('%Y-%m-%d %H:%M:%S')
+  )
+
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-MYPATH = '/data/'
-#MYPATH = os.path.join(PROJECT_ROOT, '../../../../../../../data/')
+MYPATH = '/data/kinnek'
 FILETYPE = ".txt"
 FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
 
@@ -90,7 +99,7 @@ def set_post_status_series(request):
   for filename in newlist:
     read_results = []
     results_object = {}
-    path = os.path.join(PROJECT_ROOT, '/data/' + filename)
+    path = os.path.join(PROJECT_ROOT, '/data/kinnek/' + filename)
     
     print
     #open the file
@@ -146,6 +155,26 @@ def translate_hash(request_dict):
     pass
   return request_dict
 
+def return_user_event_details(request):
+    request_dict = dict(request.GET._iterlists())
+    request_dict = translate_hash(request_dict)
+    sql_query = create_user_event_sql_query(request_dict)
+    sql_results =  list(get_sql_data(sql_query))
+    sql_results = [list(i) for i in sql_results]
+    #convert startime
+    for i in range(0,len(sql_results)):
+      print sql_results[i][0]
+      sql_results[i][0] = convert_date(sql_results[i][0])
+    
+    print sql_results
+    sql_results.insert(0, ['log_time', 'visit_id', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'referrer'])
+    
+    return render_to_response('user_event_details.html', {
+            'mydict': request_dict,
+            'sql_query': sql_query,
+            'sql_results': sql_results
+    })
+
 def return_event_detail(request):
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
@@ -172,10 +201,15 @@ def return_user_detail (request):
             'mydict': request_dict,
             'sql_query': sql_query,
             'sql_results': sql_results,
-            'cycle_start': """'<tr>' '' '' '' '' '' '' ''""",
-            'cycle_end': """'' '' '' '' '' '' '' '</tr>'""",
     })
 import urllib2
+
+def create_user_event_sql_query(query_dict):
+    sql_query = """select log_time, visit_id, url, css_class, element, element_txt, label, img_src, name_attr, referrer from all_segment_events where """
+    sql_query += join_where_clause(query_dict)
+    sql_query += """ order by start_time desc"""
+    return sql_query
+
 
 def create_event_sql_query(query_dict):
     sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr  from all_segment_events where """
