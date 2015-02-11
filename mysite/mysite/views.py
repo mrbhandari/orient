@@ -189,6 +189,48 @@ def return_event_detail(request):
             'sql_results': sql_results
     })
 
+quadrant_definitions = {
+  'tp': {
+    'table': 'success',
+    'sign': '>='
+  },
+  'fn': {
+    'table': 'success',
+    'sign': '<'
+  },
+  'fp': {
+    'table': 'failure',
+    'sign': '>='
+  },
+  'tn': {
+    'table': 'failure',
+    'sign': '<'
+  },
+}
+
+def return_user_quad_details(request):
+    request_dict = dict(request.GET._iterlists())
+    request_dict = translate_hash(request_dict)
+    quadrant = request_dict['quadrant'][0]
+
+    table = quadrant_definitions[quadrant]['table']
+    sign = quadrant_definitions[quadrant]['sign']
+    print quadrant, table, sign
+    request_dict.pop("quadrant", None)
+    
+    
+    sql_query = create_uid_quad_sql_query(request_dict, table, sign)
+    sql_results =  list(get_sql_data(sql_query))
+    print sql_results
+    sql_results.insert(0, ['cnt', 'uid'])
+    
+    return render_to_response('user_quad_details.html', {
+            'mydict': request_dict,
+            'sql_query': sql_query,
+            'sql_results': sql_results,
+    })
+  
+  
 def return_user_detail (request):
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
@@ -217,6 +259,14 @@ def create_event_sql_query(query_dict):
     sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr order by cnt desc"""
     return sql_query
 
+def create_uid_quad_sql_query(query_dict, table, sign):
+    output =''
+    min_count = ''
+    sql_query = """select * from (select sum(cnt) as cnt, uid from """ + table + """_uids_events_cnt where """
+    sql_query += join_where_clause(query_dict)
+    sql_query += """ group by uid) t1 where """ + join_where_greaterless_clause(query_dict, sign)
+    return sql_query
+
 def create_uid_sql_query(query_dict):
     sql_query = """select count(*) as cnt, uid, url, css_class, element, element_txt, label, img_src, name_attr  from all_segment_events where """
     sql_query += join_where_clause(query_dict)
@@ -224,13 +274,41 @@ def create_uid_sql_query(query_dict):
     return sql_query
 
 def join_where_clause(query_dict):
+  #takes any arguments and makes them greater than sequel queries, except for count
+    sql_query = ''
+    i = 0
+    itotal = 0
+    
+    #find how many non int values there are
+    for key, value in query_dict.iteritems():
+      try:
+        int(value[0])
+      except:
+        itotal+=1
+      
+    for key, value in query_dict.iteritems():
+      if key != 'cnt':
+        try:
+          sql_query = sql_query + " " + key + "=" + str(int(value[0])) + ""
+          print "int worked"
+        except:
+          sql_query = sql_query + " " + key + "= '" + value[0] + "'"
+        if i < itotal - 1: #add and for all non int values
+            sql_query = sql_query + " and "
+      i +=1
+    return sql_query
+
+def join_where_greaterless_clause(query_dict, sign):
+  #takes any numerical arguments and makes them greater than sequel queries; only works for one number
     sql_query = ''
     i = 0
     for key, value in query_dict.iteritems():
-        sql_query = sql_query + " " + key + "= '" + value[0] + "'"
-        if i < len(query_dict) - 1:
-            sql_query = sql_query + " and "
-        i +=1
+      if key == 'cnt':
+        try:
+          sql_query = sql_query + " " + key + sign + str(int(value[0])) + ""
+          print "int worked"
+        except:
+          pass
     return sql_query
 
 
@@ -244,15 +322,3 @@ def get_sql_data(sql_query):
       cur.execute(sql_query)
       return cur.fetchall() 
       
-  
-#[{
-#    "name": "Month",
-#    "data": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-#}, {
-#    "name": "Revenue",
-#    "data": [23987, 24784, 25899, 25569, 25897, 25668, 24114, 23899, 24987, 25111, 25899, 23221]
-#}, {
-#    "name": "Overhead",
-#    "data": [21990, 22365, 21987, 22369, 22558, 22987, 23521, 23003, 22756, 23112, 22987, 22897]
-#}]
-  

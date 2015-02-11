@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from views import render_home, login, auth_view, logout, loggedin, invalid_login, set_post_status_series, return_event_detail, return_user_detail, return_user_event_details
+from views import render_home, login, auth_view, logout, loggedin, invalid_login, set_post_status_series, return_event_detail, return_user_detail, return_user_event_details, return_user_quad_details
 
 
 urlpatterns = patterns('',
@@ -21,5 +21,5 @@ urlpatterns = patterns('',
     url(r'^accounts/loggedin/get_event_details/?$', return_event_detail, name='get_event_details'),
     url(r'^accounts/loggedin/get_user_details/?$', return_user_detail, name='get_user_details'),
     url(r'^accounts/loggedin/get_user_event_details/?$', return_user_event_details, name='get_user_event_details'),
-    
+    url(r'^accounts/loggedin/get_user_quad_details/?$', return_user_quad_details, name='get_user_quad_details'),
         )

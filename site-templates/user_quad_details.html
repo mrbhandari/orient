@@ -17,13 +17,13 @@
 <table id="foo" class="table table-bordered table-condensed table-hover table-striped">
   {% for row in sql_results %}
     {% for cell in row %}
-        {% cycle '<tr>' '' '' '' '' '' '' '' '' %}
+        {% cycle '<tr>' ''%}
         {% if forloop.counter == 2 %}
             <td><a href = "/accounts/loggedin/get_user_event_details?uid={{ cell }}">{{ cell }}</b></td>
         {% else %}
             <td>{{ cell }}</td>
         {% endif %}
-        {% cycle '' '' '' '' '' '' '' '' '</tr>' %}
+        {% cycle  '' '</tr>' %}
     {% endfor %}
   {% endfor %}
 </table>

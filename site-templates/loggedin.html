@@ -137,7 +137,11 @@
                                     var target = $( e.target )
                                     var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
                                     graph_title  = datacollection[graph_no].title
-                                    var tp_detail_url = convert_title_to_url(graph_title, '\get_user_details?cnt=' + this.category.toString() + '&')
+                                    var tp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tp&cnt=' + this.category.toString() + '&')
+                                    var fp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fp&cnt=' + this.category.toString() + '&')
+                                    var tn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tn&cnt=' + this.category.toString() + '&')
+                                    var fn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fn&cnt=' + this.category.toString() + '&')
+                                    
                                     
                                     console.log("graph name:", graph_title)
                                     console.log(datacollection[graph_no].series)
@@ -152,8 +156,8 @@
                                     var scaled_mcc = mcc *(tp + fp)
                                     var expected_value = 10* tp + -1*fp
                                     var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
-                                    var row2 = "<tr><td> + (Actual)</td><td><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td>"+fn+"</td></tr>"
-                                    var row3 = "<tr><td> - (Actual)</td><td>" + fp + "</td><td>"+tn+"</td></tr></table>"
+                                    var row2 = "<tr><td> + (Actual)</td><td><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td><a target='_blank' href='" + fn_detail_url + "'>" + fn + "</a></td></tr>"
+                                    var row3 = "<tr><td> - (Actual)</td><td><a target='_blank' href='" + fp_detail_url + "'>" + fp + "</a></td><td><a target='_blank' href='" + tn_detail_url + "'>" + tn + "</a></td></tr></table>"
                                     var row4 = "<br>Chi squared: " + chi_squared
                                     var row5 = "<br>MCC: " + mcc
                                     var row6 = "<br>Expected value: " + expected_value
