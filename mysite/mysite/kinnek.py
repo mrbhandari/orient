@@ -3,20 +3,8 @@ import os
 import numpy as np
 import pandas as pd
 from collections import Counter
-
-
-
-#your_djangoproject_home="/Users/tempuser/orient/mysite/"
-#
-#sys.path.append(your_djangoproject_home)
-#os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
-#import django
-#django.setup()
-
 import csv
 import math
-#from django.db import connection
-
 import MySQLdb as mdb
 
 
@@ -125,6 +113,9 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
 
 
 
+folder = "/data/kinnek/"
+
+
 con = mdb.connect("localhost", "root", "thebakery", "orient")
 
 with con:
@@ -224,6 +215,21 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 SELECT * from all_uid_events_cnt order by uid;
                 """)
     print "HERE"
+
+    print "Starting to delete files in " + folder
+    
+    
+    for the_file in os.listdir(folder):
+        file_path = os.path.join(folder, the_file)
+    try:
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+    except Exception, e:
+        print e
+
+    print "finished deleting files in " + folder
+
+    
     conv_events = {}
     nc_events = {}
     event_metadata = {}
@@ -313,7 +319,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
             conv_events[event].extend([0] * num_conv_with_zero)
             nc_events[event].extend([0] * num_nc_with_zero)
             
-            filename = "/data/kinnek/event" + str(ctr) + ".txt"
+            filename = folder + "event" + str(ctr) + ".txt"
             get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION)
             #print event, mcc_arr
             ctr += 1
@@ -327,7 +333,7 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
         for metric in metrics:
             print metric
             for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
-                fname = "/data/kinnek/event" + str(ctr+1) + ".txt"
+                fname = folder + "event" + str(ctr+1) + ".txt"
                 print ctr + 1, " file "
                 writer = open(fname,"wb")
                 writer.write(event_data[ind])

@@ -20,10 +20,6 @@ def convert_date(timestamp):
       ).strftime('%Y-%m-%d %H:%M:%S')
   )
 
-PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-MYPATH = '/data/kinnek'
-FILETYPE = ".txt"
-FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
 
 
 def render_home(request):
@@ -60,7 +56,6 @@ def loggedin(request):
         graph_num = 5
     return render_to_response('loggedin.html',
                               {'full_name': request.user.username,
-                               'FILELIST': FILELIST,
                                'graph_num': graph_num})
 
 def invalid_login(request):
@@ -89,7 +84,11 @@ def logout(request):
 
 
 def set_post_status_series(request):
-  
+  PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+  MYPATH = '/data/kinnek'
+  FILETYPE = ".txt"
+  FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
+
   results_collection = []
   newlist = []
   newlist = sorted(FILELIST, key=lambda item: int(item.replace('event', '').replace('.txt', '')))
@@ -196,7 +195,7 @@ quadrant_definitions = {
   },
   'fn': {
     'table': 'success',
-    'sign': '<'
+    'sign': '>='
   },
   'fp': {
     'table': 'failure',
@@ -204,7 +203,7 @@ quadrant_definitions = {
   },
   'tn': {
     'table': 'failure',
-    'sign': '<'
+    'sign': '>='
   },
 }
 

@@ -1,10 +1,9 @@
 #TODO RAHUL
 #LIMIT 1000
-#User event details
 #No wifi needed for confusion matrix
 #Have kinnek.py delete old files
-#Not require server restart
-#Display query
+#Not require server restart - starting
+#Display query that produced the results
 #User input query
 
 
