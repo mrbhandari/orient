@@ -220,6 +220,13 @@ def return_user_quad_details(request):
     
     
     sql_query = create_uid_quad_sql_query(request_dict, table, sign)
+    
+    if quadrant == 'fn':
+      sql_query = """SELECT  count(*), uid from success_uids_events_cnt where uid not in (select x.uid from (""" + sql_query+ """) x) group by uid"""
+    
+    if quadrant == 'tn':
+      sql_query = """SELECT  count(*), uid from failure_uids_events_cnt where uid not in (select x.uid from (""" + sql_query+ """) x) group by uid"""
+    
     sql_results =  list(get_sql_data(sql_query))
     print sql_results
     sql_results.insert(0, ['cnt', 'uid'])
