@@ -1,9 +1,9 @@
 #TODO RAHUL
 #LIMIT 1000
 #No wifi needed for confusion matrix
-#Have kinnek.py delete old files
-#Not require server restart - starting
-#Display query that produced the results
+#Have kinnek.py delete old files DEON
+#Not require server restart - starting DONE
+#Display query that produced the results START
 #User input query
 
 

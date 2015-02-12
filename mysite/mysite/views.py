@@ -54,6 +54,7 @@ def loggedin(request):
         graph_num = requestdict['graph'][0]
     except KeyError, e:
         graph_num = 5
+        
     return render_to_response('loggedin.html',
                               {'full_name': request.user.username,
                                'graph_num': graph_num})
@@ -64,20 +65,6 @@ def invalid_login(request):
 def logout(request):
     auth.logout(request)
     return render_to_response('logout.html')
-  
-#def series(request):
-#    results = []
-#    
-#    for i in xrange(1, 11):
-#        results.append({
-#            'y': randint(0, 100)
-#        })
-#    
-#    print results
-#    
-#    json_results = json.dumps(results)
-#    print json_results
-#    return HttpResponse(json_results)
 
 
 
@@ -93,6 +80,9 @@ def set_post_status_series(request):
   newlist = []
   newlist = sorted(FILELIST, key=lambda item: int(item.replace('event', '').replace('.txt', '')))
   print newlist
+  
+  with open(MYPATH + '/summary.json', 'r' ) as f:
+    summary_data = json.load(f)
   
   
   for filename in newlist:

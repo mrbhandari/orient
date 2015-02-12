@@ -114,7 +114,8 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
 
 
 folder = "/data/kinnek/"
-
+segment_where ="""title = 'my requests | kinnek.com'"""
+success_where ="""name_attr='confirmpurchase' or name_attr='order'"""
 
 con = mdb.connect("localhost", "root", "thebakery", "orient")
 
@@ -132,18 +133,18 @@ with con:
             pass
     cur.execute("""
                 CREATE TABLE user_segment
-        select distinct user_events.uid from user_events where title = 'my requests | kinnek.com';
-                """)
+        select distinct user_events.uid from user_events where """ + segment_where +
+                """;""")
 #select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%');
 #select distinct user_events.uid from user_events;
 #select distinct user_events.uid from user_events where etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
+    
+
     cur.execute("""
                 CREATE TABLE success_uids
-SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where
-name_attr='confirmpurchase' or name_attr='order'
-group by t1.uid;
-
-                """)
+SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where """
++ success_where +
+ """  group by t1.uid; """)
 #url='http://www.kinnek.com/post/#justcreated'
 #name_attr='confirmpurchase' or name_attr='order';
 #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
@@ -229,6 +230,14 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
 
     print "finished deleting files in " + folder
 
+    #write a summary of what you've just outputted in sql
+    import json
+    summary_json = {
+        'users_considered': segment_where,
+        'success_users': success_where,
+    }
+    with open(folder + 'summary.json', 'w') as outfile:
+        json.dump(summary_json, outfile)
     
     conv_events = {}
     nc_events = {}
@@ -339,6 +348,8 @@ UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
                 writer.write(event_data[ind])
                 writer.close()
                 ctr += 1
+
+
 
 def generate_output():
     inputtsv = []
