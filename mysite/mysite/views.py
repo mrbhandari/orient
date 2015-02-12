@@ -127,7 +127,12 @@ def set_post_status_series(request):
     
     results_collection.append(results_object)
     
-  json_results = json.dumps(results_collection)
+  results_collection_meta = {
+    'meta': summary_data,
+    'each_graph': results_collection,
+    }
+  
+  json_results = json.dumps(results_collection_meta)
   #print json_results
   
   return HttpResponse(json_results)
@@ -245,7 +250,7 @@ import urllib2
 def create_user_event_sql_query(query_dict):
     sql_query = """select log_time, visit_id, url, css_class, element, element_txt, label, img_src, name_attr, referrer from all_segment_events where """
     sql_query += join_where_clause(query_dict)
-    sql_query += """ order by start_time desc"""
+    sql_query += """ order by log_time"""
     return sql_query
 
 

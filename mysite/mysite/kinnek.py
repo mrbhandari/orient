@@ -114,8 +114,15 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION):
 
 
 folder = "/data/kinnek/"
-segment_where ="""title = 'my requests | kinnek.com'"""
-success_where ="""name_attr='confirmpurchase' or name_attr='order'"""
+segment_where ="""  img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png'  """
+#start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%')
+#title = 'my requests | kinnek.com'
+
+success_where =""" name_attr='confirmpurchase' or name_attr='order' """
+
+#url='http://www.kinnek.com/post/#justcreated' or name='submit_profile'
+#url='http://www.kinnek.com/post/#justcreated' or name='submit_profile'
+#name_attr='confirmpurchase' or name_attr='order'
 
 con = mdb.connect("localhost", "root", "thebakery", "orient")
 
