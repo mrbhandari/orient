@@ -1,3 +1,14 @@
+#TODO RAHUL
+#LIMIT 1000
+#No wifi needed for confusion matrix
+#Have kinnek.py delete old files DEON
+#Not require server restart - starting DONE
+#Display query that produced the results DONE
+#User input query START
+#visualize event
+
+
+
 #Rahul's computer setup
 
 bash <(curl -Ls http://git.io/eUx7rg)
@@ -16,10 +27,13 @@ python manage.py migrate
 python manage.py createsuperuser
 
 
-sudo scp -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com:/data/visits_20150128.tsv visits_20150128.tsv
+sudo scp -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com:/data/visits_2015*.tsv
 
 mysql -u root -p --local-infile
-user orient;
+use orient;
+
+drop table user_events;
+
 
 CREATE TABLE `user_events` (
   `uid` varchar(100) DEFAULT NULL,
@@ -41,13 +55,17 @@ CREATE TABLE `user_events` (
   `img_src` varchar(1000) DEFAULT NULL,
   `label` varchar(1000) DEFAULT NULL,
   `start_hc` int(11) DEFAULT NULL,
-  `href` varchar(1000) DEFAULT NULL
+  `href` varchar(1000) DEFAULT NULL,
+  `landing_url` varchar(1000) DEFAULT NULL,
+  `name_attr` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
+LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
 
-LOAD DATA LOCAL  INFILE '/data/visits_20150130.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain);
- 
+
+
+
 
 
 
@@ -109,3 +127,18 @@ LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS ter
 
 sudo apt-get install python-dev
 sudo pip install numpy
+sudo pip install pandas
+
+
+
+
+LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
+
+pip install pandas==0.13.1
+
+
+python kinnek.py True 0.2
+python kinnek.py False
+
+mkdir /data/kinnek/
+sudo chmod -R 775 /data/
