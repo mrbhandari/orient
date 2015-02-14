@@ -185,8 +185,18 @@ def return_event_detail(request):
     request_dict = translate_hash(request_dict)
     sql_query = create_event_sql_query(request_dict)
     sql_results =  list(get_sql_data(sql_query))
+    sql_results = [list(i) for i in sql_results]
+    for i in range(0,len(sql_results)):
+      
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1]  +"'> "+ sql_results[i][1] +"</a>"
+      sql_results[i][6] = "<img class='img' src='"+  sql_results[i][6]  +"'> "+ sql_results[i][6] +"</img>"
+    
+    
     print sql_results
     sql_results.insert(0, ['cnt', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr'])
+    
+    
+    
     
     return render_to_response('event_details.html', {
             'mydict': request_dict,

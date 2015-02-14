@@ -147,19 +147,14 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
                     CREATE TABLE user_segment
             select distinct user_events.uid from user_events where """ + filter_query +
                     """;""")
-    #select distinct user_events.uid from user_events where start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%');
-    #select distinct user_events.uid from user_events;
-    #select distinct user_events.uid from user_events where etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
-        
+    
     
         cur.execute("""
                     CREATE TABLE success_uids
     SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where """
     + success_query +
      """  group by t1.uid; """)
-    #url='http://www.kinnek.com/post/#justcreated'
-    #name_attr='confirmpurchase' or name_attr='order';
-    #etype='click' and img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png';
+    
         cur.execute("""
     CREATE TABLE failure_uids
     SELECT distinct A.uid from user_segment A where A.uid not in (select uid from success_uids);

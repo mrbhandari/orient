@@ -4,8 +4,10 @@
 #Have kinnek.py delete old files DEON
 #Not require server restart - starting DONE
 #Display query that produced the results DONE
-#User input query START
-#visualize event
+#User input query DONE
+#visualize events START
+#Fix event details bug sometimes parameters not parsed correctly
+#
 
 
 
