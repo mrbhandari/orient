@@ -144,3 +144,9 @@ python kinnek.py False
 
 mkdir /data/kinnek/
 sudo chmod -R 775 /data/
+
+
+django-admin.py startapp userprofile
+
+python manage.py makemigrations userprofile
+python manage.py migrate

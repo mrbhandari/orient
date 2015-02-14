@@ -40,12 +40,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'userprofile',
     #'crispy_forms',
     #'django_tables2',
     #'mathfilters',
     #'django.contrib.sitemaps',
     #'static_sitemaps',
 )
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -112,3 +114,5 @@ STATICFILES_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_ROOT, '../../site-templates/'),
 )
+
+AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
