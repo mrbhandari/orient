@@ -10,18 +10,26 @@
     <script src="{% static 'jquery-cookie-1.4.1/jquery.cookie.js' %}"></script>
   <div class="container">
 
-  <p>Hi {{full_name}} you are now logged in!<p>
-
-  <p>Click <a href="/accounts/logout/">here</a> to logout or <a href="/accounts/profile/">edit your profile</a></p>
+  <p>Hi {{full_name}} you are now logged in! Click <a href="/accounts/logout/">here</a> to logout.</p>
   
-  <form id='update_graphs' action='/get'>
-    Filter Query
-    <textarea name='filter_query' id= 'filter_query'></textarea>
-    Success Query
-    <textarea name='success_query' id = 'success_query'></textarea>
-    <button >Submit</button>
-  </form>
-  
+<!--  <form action="/accounts/profile/" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='aNJgmLAQiAAp7vXeBn1q5GKk1fxQXYfg' />
+            <table class="table table-bordered table-condensed table-hover table-striped">
+            <tr><th><label>Filter Query</label></th><td><textarea name='filter_query' id= 'filter_query'></textarea></td></tr>
+<tr><th><label>Success Query</label></th><td><textarea name='success_query' id = 'success_query'></textarea></td></tr>
+            </table>
+            <input type="submit" value="Update"/>
+            
+        </form>
+-->
+    <div class="form-group">
+        <form id='update_graphs' action='/get'>
+                <table class="table table-bordered table-condensed table-hover table-striped">
+                <tr><th><label>Users considered</label></th><td><textarea class= 'form-control' name='filter_query' id= 'filter_query'></textarea></td></tr>
+                <tr><th><label>Success goal</label></th><td><textarea class= 'form-control' name='success_query' id = 'success_query'></textarea></td></tr>
+                </table>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
   
   {{ requestdict }}
   <div id = 'graphs'></div>
