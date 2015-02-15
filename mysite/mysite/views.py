@@ -9,7 +9,7 @@ from os.path import isfile, join
 import os
 import os.path
 import csv
-from kinnek import generate_event_files
+from kinnek import generate_event_files, create_foldername_for_user
 import urllib2
 
 import datetime
@@ -68,8 +68,13 @@ def logout(request):
 
 
 def set_post_status_series(request):
-  PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-  MYPATH = '/data/kinnek'
+  print "Now fetching created user files"
+  merchant, username = request.user.profile.merchant, request.user.username
+  print merchant, username
+  
+  
+  #PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+  MYPATH =  os.path.join('/data/', create_foldername_for_user(username))
   FILETYPE = ".txt"
   FILELIST = [ f for f in listdir(MYPATH) if (isfile(join(MYPATH,f)) and f.endswith(FILETYPE))]
 
@@ -78,14 +83,14 @@ def set_post_status_series(request):
   newlist = sorted(FILELIST, key=lambda item: int(item.replace('event', '').replace('.txt', '')))
   print newlist
   
-  with open(MYPATH + '/summary.json', 'r' ) as f:
+  with open(os.path.join(MYPATH, 'summary.json'), 'r' ) as f:
     summary_data = json.load(f)
   
   
   for filename in newlist:
     read_results = []
     results_object = {}
-    path = os.path.join(PROJECT_ROOT, '/data/kinnek/' + filename)
+    path = os.path.join(MYPATH, filename)
     
     print
     #open the file
@@ -141,7 +146,7 @@ def get_graph_data(request):
   filter_query = request_dict['filter_query'][0]
   success_query = request_dict['success_query'][0]
   
-  generate_event_files(False, filter_query, success_query)
+  generate_event_files(False, filter_query, success_query, request.user.profile.merchant, request.user.username)
   result = {'status': 'success'}
   json_results = json.dumps(result)
   return HttpResponse(json_results)
@@ -160,9 +165,10 @@ def translate_hash(request_dict):
   return request_dict
 
 def return_user_event_details(request):
+    table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
-    sql_query = create_user_event_sql_query(request_dict)
+    sql_query = create_user_event_sql_query(request_dict, table_prefix)
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
     #convert startime
@@ -181,9 +187,10 @@ def return_user_event_details(request):
 
 
 def return_event_detail(request):
+    table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
-    sql_query = create_event_sql_query(request_dict)
+    sql_query = create_event_sql_query(request_dict, table_prefix)
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
     for i in range(0,len(sql_results)):
@@ -224,23 +231,25 @@ quadrant_definitions = {
 }
 
 def return_user_quad_details(request):
+    table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
     quadrant = request_dict['quadrant'][0]
-
+    
+    
     table = quadrant_definitions[quadrant]['table']
     sign = quadrant_definitions[quadrant]['sign']
     print quadrant, table, sign
     request_dict.pop("quadrant", None)
     
     
-    sql_query = create_uid_quad_sql_query(request_dict, table, sign)
+    sql_query = create_uid_quad_sql_query(request_dict, table, sign, table_prefix)
     
     if quadrant == 'fn':
-      sql_query = """SELECT  count(*), uid from success_uids_events_cnt where uid not in (select x.uid from (""" + sql_query+ """) x) group by uid"""
+      sql_query = """SELECT  count(*), uid from %ssuccess_uids_events_cnt where uid not in (select x.uid from (""" % (table_prefix) + sql_query+ """) x) group by uid""" 
     
     if quadrant == 'tn':
-      sql_query = """SELECT  count(*), uid from failure_uids_events_cnt where uid not in (select x.uid from (""" + sql_query+ """) x) group by uid"""
+      sql_query = """SELECT  count(*), uid from %sfailure_uids_events_cnt where uid not in (select x.uid from (""" % (table_prefix) + sql_query+ """) x) group by uid""" 
     
     sql_results =  list(get_sql_data(sql_query))
     print sql_results
@@ -254,9 +263,10 @@ def return_user_quad_details(request):
   
   
 def return_user_detail (request):
+    table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
-    sql_query = create_uid_sql_query(request_dict)
+    sql_query = create_uid_sql_query(request_dict, table_prefix)
     sql_results =  list(get_sql_data(sql_query))
     print sql_results
     sql_results.insert(0, ['cnt', 'uid', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr'])
@@ -268,29 +278,29 @@ def return_user_detail (request):
     })
 
 
-def create_user_event_sql_query(query_dict):
-    sql_query = """select log_time, visit_id, url, css_class, element, element_txt, label, img_src, name_attr, referrer from all_segment_events where """
+def create_user_event_sql_query(query_dict, table_prefix):
+    sql_query = """select log_time, visit_id, url, css_class, element, element_txt, label, img_src, name_attr, referrer from %sall_segment_events where """ % (table_prefix)
     sql_query += join_where_clause(query_dict)
     sql_query += """ order by log_time"""
     return sql_query
 
 
-def create_event_sql_query(query_dict):
-    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr  from all_segment_events where """
+def create_event_sql_query(query_dict, table_prefix):
+    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr  from %sall_segment_events where """ % (table_prefix)
     sql_query += join_where_clause(query_dict)
     sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr order by cnt desc"""
     return sql_query
 
-def create_uid_quad_sql_query(query_dict, table, sign):
+def create_uid_quad_sql_query(query_dict, table, sign, table_prefix):
     output =''
     min_count = ''
-    sql_query = """select * from (select sum(cnt) as cnt, uid from """ + table + """_uids_events_cnt where """
+    sql_query = """select * from (select sum(cnt) as cnt, uid from %s""" % (table_prefix) + table + """_uids_events_cnt where """
     sql_query += join_where_clause(query_dict)
     sql_query += """ group by uid) t1 where """ + join_where_greaterless_clause(query_dict, sign)
     return sql_query
 
-def create_uid_sql_query(query_dict):
-    sql_query = """select count(*) as cnt, uid, url, css_class, element, element_txt, label, img_src, name_attr  from all_segment_events where """
+def create_uid_sql_query(query_dict, table_prefix):
+    sql_query = """select count(*) as cnt, uid, url, css_class, element, element_txt, label, img_src, name_attr  from %sall_segment_events where """ % (table_prefix)
     sql_query += join_where_clause(query_dict)
     sql_query += """group by uid, url, css_class, element, element_txt, label, img_src, name_attr order by cnt desc"""
     return sql_query
@@ -321,7 +331,7 @@ def join_where_clause(query_dict):
     return sql_query
 
 def join_where_greaterless_clause(query_dict, sign):
-  #takes any numerical arguments and makes them greater than sequel queries; only works for one number
+  #takes any numerical arguments and makes them greater than sql queries; only works for one number
     sql_query = ''
     i = 0
     for key, value in query_dict.iteritems():

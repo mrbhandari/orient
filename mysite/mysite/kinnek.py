@@ -6,7 +6,7 @@ from collections import Counter
 import csv
 import math
 import MySQLdb as mdb
-
+import base64
 
 event_max_column_values = {}
 event_data = {}
@@ -115,16 +115,30 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
             event_data[feature] = str_output 
     return
 
+import string
 
-def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION=0.2):
-    folder = "/data/kinnek/"
+def create_foldername_for_user(username):
+    print "GENERATING FOLDERNAME"
+    valid_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+    file_name_string = ''.join(c for c in username if c in valid_chars)
+    return file_name_string
+
+
+def generate_event_files(print_all, filter_query, success_query, merchant_name, username, MIN_CORRELATION=0.2):
+    
+    user_folder = create_foldername_for_user(username)
+    print user_folder
+    main_folder = "/data/"
+    folder = os.path.join(main_folder, user_folder)
+    print folder
+    
+    merchant_name_ = merchant_name + "_"
+    user_folder_ = user_folder + "_"
+    
     ##segment_where ="""  img_src='http://resources.kinnek.com/static/css/Buyer/Products/get_quotes_button.f382438052ec.png'  """
     #start_hc <=5 and (landing_url ='http://www.kinnek.com/' or landing_url = 'http://kinnek.com/' or landing_url like 'http://www.kinnek.com/?%' or landing_url like 'http://kinnek.com/?%')
     #title = 'my requests | kinnek.com'
-    
     ##success_where =""" name_attr='confirmpurchase' or name_attr='order' """
-    
-    
     #url='http://www.kinnek.com/post/#justcreated' or name='submit_profile'
     #url='http://www.kinnek.com/post/#justcreated' or name='submit_profile'
     #name_attr='confirmpurchase' or name_attr='order'
@@ -137,95 +151,99 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
         
         for i in tablelist:
             try:
-                sql_query = "drop table " + i +";"
+                print user_folder_
+                print i
+                sql_query = "drop table %s%s;" % (user_folder_, i)
                 print sql_query
                 cur.execute(sql_query)
                 print "success"
             except:
                 pass
         cur.execute("""
-                    CREATE TABLE user_segment
-            select distinct user_events.uid from user_events where """ + filter_query +
-                    """;""")
-    
+                    CREATE TABLE %suser_segment
+            select distinct %suser_events.uid from %suser_events where %s;""" % (user_folder_, merchant_name_, merchant_name_, filter_query)) 
     
         cur.execute("""
-                    CREATE TABLE success_uids
-    SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM user_events t1 join user_segment t2 on (t1.uid=t2.uid) where """
-    + success_query +
-     """  group by t1.uid; """)
+                    CREATE TABLE %ssuccess_uids
+    SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM %suser_events t1 join %suser_segment t2 on (t1.uid=t2.uid) where %s group by t1.uid; """ % (user_folder_, merchant_name_, user_folder_, success_query))
     
         cur.execute("""
-    CREATE TABLE failure_uids
-    SELECT distinct A.uid from user_segment A where A.uid not in (select uid from success_uids);
-    """)
+    CREATE TABLE %sfailure_uids
+    SELECT distinct A.uid from %suser_segment A where A.uid not in (select uid from %ssuccess_uids);
+    """ % (user_folder_, user_folder_, user_folder_ ))
     
         cur.execute("""
-                    CREATE TABLE failure_uids_events
-    Select a.* from user_events a,
-    failure_uids as b
+                    CREATE TABLE %sfailure_uids_events
+    Select a.* from %suser_events a,
+    %sfailure_uids as b
     where a.uid = b.uid;
-                    """)
+                    """ % (user_folder_, merchant_name_, user_folder_))
         
         cur.execute("""
-                    CREATE TABLE success_uids_events
-    Select a.* from user_events a,
-    success_uids as b
+                    CREATE TABLE %ssuccess_uids_events
+    Select a.* from %suser_events a,
+    %ssuccess_uids as b
     where a.uid = b.uid and a.log_time < b.log_time;
-    """)
+    """ % (user_folder_, merchant_name_, user_folder_))
         
         
         cur.execute("""
-                    CREATE TABLE success_uids_events_cnt
+                    CREATE TABLE %ssuccess_uids_events_cnt
     SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
           COUNT(*) AS cnt
-    FROM success_uids_events
+    FROM %ssuccess_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
-                    """)
+                    """ % (user_folder_, user_folder_))
         
             
         cur.execute("""
-                    CREATE  TABLE failure_uids_events_cnt
+                    CREATE  TABLE %sfailure_uids_events_cnt
     SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
           COUNT(*) AS cnt
-    FROM failure_uids_events
+    FROM %sfailure_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
-                    """)
+                    """ % (user_folder_, user_folder_))
         
         
         cur.execute("""
-                    Alter table success_uids_events_cnt add converted boolean default True;
-                    """)
+                    Alter table %ssuccess_uids_events_cnt add converted boolean default True;
+                    """ % (user_folder_))
         
         
         cur.execute("""
-                    Alter table failure_uids_events_cnt add converted boolean default False;
-                    """)
+                    Alter table %sfailure_uids_events_cnt add converted boolean default False;
+                    """ % (user_folder_))
         
         
         cur.execute("""
-                    CREATE table all_uid_events_cnt
-    SELECT success_uids_events_cnt.* FROM success_uids_events_cnt
-    UNION SELECT failure_uids_events_cnt.* FROM failure_uids_events_cnt;
-                    """)
+                    CREATE table %sall_uid_events_cnt
+    SELECT %ssuccess_uids_events_cnt.* FROM %ssuccess_uids_events_cnt
+    UNION SELECT %sfailure_uids_events_cnt.* FROM %sfailure_uids_events_cnt;
+                    """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_))
     
         cur.execute("""
-                CREATE table all_segment_events
-                SELECT success_uids_events.* FROM success_uids_events
-                UNION SELECT failure_uids_events.* FROM failure_uids_events;
-                                """)    
+                CREATE table %sall_segment_events
+                SELECT %ssuccess_uids_events.* FROM %ssuccess_uids_events
+                UNION SELECT %sfailure_uids_events.* FROM %sfailure_uids_events;
+                                """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_))    
         
         cur.execute("""
-                    SELECT count(*) from all_uid_events_cnt;
-                    """)
+                    SELECT count(*) from %sall_uid_events_cnt;
+                    """ % (user_folder_))
         
         cur.execute("""
-                    SELECT * from all_uid_events_cnt order by uid;
-                    """)
+                    SELECT * from %sall_uid_events_cnt order by uid;
+                    """ % (user_folder_))
         print "HERE"
-    
-        print "Starting to delete files in " + folder
         
+        #managing output directory, 
+        #check if directory exists
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            print "created the folder"
+            print folder
+            
+        print "Starting to delete files in " + folder
         
         for the_file in os.listdir(folder):
             file_path = os.path.join(folder, the_file)
@@ -233,6 +251,7 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
             if os.path.isfile(file_path):
                 os.unlink(file_path)
         except Exception, e:
+            print "No files in this directory"
             print e
     
         print "finished deleting files in " + folder
@@ -243,7 +262,7 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
             'users_considered': filter_query,
             'success_users': success_query,
         }
-        with open(folder + 'summary.json', 'w') as outfile:
+        with open(os.path.join(folder, 'summary.json'), 'w') as outfile:
             json.dump(summary_json, outfile)
         
         conv_events = {}
@@ -335,7 +354,7 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
                 conv_events[event].extend([0] * num_conv_with_zero)
                 nc_events[event].extend([0] * num_nc_with_zero)
                 
-                filename = folder + "event" + str(ctr) + ".txt"
+                filename = os.path.join(folder, "event" + str(ctr) + ".txt")
                 get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION, conv_events, nc_events)
                 #print event, mcc_arr
                 ctr += 1
@@ -349,7 +368,7 @@ def generate_event_files(print_all, filter_query, success_query, MIN_CORRELATION
             for metric in metrics:
                 print metric
                 for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
-                    fname = folder + "event" + str(ctr+1) + ".txt"
+                    fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
                     writer = open(fname,"wb")
                     writer.write(event_data[ind])

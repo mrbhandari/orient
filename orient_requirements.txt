@@ -36,7 +36,7 @@ use orient;
 
 drop table user_events;
 
-
+#create for each merchant
 CREATE TABLE `user_events` (
   `uid` varchar(100) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
@@ -143,10 +143,10 @@ python kinnek.py True 0.2
 python kinnek.py False
 
 mkdir /data/kinnek/
-sudo chmod -R 775 /data/
+sudo chmod -R 777 /data/
 
 
 django-admin.py startapp userprofile
 
-python manage.py makemigrations userprofile
-python manage.py migrate
+sudo python manage.py makemigrations userprofile
+sudo python manage.py migrate

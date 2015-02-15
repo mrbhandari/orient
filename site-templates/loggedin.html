@@ -77,18 +77,23 @@
                 e.preventDefault();
                 var dataToBeSent = $(this).serializeFormJSON();
                 console.log(dataToBeSent);
-            
+                
+                //api to generate data is called
                 $.post('get_graph_data/', dataToBeSent, function(data) {
                     $('#graphs').empty();
-                    $('#graphs').append(data.status)
+                    $('#graphs').append(data.status) //updates that data was generated
                     execute_graph_refresh();
                   }, "json");
             });
             
+            
+            //this loads the initial page
             execute_graph_refresh();
             var graph_param = {{graph_num}};
             console.log(graph_param)
             
+            
+            //this function fetches the generated event files and creates them
             function execute_graph_refresh() {
                 
                 $.getJSON('/ajax/set_post_status_series', function(datacollection) {
