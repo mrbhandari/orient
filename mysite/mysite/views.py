@@ -309,26 +309,33 @@ def join_where_clause(query_dict):
   #takes any arguments and makes them greater than sequel queries, except for count
     sql_query = ''
     i = 0
-    itotal = 0
+    count_column_exists = 0
+    itotal = len(query_dict)
+
+    if query_dict.get('cnt') >-1:
+      count_column_exists = 1
+      itotal = 0
+      for key, value in query_dict.iteritems():
+        try:
+          int(value[0])
+        except:
+          itotal+=1
     
-    #find how many non int values there are
+    print ['count_column_exists', count_column_exists]
+    print ['itotal', itotal]
+    
     for key, value in query_dict.iteritems():
-      try:
-        int(value[0])
-      except:
-        itotal+=1
-      
-    for key, value in query_dict.iteritems():
+      #determine if there is a count column that should be treated as an integer
       if key != 'cnt':
         try:
-          sql_query = sql_query + " " + key + "=" + str(int(value[0])) + ""
+          sql_query = sql_query + " " + key + "=" + str(int(value[0])) + " and "
           print "int worked"
         except:
-          sql_query = sql_query + " " + key + "= '" + value[0] + "'"
-        if i < itotal - 1: #add and for all non int values
-            sql_query = sql_query + " and "
-      i +=1
-    return sql_query
+          sql_query = sql_query + " " + key + "= '" + value[0] + "' and "
+        #if i < itotal - 1: #add and for all non int values
+        #    sql_query = sql_query + " and "
+      i+=1
+    return sql_query[:-4] #removes the last and
 
 def join_where_greaterless_clause(query_dict, sign):
   #takes any numerical arguments and makes them greater than sql queries; only works for one number

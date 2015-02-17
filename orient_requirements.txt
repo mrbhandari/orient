@@ -6,8 +6,10 @@
 #Display query that produced the results DONE
 #User input query DONE
 #visualize events START
-#Fix event details bug sometimes parameters not parsed correctly
-#
+#Fix event details bug sometimes parameters not parsed correctly DONE
+# Per user and merchant logins DONE
+# Ability to test segments
+# Status messages
 
 
 
