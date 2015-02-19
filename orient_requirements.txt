@@ -10,6 +10,9 @@
 # Per user and merchant logins DONE
 # Ability to test segments
 # Status messages
+# Manav logging in analytics
+# Fix pixel - element txt trim
+#Formatting on other pages
 
 
 

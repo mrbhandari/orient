@@ -147,7 +147,7 @@ def get_graph_data(request):
   success_query = request_dict['success_query'][0]
   
   generate_event_files(False, False, filter_query, success_query, request.user.profile.merchant, request.user.username)
-  result = {'status': 'success'}
+  result = {'status': 'Generated all the data. Now loading on page.'}
   
   json_results = json.dumps(result)
   return HttpResponse(json_results)

@@ -11,16 +11,8 @@
   <div class="container">
 
   <p>Hi {{full_name}} you are now logged in! Click <a href="/accounts/logout/">here</a> to logout.</p>
-  
-<!--  <form action="/accounts/profile/" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='aNJgmLAQiAAp7vXeBn1q5GKk1fxQXYfg' />
-            <table class="table table-bordered table-condensed table-hover table-striped">
-            <tr><th><label>Filter Query</label></th><td><textarea name='filter_query' id= 'filter_query'></textarea></td></tr>
-<tr><th><label>Success Query</label></th><td><textarea name='success_query' id = 'success_query'></textarea></td></tr>
-            </table>
-            <input type="submit" value="Update"/>
-            
-        </form>
--->
+  <p>Note: each user can only run one query at a time.</p>
+
     <div class="form-group">
         <form id='update_graphs' action='/get'>
                 <table class="table table-bordered table-condensed table-hover table-striped">
@@ -34,14 +26,31 @@
     </div>
   
   
-  {{ requestdict }}
-  <div id = 'status_update'></div>
-  <div id = 'graphs'></div>
+    <div id="loading" class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">100% Complete</span></div></div>
+    <div id = 'status_update'></div>
+    <div id = 'graphs'></div>
   
   
   </div>
     <script type='text/javascript'>
-
+        //this creates a loading modal    
+        var myApp;
+        myApp = myApp || (function () {
+            var pleaseWaitDiv = $('#loading');
+            return {
+                showPleaseWait: function() {
+                    console.log("wait")
+                    pleaseWaitDiv.show();
+                },
+                hidePleaseWait: function () {
+                    console.log("hide")
+                    pleaseWaitDiv.hide();
+                },
+        
+            };
+        })();
+        
+        //converts a title url to a grph url - replaces the parameters and hashes
         function convert_title_to_url(graph_title, prepend_string) {
             detail_param = encodeURI(graph_title.replace(/::/g, "&").replace(/#/g, "%23"))
             return prepend_string + detail_param
@@ -49,6 +58,7 @@
 
         
         $(document).ready(function() {
+            $('#loading').hide()
             //this block of code allows ajax post requests to be made from the browser
             var csrftoken = $.cookie('csrftoken');
             function csrfSafeMethod(method) {
@@ -84,32 +94,54 @@
                 };
             })(jQuery);
             
+            
+            
             //this block tests what the user is about to submit
             $('#form_test').click(function (e) {
                 e.preventDefault();
+                
+                //show loader and clear the last status
+                myApp.showPleaseWait();
+                $('#status_update').empty();
+                
                 var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
                 console.log(dataToBeSent);
-                
-                //api to test data is called
-                $.post('test_graph_data/', dataToBeSent, function(data) {
-                    $('#status_update').empty();
-                    
-                    $('#status_update').append(JSON.stringify(data, null, 4)) //updates that data was generated
-                  }, "json");
+                test_graph_refresh(dataToBeSent);
+
             });
             
             //this block refreshes graphs when user submits the form
             $('#form_submit').click(function (e) {
                 e.preventDefault();
+            
+            //TODO: trace if fails  
+                
+                //part 1: test the queries
+                myApp.showPleaseWait(); //show spinnner
                 var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
                 console.log(dataToBeSent);
+                //test data function to see if this is the data you want - returns a div with data
+                //test_graph_refresh(dataToBeSent)
                 
-                //api to generate data is called
+                //part 2: generate the data
+                myApp.showPleaseWait(); //show spinnner
+                //$('#graphs').empty(); //clear the last status
+                
                 $.post('get_graph_data/', dataToBeSent, function(data) {
-                    $('#graphs').empty();
-                    $('#graphs').append(data.status) //updates that data was generated
+                    //on success of data generation  
+                    $('#graphs').append('<div class="alert alert-success" role="alert">' + data.status + '</div>' ) //updates that data was generated
+                    
+                    //start updating the graphs
                     execute_graph_refresh();
-                  }, "json");
+                    //myApp.hidePleaseWait(); //hide spinner
+                    $('#graphs').empty(); //clear the status that the data was generated
+
+                  }, "json").fail(function() {
+                    //on failure
+                    $('#status_update').empty();
+                    $('#status_update').append('<div class="alert alert-danger" role="alert">' + 'Invalid query - either the syntax was wrong or no succesful users were found.' + '</div>' ) //updates that data was generated
+                    myApp.hidePleaseWait();
+                  });
             });
             
             
@@ -118,10 +150,22 @@
             var graph_param = {{graph_num}};
             console.log(graph_param)
             
-            
+            function test_graph_refresh(dataToBeSent) {
+                $('#status_update').empty();
+                //api to test data is called
+                $.post('test_graph_data/', dataToBeSent, function(data) {
+                    
+                    $('#status_update').append('<div class="alert alert-info" role="alert">' + JSON.stringify(data, null, 4)+ '</div>' ) //updates that data was generated
+                    myApp.hidePleaseWait();
+                  }, "json").fail(function() {
+                    $('#status_update').empty();
+                    $('#status_update').append('<div class="alert alert-danger" role="alert">' + 'Invalid query - either the syntax was wrong or no succesful users were found.' + '</div>' ) //updates that data was generated
+                    myApp.hidePleaseWait();
+                  });
+            }
             //this function fetches the generated event files and creates them
             function execute_graph_refresh() {
-                
+                myApp.showPleaseWait();
                 $.getJSON('/ajax/set_post_status_series', function(datacollection) {
                     
                     $('#graphs').append("<h3>Users Considered:  " + datacollection.meta.users_considered + "</h3>")
@@ -283,6 +327,7 @@
                             }
                         }); //end highcharts container
                     };//end for datacollection loop
+                myApp.hidePleaseWait();
                 }); //end getJSON
             } //end function for make data refresh
             
