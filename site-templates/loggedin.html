@@ -27,13 +27,15 @@
                 <tr><th><label>Users considered</label></th><td><textarea class= 'form-control' name='filter_query' id= 'filter_query'></textarea></td></tr>
                 <tr><th><label>Success goal</label></th><td><textarea class= 'form-control' name='success_query' id = 'success_query'></textarea></td></tr>
                 </table>
-        <button class="btn btn-primary">Test</button>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button id="form_test" type="submit" class="btn btn-primary">Test</button>
+        <button id="form_submit" type="submit" class="btn btn-primary">Submit</button>
         
         </form>
     </div>
   
+  
   {{ requestdict }}
+  <div id = 'status_update'></div>
   <div id = 'graphs'></div>
   
   
@@ -82,10 +84,24 @@
                 };
             })(jQuery);
             
-            //this block refreshes graphs when user submits the form
-            $('form').submit(function (e) {
+            //this block tests what the user is about to submit
+            $('#form_test').click(function (e) {
                 e.preventDefault();
-                var dataToBeSent = $(this).serializeFormJSON();
+                var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
+                console.log(dataToBeSent);
+                
+                //api to test data is called
+                $.post('test_graph_data/', dataToBeSent, function(data) {
+                    $('#status_update').empty();
+                    
+                    $('#status_update').append(JSON.stringify(data, null, 4)) //updates that data was generated
+                  }, "json");
+            });
+            
+            //this block refreshes graphs when user submits the form
+            $('#form_submit').click(function (e) {
+                e.preventDefault();
+                var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
                 console.log(dataToBeSent);
                 
                 //api to generate data is called

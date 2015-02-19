@@ -124,8 +124,14 @@ def create_foldername_for_user(username):
     return file_name_string
 
 
-def generate_event_files(print_all, filter_query, success_query, merchant_name, username, MIN_CORRELATION=0.2):
-    
+def generate_event_files(testing, print_all, filter_query, success_query, merchant_name, username, MIN_CORRELATION=0.2):
+    temp_prefix = ''
+    temp_table_prefix = ''
+
+    if testing == True:
+        temp_prefix = " TEMPORARY "
+        temp_table_prefix = 'temp_'
+        print "just testing if this is a good segment"
     user_folder = create_foldername_for_user(username)
     print user_folder
     main_folder = "/data/"
@@ -147,62 +153,102 @@ def generate_event_files(print_all, filter_query, success_query, merchant_name, 
     
     with con:
         cur = con.cursor()
-        tablelist = ['user_segment','success_uids', 'failure_uids','failure_uids_events','success_uids_events', 'success_uids_events_cnt', 'failure_uids_events_cnt', 'all_uid_events_cnt', 'all_segment_events']
+        if testing == False: #if not testing then drop all tables
+            tablelist = ['%suser_segment' %(temp_table_prefix),'%ssuccess_uids' %(temp_table_prefix),'user_segment','success_uids', 'failure_uids','failure_uids_events','success_uids_events', 'success_uids_events_cnt', 'failure_uids_events_cnt', 'all_uid_events_cnt', 'all_segment_events']
+            
+            for i in tablelist:
+                try:
+                    print user_folder_
+                    print i
+                    sql_query = "drop table %s%s;" % (user_folder_, i)
+                    print sql_query
+                    cur.execute(sql_query)
+                    print "success"
+                except:
+                    pass
+
+        querya = """
+                    CREATE %s TABLE %s%suser_segment
+            select distinct %suser_events.uid from %suser_events where %s;""" % (temp_prefix, user_folder_, temp_table_prefix, merchant_name_, merchant_name_, filter_query)
+        print "executing %s" % (querya)
+        cur.execute(querya) 
         
-        for i in tablelist:
-            try:
-                print user_folder_
-                print i
-                sql_query = "drop table %s%s;" % (user_folder_, i)
-                print sql_query
-                cur.execute(sql_query)
-                print "success"
-            except:
-                pass
-        cur.execute("""
-                    CREATE TABLE %suser_segment
-            select distinct %suser_events.uid from %suser_events where %s;""" % (user_folder_, merchant_name_, merchant_name_, filter_query)) 
+        queryb = """
+                    CREATE %s TABLE %s%ssuccess_uids
+    SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM %suser_events t1 join %s%suser_segment t2 on (t1.uid=t2.uid) where %s group by t1.uid; """ % (temp_prefix, user_folder_, temp_table_prefix, merchant_name_, user_folder_, temp_table_prefix, success_query)
+        print "executing %s" % (queryb)
+        cur.execute(queryb)
     
-        cur.execute("""
-                    CREATE TABLE %ssuccess_uids
-    SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM %suser_events t1 join %suser_segment t2 on (t1.uid=t2.uid) where %s group by t1.uid; """ % (user_folder_, merchant_name_, user_folder_, success_query))
+        if testing == True:
+            print "Testing is true so just returning numbers"
+            
+            #Find total users
+            cur.execute("""select count(*) from (select distinct uid from %suser_events) x;""" % (merchant_name_))
+            total_user_count = cur.fetchone()
+            print ['total_user_count', total_user_count]
+            
+            cur.execute("""
+                    SELECT count(*) from %s%suser_segment;
+                    """ % (user_folder_, temp_table_prefix))
+            user_segment_count = cur.fetchone()
+            print ['user_segment_count', user_segment_count]
+            
+            cur.execute("""
+                    SELECT count(*) from %s%ssuccess_uids;
+                    """ % (user_folder_, temp_table_prefix))
+            success_uids_count = cur.fetchone()
+            print ['success_uids_count', success_uids_count]
+            
+            return {'Total users': total_user_count[0],
+                    'Users considered': user_segment_count[0],
+                    'Users who attained success goal': success_uids_count[0]}
+
     
-        cur.execute("""
-    CREATE TABLE %sfailure_uids
-    SELECT distinct A.uid from %suser_segment A where A.uid not in (select uid from %ssuccess_uids);
-    """ % (user_folder_, user_folder_, user_folder_ ))
+        query1 = """
+        CREATE TABLE %sfailure_uids
+        SELECT distinct A.uid from %suser_segment A where A.uid not in (select uid from %ssuccess_uids);
+        """ % (user_folder_, user_folder_, user_folder_ )
+        print "executing %s" % (query1)
+        cur.execute(query1)
     
-        cur.execute("""
+        query2 = """
                     CREATE TABLE %sfailure_uids_events
     Select a.* from %suser_events a,
     %sfailure_uids as b
     where a.uid = b.uid;
-                    """ % (user_folder_, merchant_name_, user_folder_))
+                    """ % (user_folder_, merchant_name_, user_folder_)
+        print "executing %s" % (query2)
+        cur.execute(query2)
         
-        cur.execute("""
+        query3 = """
                     CREATE TABLE %ssuccess_uids_events
     Select a.* from %suser_events a,
     %ssuccess_uids as b
     where a.uid = b.uid and a.log_time < b.log_time;
-    """ % (user_folder_, merchant_name_, user_folder_))
+    """ % (user_folder_, merchant_name_, user_folder_)
+        print "executing %s" % (query3)
+        cur.execute(query3)
         
         
-        cur.execute("""
+        query4 = """
                     CREATE TABLE %ssuccess_uids_events_cnt
     SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
           COUNT(*) AS cnt
     FROM %ssuccess_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
-                    """ % (user_folder_, user_folder_))
+                    """ % (user_folder_, user_folder_)
+        print "executing %s" % (query4)
+        cur.execute(query4)
         
-            
-        cur.execute("""
+        query5 = """
                     CREATE  TABLE %sfailure_uids_events_cnt
     SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
           COUNT(*) AS cnt
     FROM %sfailure_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
-                    """ % (user_folder_, user_folder_))
+                    """ % (user_folder_, user_folder_)
+        print "executing %s" % (query5)
+        cur.execute(query5)
         
         
         cur.execute("""

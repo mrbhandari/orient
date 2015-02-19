@@ -146,11 +146,23 @@ def get_graph_data(request):
   filter_query = request_dict['filter_query'][0]
   success_query = request_dict['success_query'][0]
   
-  generate_event_files(False, filter_query, success_query, request.user.profile.merchant, request.user.username)
+  generate_event_files(False, False, filter_query, success_query, request.user.profile.merchant, request.user.username)
   result = {'status': 'success'}
+  
   json_results = json.dumps(result)
   return HttpResponse(json_results)
   #return set_post_status_series(request)
+
+def test_graph_data(request):
+  request_dict = dict(request.POST._iterlists())
+  filter_query = request_dict['filter_query'][0]
+  success_query = request_dict['success_query'][0]
+  test_summary = generate_event_files(True, False, filter_query, success_query, request.user.profile.merchant, request.user.username)
+  #result = {'Total Users': 55,
+  #          'Users meeting consideration criteria': test_summary[0],
+  #          'Users considered successful': test_summary[1]}
+  json_results = json.dumps(test_summary)
+  return HttpResponse(json_results)
 
 def translate_hash(request_dict):
   #fix the # problem
