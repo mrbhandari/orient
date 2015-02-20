@@ -165,15 +165,11 @@ def test_graph_data(request):
   return HttpResponse(json_results)
 
 def translate_hash(request_dict):
-  #fix the # problem
-  try:
-    request_dict['path'][0] = request_dict['path'][0].replace('%23', '#')
-  except KeyError, e:
-    pass
-  try:
-    request_dict['href'][0] = request_dict['href'][0].replace('%23', '#')
-  except KeyError, e:
-    pass
+  for i in ['path', 'href', 'url']:
+    try:
+      request_dict[i][0] = request_dict[i][0].replace('%23', '#')
+    except KeyError, e:
+      pass
   return request_dict
 
 def return_user_event_details(request):
