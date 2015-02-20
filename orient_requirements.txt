@@ -61,7 +61,8 @@ CREATE TABLE `user_events` (
   `start_hc` int(11) DEFAULT NULL,
   `href` varchar(1000) DEFAULT NULL,
   `landing_url` varchar(1000) DEFAULT NULL,
-  `name_attr` varchar(500) DEFAULT NULL
+  `name_attr` varchar(500) DEFAULT NULL,
+  `time_period` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
