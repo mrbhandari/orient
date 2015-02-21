@@ -72,8 +72,9 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         tnv = tn[i]
         fnv = fn[i]
         total = tpv + fpv + tnv + fnv
-        leverage = tpv/total - (tpv + fpv + 0.0)/total * (0.0 + tpv + fnv)/total
-        lift = (tpv/total)/((tpv + fpv + 0.0)/total * (tpv + fnv + 0.0)/total)
+        leverage = (tpv + 0.0)/total - (tpv + fpv + 0.0)/total * (0.0 + tpv + fnv)/total
+        lift = ((tpv + 0.0)/total)/(((tpv + fpv + 0.0)/total) * ((tpv + fnv + 0.0)/total))
+        #print tpv,fpv,tnv,fnv,total,lift,leverage
         if ((min_ctr > 0 and i == min_ctr) or (min_ctr == 0 and i == min_ctr + 1)):
             event_max_column_value_attributes[feature] = {"num_people_clicked": (tpv + fpv)}
             
@@ -126,8 +127,8 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         if cost > cost_max:
             cost_max = cost
             cost_max_dict = output_dict
-        if npv > npv_max:
-            npv_max = npv
+        if negative_predictive_value > npv_max:
+            npv_max = negative_predictive_value
             npv_max_dict = output_dict
         if f1_score > f1_max:
             f1_max = f1_score
@@ -472,3 +473,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     writer.close()
                     ctr += 1
 
+#generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
