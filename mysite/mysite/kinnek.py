@@ -9,6 +9,7 @@ import MySQLdb as mdb
 import base64
 
 event_max_column_values = {}
+event_max_column_value_attributes = {}
 event_data = {}
 
 #Runs the data
@@ -44,24 +45,38 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
     
     fn = get_cumsum_counts2(feature,conv_events,min_ctr, max_ctr)
     tn = get_cumsum_counts2(feature,nc_events, min_ctr, max_ctr)
-    min_cnt = np.min([np.min(tp.keys()),np.min(fp.keys()),np.min(tn.keys()),np.min(fn.keys())])
-    max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
-    mcc_arr = []
+    #min_cnt = np.min([np.min(tp.keys()),np.min(fp.keys()),np.min(tn.keys()),np.min(fn.keys())])
+    #max_cnt = np.max([np.max(tp.keys()),np.max(fp.keys()),np.max(tn.keys()),np.max(fn.keys())])
+    
+    
     output_tuples = []
     significance_higher = False
     mcc_max = 0
+    mcc_max_dict = {}
     precision_max = 0
+    precision_max_dict = {}
     recall_max = 0
+    recall_max_dict = {}
     cost_max = 0
+    cost_max_dict = {}
     npv_max = 0
+    npv_max_dict = {}
     f1_max = 0
+    f1_max_dict = {}
     scaled_mcc_max = 0
+    scaled_mcc_max_dict = {}
+    
     for i in range(min_ctr,max_ctr+1):
         tpv = tp[i]
         fpv = fp[i]
         tnv = tn[i]
         fnv = fn[i]
         total = tpv + fpv + tnv + fnv
+        leverage = tpv/total - (tpv + fpv + 0.0)/total * (0.0 + tpv + fnv)/total
+        lift = (tpv/total)/((tpv + fpv + 0.0)/total * (tpv + fnv + 0.0)/total)
+        if ((min_ctr > 0 and i == min_ctr) or (min_ctr == 0 and i == min_ctr + 1)):
+            event_max_column_value_attributes[feature] = {"num_people_clicked": (tpv + fpv)}
+            
         #print i,tpv,fpv,tnv,fnv
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
 
@@ -77,37 +92,73 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         cost = 10 * tpv - fpv
         num_users = tpv + fpv
         scaled_mcc = num_users * mcc * mcc
-            
+        #event_max_column_value_attributes    
         #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
-        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score,num_users,scaled_mcc))
-        mcc_max = max(mcc_max,abs(mcc))
-        precision_max = max(precision_max,precision)
-        recall_max = max(recall_max, recall)
-        cost_max = max(cost_max,cost)
-        npv_max = max(npv_max, negative_predictive_value)
-        f1_max = max(f1_max,f1_score)
-        scaled_mcc_max = max(scaled_mcc_max,scaled_mcc)
-        mcc_arr.append(mcc)
+        output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score,num_users,scaled_mcc,lift,leverage))
+        output_dict = {}
+        output_dict["i"] = i
+        output_dict["tpv"] = tpv
+        output_dict["fpv"] = fpv
+        output_dict["tnv"] = tnv
+        output_dict["fnv"] = fnv
+        output_dict["mcc"] = mcc
+        output_dict["precision"] = precision
+        output_dict["recall"] = recall
+        output_dict["cost"] = cost
+        output_dict["significance"] = significance
+        output_dict["negative_predictive_value"] = negative_predictive_value
+        output_dict["f1"] = f1_score
+        output_dict["num_users"] = num_users
+        output_dict["scaled_mcc"] = scaled_mcc
+        output_dict["lift"] = lift
+        output_dict["leverage"] = leverage
+        
+        if abs(mcc) > mcc_max:
+            mcc_max = abs(mcc)
+            mcc_max_dict = output_dict
+        if precision > precision_max:
+            precision_max = precision
+            precision_max_dict = output_dict
+        if recall > recall_max:
+            recall_max = recall
+            recall_max_dict = output_dict
+        if cost > cost_max:
+            cost_max = cost
+            cost_max_dict = output_dict
+        if npv > npv_max:
+            npv_max = npv
+            npv_max_dict = output_dict
+        if f1_score > f1_max:
+            f1_max = f1_score
+            f1_max_dict = output_dict
+        if scaled_mcc > scaled_mcc_max:
+            scaled_mcc_max = scaled_mcc
+            scaled_mcc_max_dict = output_dict           
+
+
 
     str_output = ""
     if significance_higher:
         event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max, "scaled_mcc_max":scaled_mcc_max}
+        event_max_column_value_attributes[feature].update({"precision_max_dict":precision_max_dict,"scaled_mcc_max_dict":scaled_mcc_max_dict})
+
+        
         if print_all:
             writer = open(fname,"wb")
             writer.write(feature)
             writer.write("\n");
-            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\n")
+            writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\tLift\tLeverage\n")
         else:
             str_output = feature
             str_output = str_output + "\n"
-            str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\n"
+            str_output = str_output + "i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\tLift\tLeverage\n"
         for row in output_tuples:
             if print_all:
-                writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" +  str(row[13]) )
+                writer.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" +  str(row[13]) + "\t" + str(row[14]) + "\t" + str(row[15]) )
                 writer.write("\n")
             else:
-                str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" + str(row[13])
+                str_output = str_output + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[6]) + "\t" + str(row[7]) + "\t" + str(row    [8]) + "\t" + str(row[9]) + "\t" + str(row[10]) + "\t" + str(row[11]) + "\t" + str(row[12]) + "\t" + str(row[13]) + "\t" + str(row[14]) + "\t" + str(row[15]) 
                 str_output = str_output + "\n"
         if print_all:
             writer.close()
@@ -402,7 +453,6 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 
                 filename = os.path.join(folder, "event" + str(ctr) + ".txt")
                 get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION, conv_events, nc_events)
-                #print event, mcc_arr
                 ctr += 1
     
         if not print_all:
@@ -417,8 +467,8 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
                     writer = open(fname,"wb")
+                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))                    
                     writer.write(event_data[ind])
                     writer.close()
                     ctr += 1
-
 
