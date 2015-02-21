@@ -116,7 +116,7 @@ def set_post_status_series(request):
     if header_row == 1:
       results_object = {"series": [],
         "title": graph_title,
-      'meta_metrics': 'foo',
+      'meta_metrics': graph_meta_metrics,
       }
       for i in read_results[0]:
         results_object['series'].append(

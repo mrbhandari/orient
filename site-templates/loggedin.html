@@ -36,7 +36,7 @@
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button id="form_test" type="submit" class="btn btn-default">Test</button>
-                <button id="form_submit" type="submit" class="btn btn-default">Calcualte</button>
+                <button id="form_submit" type="submit" class="btn btn-default">Calculate</button>
             </div>
           </div>
           
@@ -192,9 +192,15 @@
                 myApp.showPleaseWait();
                 $.getJSON('/ajax/set_post_status_series', function(datacollection) {
                     
-                    $('#graphs').append("<h3>Users Considered:  " + datacollection.meta.users_considered + "</h3>")
-                    $('#graphs').append("<h3>Success Goal:  " + datacollection.meta.success_users + "</h3><br><br>")
-                    
+                    //creates the title block for the graphs section
+                    append_string = '<div class="bs-callout bs-callout-success" id="callout-helper-context-color-specificity">'
+                    //append_string += "<h4>Users considered and goal</h4>"
+                    append_string += "<h4>Users Considered</h4>"
+                    append_string += "<p>" + datacollection.meta.users_considered + "</p>"
+                    append_string +="<h4>Success Goal</h4>"
+                    append_string += "<p>" + datacollection.meta.success_users + "</p>"
+                    append_string += '</div>'
+                    $('#graphs').append(append_string)
     
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
                         var data = datacollection.each_graph[counter]
