@@ -43,23 +43,14 @@
         </form>
     </div><!-- /example -->
   
-  <br>
-    <!--<div class="form-group">
-        <form id='update_graphs1' action='/get'>
-                <table class="table table-bordered table-condensed table-hover table-striped">
-                <tr><th><label>Users considered</label></th><td><textarea class= 'form-control' name='filter_query' id= 'filter_query'></textarea></td></tr>
-                <tr><th><label>Success goal</label></th><td><textarea class= 'form-control' name='success_query' id = 'success_query'></textarea></td></tr>
-                </table>
-        <button id="form_test" type="submit" class="btn btn-primary">Test</button>
-        <button id="form_submit" type="submit" class="btn btn-primary">Submit</button>
-        
-        </form>
-    </div>-->
-  
-    <div id="loading">
-        <div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">100% Complete</span></div></div>
-        <!--<img class="img-responsive" src="{% static 'images/02-loading-blossom-2x.gif' %}">-->
+    <!-- /Loading div - hidden by default -->
+    <div id="loading" class="bs-callout bs-callout-info" id="callout-helper-context-color-specificity">
+    <h4>Loading data ...</h4>
+    <p>Thanks for your patience. We're working on improving our speed but for now we want to make sure you get the best insights.</p>
+    <div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">0% Complete</span></div></div>
     </div>
+  
+    
     <div id = 'status_update'></div>
     <div id = 'graphs'></div>
   

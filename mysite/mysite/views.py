@@ -96,26 +96,33 @@ def set_post_status_series(request):
     #open the file
     with open(path, 'rU') as f:
         reader = csv.reader(f, delimiter='\t')
+        print path
         for row in reader:
             if row[0] != '':
               read_results.append(row)
-    
+    print read_results
     #format expects title first and then header in terms of order
+    if len(read_results[0]) == 1:
+      graph_meta_metrics = read_results[0][0]
+      read_results.pop(0) #remove it
+    
+    #format expected is a row of json data next
     if len(read_results[0]) == 1:
       graph_title = read_results[0][0]
       read_results.pop(0) #remove it
-      
+    
     header_row = 1
-    
-    
     
     if header_row == 1:
       results_object = {"series": [],
-        "title": graph_title}
+        "title": graph_title,
+      'meta_metrics': 'foo',
+      }
       for i in read_results[0]:
         results_object['series'].append(
           {"name": i,
-          "data": []}
+          "data": [],
+            }
         )
       for i in read_results[1:]:
         n = 0 

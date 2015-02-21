@@ -476,4 +476,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     writer.close()
                     ctr += 1
 
-generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
+#generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")

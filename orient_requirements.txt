@@ -149,7 +149,9 @@ mkdir /data/kinnek/
 sudo chmod -R 777 /data/
 
 
-django-admin.py startapp userprofile
+#django-admin.py startapp userprofile THIS IS ALREADY CHECKED IN - NO NEED TO DO
 
 sudo python manage.py makemigrations userprofile
 sudo python manage.py migrate
+
+ALTER TABLE `kinnek_user_events` ADD INDEX `uid` (`uid`);
