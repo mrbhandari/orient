@@ -75,8 +75,10 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         leverage = (tpv + 0.0)/total - (tpv + fpv + 0.0)/total * (0.0 + tpv + fnv)/total
         lift = ((tpv + 0.0)/total)/(((tpv + fpv + 0.0)/total) * ((tpv + fnv + 0.0)/total))
         #print tpv,fpv,tnv,fnv,total,lift,leverage
+        if i == min_ctr:
+            event_max_column_value_attributes[feature] = {"event": feature}
         if ((min_ctr > 0 and i == min_ctr) or (min_ctr == 0 and i == min_ctr + 1)):
-            event_max_column_value_attributes[feature] = {"num_people_clicked": (tpv + fpv)}
+            event_max_column_value_attributes[feature].update({"num_people_clicked": (tpv + fpv)})
             
         #print i,tpv,fpv,tnv,fnv
         mcc = (tpv * tnv  - fpv * fnv)/math.sqrt(max(tpv + fpv,1)*max(tpv + fnv,1)*max(tnv + fpv,1) * max(tnv + fnv,1))
@@ -93,8 +95,6 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         cost = 10 * tpv - fpv
         num_users = tpv + fpv
         scaled_mcc = num_users * mcc * mcc
-        #event_max_column_value_attributes    
-        #print "PRC",precision,recall,cost
         f1_score = 2 * (precision * negative_predictive_value)/(negative_predictive_value + precision)
         output_tuples.append((i,tpv,fpv,tnv,fnv,mcc,significance,precision,recall, cost,negative_predictive_value,f1_score,num_users,scaled_mcc,lift,leverage))
         output_dict = {}
@@ -466,14 +466,25 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
             top_k_metrics_to_print = 500
             for metric in metrics:
                 print metric
+                summary_fname = os.path.join(folder, "table.json")
+                summary_dict = {}
+                print "writing ", summary_fname
+                summary_file_writer = open(summary_fname, "wb")
                 for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
                     fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
                     writer = open(fname,"wb")
-                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))            
+                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
+                    print "event",event_max_column_value_attributes[ind]["event"]
+                    print "npc",event_max_column_value_attributes[ind]["num_people_clicked"]
+                    print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
+                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
+                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
+                    summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
                     ctr += 1
-
-generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
+                summary_file_writer.write(str(summary_dict))
+                summary_file_writer.close()
+#generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
