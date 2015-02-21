@@ -10,11 +10,42 @@
     <script src="{% static 'jquery-cookie-1.4.1/jquery.cookie.js' %}"></script>
   <div class="container">
 
-  <p>Hi {{full_name}} you are now logged in! Click <a href="/accounts/logout/">here</a> to logout.</p>
-  <p>Note: each user can only run one query at a time.</p>
+  <!--<p>Hi {{full_name}} you are now logged in! Click <a href="/accounts/logout/">here</a> to logout.</p>
+  <p>Note: each user can only run one query at a time.</p>-->
 
-    <div class="form-group">
-        <form id='update_graphs' action='/get'>
+  
+  
+    <div class="bs-example" data-example-id="basic-forms">
+        <form id='update_graphs' class="form-horizontal" action='/get'>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Users considered</label>
+            <div class="col-sm-10">
+            <textarea class= 'form-control' name='filter_query' id= 'filter_query'></textarea>
+            <p class="help-block">Consider a segment like all users who are new (e.g., starthc<5).</p>
+            </div>
+            
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label">Success goal</label>
+            <div class="col-sm-10">
+            <textarea class= 'form-control' name='success_query' id = 'success_query'></textarea>
+            <p class="help-block">Consider how you define successful users. We'll look at what these users did versus failures for you.</p>
+            </div>
+            
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button id="form_test" type="submit" class="btn btn-default">Test</button>
+                <button id="form_submit" type="submit" class="btn btn-default">Calcualte</button>
+            </div>
+          </div>
+          
+        </form>
+    </div><!-- /example -->
+  
+  <br>
+    <!--<div class="form-group">
+        <form id='update_graphs1' action='/get'>
                 <table class="table table-bordered table-condensed table-hover table-striped">
                 <tr><th><label>Users considered</label></th><td><textarea class= 'form-control' name='filter_query' id= 'filter_query'></textarea></td></tr>
                 <tr><th><label>Success goal</label></th><td><textarea class= 'form-control' name='success_query' id = 'success_query'></textarea></td></tr>
@@ -23,7 +54,7 @@
         <button id="form_submit" type="submit" class="btn btn-primary">Submit</button>
         
         </form>
-    </div>
+    </div>-->
   
     <div id="loading">
         <div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">100% Complete</span></div></div>
@@ -106,7 +137,7 @@
                 myApp.showPleaseWait();
                 $('#status_update').empty();
                 
-                var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
+                var dataToBeSent = $(this).parent().parent().parent().serializeFormJSON(); //element's parent is form
                 console.log(dataToBeSent);
                 test_graph_refresh(dataToBeSent);
 
@@ -120,7 +151,7 @@
                 
                 //part 1: test the queries
                 myApp.showPleaseWait(); //show spinnner
-                var dataToBeSent = $(this).parent().serializeFormJSON(); //element's parent is form
+                var dataToBeSent = $(this).parent().parent().parent().serializeFormJSON(); //element's parent is form
                 console.log(dataToBeSent);
                 //test data function to see if this is the data you want - returns a div with data
                 //test_graph_refresh(dataToBeSent)
