@@ -147,6 +147,8 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         
         if print_all:
             writer = open(fname,"wb")
+            writer.write(str(scaled_mcc_mac_dict))
+            writer.write("\n");
             writer.write(feature)
             writer.write("\n");
             writer.write("i\tTrue positives\tFalse Positives\tTrue Negatives\tFalse Negatives\tMCC\tChi squared\tPrecision\tRecall\tCost\tNPV\tF1\tNum_users\tscaled_MCC\tLift\tLeverage\n")
@@ -468,9 +470,10 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
                     writer = open(fname,"wb")
-                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))                    
+                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))            
+                    writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
                     ctr += 1
 
-#generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
+generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
