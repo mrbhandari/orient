@@ -165,15 +165,11 @@ def test_graph_data(request):
   return HttpResponse(json_results)
 
 def translate_hash(request_dict):
-  #fix the # problem
-  try:
-    request_dict['path'][0] = request_dict['path'][0].replace('%23', '#')
-  except KeyError, e:
-    pass
-  try:
-    request_dict['href'][0] = request_dict['href'][0].replace('%23', '#')
-  except KeyError, e:
-    pass
+  for i in ['path', 'href', 'url']:
+    try:
+      request_dict[i][0] = request_dict[i][0].replace('%23', '#').replace('%26', '&')
+    except KeyError, e:
+      pass
   return request_dict
 
 def return_user_event_details(request):
@@ -187,7 +183,9 @@ def return_user_event_details(request):
     for i in range(0,len(sql_results)):
       print sql_results[i][0]
       sql_results[i][0] = convert_date(sql_results[i][0])
-    
+      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2]  +"'> "+ sql_results[i][2] +"</a>"
+      sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
+      sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
     print sql_results
     sql_results.insert(0, ['log_time', 'visit_id', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'referrer'])
     
@@ -208,7 +206,7 @@ def return_event_detail(request):
     for i in range(0,len(sql_results)):
       
       sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1]  +"'> "+ sql_results[i][1] +"</a>"
-      sql_results[i][6] = "<img class='img' src='"+  sql_results[i][6]  +"'> "+ sql_results[i][6] +"</img>"
+      sql_results[i][6] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][6]  +"'></a>"
     
     
     print sql_results
@@ -264,7 +262,6 @@ def return_user_quad_details(request):
       sql_query = """SELECT  count(*), uid from %sfailure_uids_events_cnt where uid not in (select x.uid from (""" % (table_prefix) + sql_query+ """) x) group by uid""" 
     
     sql_results =  list(get_sql_data(sql_query))
-    print sql_results
     sql_results.insert(0, ['cnt', 'uid'])
     
     return render_to_response('user_quad_details.html', {
@@ -280,7 +277,14 @@ def return_user_detail (request):
     request_dict = translate_hash(request_dict)
     sql_query = create_uid_sql_query(request_dict, table_prefix)
     sql_results =  list(get_sql_data(sql_query))
-    print sql_results
+    sql_results = [list(i) for i in sql_results]
+    
+    
+    for i in range(0,len(sql_results)):
+      print "doing this"
+      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2]  +"'> "+ sql_results[i][2] +"</a>"
+      sql_results[i][7] = "<a target='_blank'   href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
+      
     sql_results.insert(0, ['cnt', 'uid', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr'])
     
     return render_to_response('user_details.html', {

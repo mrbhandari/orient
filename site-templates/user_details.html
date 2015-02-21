@@ -21,7 +21,7 @@
         {% if forloop.counter == 2 %}
             <td><a href = "/accounts/loggedin/get_user_event_details?uid={{ cell }}">{{ cell }}</b></td>
         {% else %}
-            <td>{{ cell }}</td>
+            <td>{{ cell|safe |truncatechars_html:80 }}</td>
         {% endif %}
         {% cycle '' '' '' '' '' '' '' '' '</tr>' %}
     {% endfor %}
@@ -29,5 +29,15 @@
 </table>
 
 </div>
+
+<link href="{% static 'jquery-live-preview-master/css/livepreview-demo.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'jquery-live-preview-master/js/jquery-live-preview.min.js' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function() { 
+          $(".livepreview").livePreview();
+    });
+    
+    
+</script>
 
 {% endblock %}

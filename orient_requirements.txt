@@ -8,11 +8,8 @@
 #visualize events START
 #Fix event details bug sometimes parameters not parsed correctly DONE
 # Per user and merchant logins DONE
-# Ability to test segments
-# Status messages
-# Manav logging in analytics
-# Fix pixel - element txt trim
-#Formatting on other pages
+# Ability to test segments DONE
+# Status messages DONE
 
 
 
@@ -64,7 +61,8 @@ CREATE TABLE `user_events` (
   `start_hc` int(11) DEFAULT NULL,
   `href` varchar(1000) DEFAULT NULL,
   `landing_url` varchar(1000) DEFAULT NULL,
-  `name_attr` varchar(500) DEFAULT NULL
+  `name_attr` varchar(500) DEFAULT NULL,
+  `time_period` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 

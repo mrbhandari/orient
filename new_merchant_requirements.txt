@@ -1,6 +1,6 @@
 
 #create for table for each merchant
-CREATE TABLE `kinnek_user_events` (
+CREATE TABLE `appacademy_user_events` (
   `uid` varchar(100) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `visit_id` int(11) DEFAULT NULL,

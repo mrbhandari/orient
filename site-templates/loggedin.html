@@ -25,8 +25,10 @@
         </form>
     </div>
   
-  
-    <div id="loading" class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">100% Complete</span></div></div>
+    <div id="loading">
+        <div class="progress"><div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="sr-only">100% Complete</span></div></div>
+        <!--<img class="img-responsive" src="{% static 'images/02-loading-blossom-2x.gif' %}">-->
+    </div>
     <div id = 'status_update'></div>
     <div id = 'graphs'></div>
   
@@ -52,7 +54,7 @@
         
         //converts a title url to a grph url - replaces the parameters and hashes
         function convert_title_to_url(graph_title, prepend_string) {
-            detail_param = encodeURI(graph_title.replace(/::/g, "&").replace(/#/g, "%23"))
+            detail_param = encodeURI(graph_title.replace(/&/g, "%26").replace(/::/g, "&").replace(/#/g, "%23"))
             return prepend_string + detail_param
         }
 
@@ -296,9 +298,9 @@
                                         var chi_squared = datacollection.each_graph[graph_no].series[6].data[this.category][1]
                                         var scaled_mcc = mcc *(tp + fp)
                                         var expected_value = 10* tp + -1*fp
-                                        var row1 = "<table><tr><td> </td><td>+ (Predicted)</td><td>- (Predicted)</td></tr>"
-                                        var row2 = "<tr><td> + (Actual)</td><td><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td><a target='_blank' href='" + fn_detail_url + "'>" + fn + "</a></td></tr>"
-                                        var row3 = "<tr><td> - (Actual)</td><td><a target='_blank' href='" + fp_detail_url + "'>" + fp + "</a></td><td><a target='_blank' href='" + tn_detail_url + "'>" + tn + "</a></td></tr></table>"
+                                        var row1 = "<table class='table'><tr><th> </th><th>+ (Did event "+this.category+"+ times)</th><th>- (Didn't do event "+this.category+"+ times)</th></tr>"
+                                        var row2 = "<tr><th scope='row'>Y goal</th><td class='success'><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td class='danger'><a target='_blank' href='" + fn_detail_url + "'>" + fn + "</a></td></tr>"
+                                        var row3 = "<tr><th>N goal</th><td class='danger'><a target='_blank' href='" + fp_detail_url + "'>" + fp + "</a></td><td class='success'><a target='_blank' href='" + tn_detail_url + "'>" + tn + "</a></td></tr></table>"
                                         var row4 = "<br>Chi squared: " + chi_squared
                                         var row5 = "<br>MCC: " + mcc
                                         var row6 = "<br>Expected value: " + expected_value
