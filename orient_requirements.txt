@@ -18,7 +18,7 @@
 bash <(curl -Ls http://git.io/eUx7rg)
 sudo pip install mysql-python
 
-/usr/local/mysql-5.6.22-osx10.8-x86_64/support-files/mysql.server start
+sudo /usr/local/mysql-5.6.22-osx10.8-x86_64/support-files/mysql.server start
 mysqladmin -u root -p'WCYBVBK6' password thebakery
 mysql -u root -p
     CREATE DATABASE orient;

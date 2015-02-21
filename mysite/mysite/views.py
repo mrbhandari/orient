@@ -67,7 +67,7 @@ def logout(request):
     return render_to_response('logout.html')
 
 
-def set_post_status_series(request):
+def read_graph_data(request):
   print "Now fetching created user files"
   merchant, username = request.user.profile.merchant, request.user.username
   print merchant, username
@@ -86,13 +86,15 @@ def set_post_status_series(request):
   with open(os.path.join(MYPATH, 'summary.json'), 'r' ) as f:
     summary_data = json.load(f)
   
+  with open(os.path.join(MYPATH, 'table.json'), 'r' ) as f:
+    table_json =  json.dumps(eval(f.read()), ensure_ascii=False)
   
   for filename in newlist:
     read_results = []
     results_object = {}
     path = os.path.join(MYPATH, filename)
     
-    print
+    
     #open the file
     with open(path, 'rU') as f:
         reader = csv.reader(f, delimiter='\t')
@@ -100,7 +102,7 @@ def set_post_status_series(request):
         for row in reader:
             if row[0] != '':
               read_results.append(row)
-    print read_results
+    
     #format expects title first and then header in terms of order
     if len(read_results[0]) == 1:
       graph_meta_metrics = read_results[0][0]
@@ -138,6 +140,7 @@ def set_post_status_series(request):
     
   results_collection_meta = {
     'meta': summary_data,
+    'table_json': table_json, 
     'each_graph': results_collection,
     }
   
@@ -158,7 +161,6 @@ def get_graph_data(request):
   
   json_results = json.dumps(result)
   return HttpResponse(json_results)
-  #return set_post_status_series(request)
 
 def test_graph_data(request):
   request_dict = dict(request.POST._iterlists())
