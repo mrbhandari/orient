@@ -11,6 +11,7 @@ import os.path
 import csv
 from kinnek import generate_event_files, create_foldername_for_user
 import urllib2
+import pandas as pd
 
 import datetime
 
@@ -87,7 +88,15 @@ def read_graph_data(request):
     summary_data = json.load(f)
   
   with open(os.path.join(MYPATH, 'table.json'), 'r' ) as f:
-    table_json =  json.dumps(eval(f.read()), ensure_ascii=False)
+    table_json_dict = eval(f.read())
+    df = pd.DataFrame.from_dict(table_json_dict).transpose()
+    min_max = {}
+    for k in df.columns.values:
+       min_max[k] = {'min':df[k].min(),'max':df[k].max()}
+    print min_max
+    min_max = json.dumps(min_max, ensure_ascii=False)
+    print "XXXXXXSJKJSLDKJLSDKJFLSDKJFLSDKJFLSKDJFLSDKJFLSDKJ"
+    table_json =  json.dumps(table_json_dict, ensure_ascii=False)
   
   for filename in newlist:
     read_results = []
@@ -145,7 +154,8 @@ def read_graph_data(request):
     
   results_collection_meta = {
     'meta': summary_data,
-    'table_json': table_json, 
+    'table_json': {'table_data' : table_json,
+                   'min_max': min_max },
     'each_graph': results_collection,
     }
   
