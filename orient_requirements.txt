@@ -17,9 +17,9 @@
 #default sort on scaled_MCC DONE
 #back to top DONE
 #on first click of point wierd stuff is happening DONE
-#when you submit does the table refresh
-
-#table should have filters
+#when you submit does the table refresh DONE
+# if read graph data errors - stop showing the loader and show an error message
+#table should have filters 
 #have datatables on all screens
 #table too wide
    
