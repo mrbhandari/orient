@@ -102,41 +102,46 @@ def read_graph_data(request):
         for row in reader:
             if row[0] != '':
               read_results.append(row)
+
+    if len(read_results)>0: #check there is something in the file
+      
+      #format expects title first and then header in terms of order
+      if len(read_results[0]) == 1:
+        graph_meta_metrics = read_results[0][0]
+        read_results.pop(0) #remove it
+      
+      #format expected is a row of json data next
+      if len(read_results[0]) == 1:
+        graph_title = read_results[0][0]
+        read_results.pop(0) #remove it
+      
+      header_row = 1
+      
+      if header_row == 1:
+        results_object = {"series": [],
+          "title": graph_title,
+        'meta_metrics': graph_meta_metrics,
+        }
+        for i in read_results[0]:
+          results_object['series'].append(
+            {"name": i,
+            "data": [],
+              }
+          )
+        for i in read_results[1:]:
+          n = 0 
+          for x in i:
+            try:
+              results_object['series'][n]['data'].append([float(i[0]),float(x)])
+            except ValueError:
+              pass
+            n +=1
+      #print results_object
+      results_collection.append(results_object)
+    else:
+      print "NO DATA IN FILE !!!!!!"
+      
     
-    #format expects title first and then header in terms of order
-    if len(read_results[0]) == 1:
-      graph_meta_metrics = read_results[0][0]
-      read_results.pop(0) #remove it
-    
-    #format expected is a row of json data next
-    if len(read_results[0]) == 1:
-      graph_title = read_results[0][0]
-      read_results.pop(0) #remove it
-    
-    header_row = 1
-    
-    if header_row == 1:
-      results_object = {"series": [],
-        "title": graph_title,
-      'meta_metrics': graph_meta_metrics,
-      }
-      for i in read_results[0]:
-        results_object['series'].append(
-          {"name": i,
-          "data": [],
-            }
-        )
-      for i in read_results[1:]:
-        n = 0 
-        for x in i:
-          try:
-            results_object['series'][n]['data'].append([float(i[0]),float(x)])
-          except ValueError:
-            pass
-          n +=1
-    #print results_object
-    
-    results_collection.append(results_object)
     
   results_collection_meta = {
     'meta': summary_data,

@@ -1,0 +1,39 @@
+{
+  "name": "jquery-scrollToTop",
+  "title": "jQuery scrollToTop",
+  "description": "A jquery plugin that automatically add a button to scroll to top",
+  "version": "0.3.1",
+  "homepage": "https://github.com/amazingSurge/jquery-scrollToTop",
+   "author": {
+    "name": "amazingSurge",
+    "email": "amazingSurge@yahoo.com",
+    "url": "amazingSurge.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:amazingSurge/jquery-scrollToTop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/amazingSurge/jquery-scrollToTop/issues"
+  },
+  "licenses": [
+    {
+      "type": "GPL",
+      "url": "https://github.com/amazingSurge/jquery-scrollToTop/blob/master/LICENSE-GPL"
+    }
+  ],
+  "dependencies": {
+    "jquery": ">=1.8.3"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-jsbeautifier": "*",
+    "grunt-text-replace": "*",
+    "grunt-contrib-copy": "*",
+    "grunt": "~0.4.4"
+  }
+}

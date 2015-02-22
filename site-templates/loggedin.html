@@ -3,18 +3,30 @@
 
 
 {% block content %}
+    
+    <!--highcarts-->
     <script type='text/javascript' src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
     <script type='text/javascript' src="{% static 'highslide-4.1.13/highslide/highslide-full.js' %}"></script>
+    
+    <!--highslide-->
     <script type='text/javascript' src="http://highcharts.com/highslide/highslide.config.js"></script>
     <link rel="stylesheet" type="text/css" href="http://highcharts.com/highslide/highslide.css"/>
+    
+    <!--forcookie management - csrf tokesn-->
     <script src="{% static 'jquery-cookie-1.4.1/jquery.cookie.js' %}"></script>
     
-    
+    <!--bootstrap data tables-->
     <script src="{% static 'datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
     
+    <!--scroll to top widget-->
+    <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
+    <link href="{% static 'Scroll-To-Top/css/easing.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'Scroll-To-Top/css/scrollToTop.css' %}" rel="stylesheet" media="screen">
+
+
   <div class="container">
 
   <!--<p>Hi {{full_name}} you are now logged in! Click <a href="/accounts/logout/">here</a> to logout.</p>
@@ -59,52 +71,7 @@
   
     
     <div id = 'status_update'></div>
-    <div id = 'graph_area_title'></div>
-     
-    <table id="summary_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th>Event</th>
-                <th>Negative Predictive Value</th>
-                <th>Significance</th>
-                <th># People Clicked</th>
-                <th>FPV</th>
-                <th>TPV</th>
-                <th># Users</th>
-                <th>Scaled_MCC</th>
-                <th>Precision</th>
-                <th>MCC</th>
-                <th>Lift</th>
-                <th>Recall</th>
-                <th>i</th>
-                <th>F1</th>
-                <th>Leverage</th>
-                <th>Cost</th>
-                <th>TNV</th>
-            </tr>
-        </thead>
-<!--   'fnv': 103,
-        'tnv': 414,
-        'cost': 85,
-        'leverage': 0.011388099772663595,
-        'f1': 0.6854304635761589,
-        'i': 1,
-        'recall': 0.07964601769911504,
-        'lift': 3.047831632653061,
-        'mcc': 0.17422681335658385,
-        'precision': 0.6,
-        'scaled_mcc': 0.4249697548934587,
-        'num_users': 14,
-        'tpv': 9,
-        'fpv': 5,
-        'num_people_clicked': 14,
-        'significance': 16.11849570345904,
-        'negative_predictive_value': 0.7992277992277992,
-        'event': 'path=body|div.containermain|table|tbody|tr|td.main|div.main-containerlead_details_containerrounded-bottomrounded-top|div#quoteform|div|div.infoboxactions|ul.navnav-tabs|li.nav-largeinvis|a.btnbtn-primary'
--->
-    </table>
-    
-    
+    <div id = 'graph_area_title'></div>    
     <div id = 'graphs'></div>
   
   
@@ -211,7 +178,9 @@
                     //start updating the graphs
                     execute_graph_refresh();
                     //myApp.hidePleaseWait(); //hide spinner
-                    $('#graphs').empty(); //clear the status that the data was generated
+                    $('#graph_area_title').empty(); //clear the headings
+                    $('#graphs').empty(); //clear the data for previous graphs
+                    
 
                   }, "json").fail(function() {
                     //on failure
@@ -236,7 +205,7 @@
                     myApp.hidePleaseWait();
                   }, "json").fail(function() {
                     $('#status_update').empty();
-                    $('#status_update').append('<div class="alert alert-danger" role="alert">' + 'Invalid query - either the syntax was wrong or no metccesful users were found.' + '</div>' ) //updates that data was generated
+                    $('#status_update').append('<div class="alert alert-danger" role="alert">' + 'Invalid query - either the syntax was wrong or no successful users were found.' + '</div>' ) //updates that data was generated
                     myApp.hidePleaseWait();
                   });
             }
@@ -256,13 +225,37 @@
                     $('#graph_area_title').append(append_string)
                     
                     table_json = JSON.parse(datacollection.table_json)
-                    console.log(table_json.table_json)
                     
+                    table_html = '<table id="summary_table" class="table table-striped table-bordered" cellspacing="0" width="100%">' +
+            '<thead>'+
+            '<tr>'+
+                '<th>Event</th>'+
+                '<th>Negative Predictive Value</th>'+
+                '<th>Significance</th>'+
+                '<th># People Clicked</th>'+
+                '<th>FPV</th>'+
+                '<th>TPV</th>'+
+                '<th># Users</th>'+
+                '<th>Scaled_MCC</th>'+
+                '<th>Precision</th>'+
+                '<th>MCC</th>'+
+                '<th>Lift</th>'+
+                '<th>Recall</th>'+
+                '<th>i</th>'+
+                '<th>F1</th>'+
+                '<th>Leverage</th>'+
+                '<th>Cost</th>'+
+                '<th>TNV</th>'+
+            '</tr>'+
+        '</thead>'+
+        '</table>'
+        
+        $('#graphs').append(table_html)
                     var tr;
                     var cnta = 1
                     for (var key in table_json) {
                         
-                        tr = $('<tr/>');
+                        tr = $('<tr/>'); //#summary_table tbody tr
                         tr.append("<td><a href='#" + cnta.toString() +"'>" + table_json[key].event + "</a></td>");
                         tr.append("<td>" + parseFloat(table_json[key].negative_predictive_value).toFixed(2) + "</td>");
                         tr.append("<td>" + parseFloat(table_json[key].significance).toFixed(2) + "</td>");
@@ -281,38 +274,18 @@
                         tr.append("<td>" + table_json[key].cost + "</td>");
                         tr.append("<td>" + table_json[key].tnv + "</td>");
                         cnta = cnta+1
-                        $('table').append(tr);
+                        $('#summary_table').append(tr);
                     }
                     
                     $('#summary_table').dataTable({
                         "order": [[ 7, "desc" ]]
                         });
                     
-                    //for(var key in table_json) {
-                    //    console.log(table_json[key].event);
-                    //   }
-        //                'fnv': 103,
-        //'tnv': 414,
-        //'cost': 85,
-        //'leverage': 0.011388099772663595,
-        //'f1': 0.6854304635761589,
-        //'i': 1,
-        //'recall': 0.07964601769911504,
-        //'lift': 3.047831632653061,
-        //'mcc': 0.17422681335658385,
-        //'precision': 0.6,
-        //'scaled_mcc': 0.4249697548934587,
-        //'num_users': 14,
-        //'tpv': 9,
-        //'fpv': 5,
-        //'num_people_clicked': 14,
-        //'significance': 16.11849570345904,
-        //'negative_predictive_value': 0.7992277992277992,
-        //'event':
-        //            } 
+
 
                     
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
+                        
                         var data = datacollection.each_graph[counter]
                         var event_detail_url = convert_title_to_url(data.title, '\get_event_details?')
                         var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
@@ -470,7 +443,9 @@
                 myApp.hidePleaseWait();
                 }); //end getJSON
             } //end function for make data refresh
-            
+        
+        $('body').scrollToTop({skin: 'cycle'});
+        
         }); //end document ready
     </script>
 

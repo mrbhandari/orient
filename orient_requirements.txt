@@ -12,12 +12,37 @@
 # Status messages DONE
 
 #clickable links DONE
-#sorted table
-#rounded numbers
-#when you submit does the table refresh
+#sorted table DONE
+#rounded numbers DONE
+#default sort on scaled_MCC DONE
+
 # on first click of point wierd stuff is happening
-#default sort on scaled_MCC
+#when you submit does the table refresh
+
 #back to top
+#have datatables on all screens
+#table too wide
+   
+<!--   'fnv': 103,
+        'tnv': 414,
+        'cost': 85,
+        'leverage': 0.011388099772663595,
+        'f1': 0.6854304635761589,
+        'i': 1,
+        'recall': 0.07964601769911504,
+        'lift': 3.047831632653061,
+        'mcc': 0.17422681335658385,
+        'precision': 0.6,
+        'scaled_mcc': 0.4249697548934587,
+        'num_users': 14,
+        'tpv': 9,
+        'fpv': 5,
+        'num_people_clicked': 14,
+        'significance': 16.11849570345904,
+        'negative_predictive_value': 0.7992277992277992,
+        'event': 'path=body|div.containermain|table|tbody|tr|td.main|div.main-containerlead_details_containerrounded-bottomrounded-top|div#quoteform|div|div.infoboxactions|ul.navnav-tabs|li.nav-largeinvis|a.btnbtn-primary'
+-->
+    
 
 
 
