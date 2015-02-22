@@ -11,6 +11,14 @@
 # Ability to test segments DONE
 # Status messages DONE
 
+#clickable links DONE
+#sorted table
+#rounded numbers
+#when you submit does the table refresh
+# on first click of point wierd stuff is happening
+#default sort on scaled_MCC
+#back to top
+
 
 
 #Rahul's computer setup

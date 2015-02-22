@@ -70,33 +70,17 @@
                 <th># People Clicked</th>
                 <th>FPV</th>
                 <th>TPV</th>
-                <th>Num_Users</th>
+                <th># Users</th>
                 <th>Scaled_MCC</th>
                 <th>Precision</th>
                 <th>MCC</th>
                 <th>Lift</th>
                 <th>Recall</th>
                 <th>i</th>
-                <th>F1.</th>
+                <th>F1</th>
                 <th>Leverage</th>
                 <th>Cost</th>
                 <th>TNV</th>
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
             </tr>
         </thead>
 <!--   'fnv': 103,
@@ -280,27 +264,29 @@
                         
                         tr = $('<tr/>');
                         tr.append("<td><a href='#" + cnta.toString() +"'>" + table_json[key].event + "</a></td>");
-                        tr.append("<td>" + table_json[key].negative_predictive_value + "</td>");
-                        tr.append("<td>" + table_json[key].significance + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].negative_predictive_value).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].significance).toFixed(2) + "</td>");
                         tr.append("<td>" + table_json[key].num_people_clicked + "</td>");
                         tr.append("<td>" + table_json[key].fpv + "</td>");
                         tr.append("<td>" + table_json[key].tpv + "</td>");
                         tr.append("<td>" + table_json[key].num_users + "</td>");
-                        tr.append("<td>" + table_json[key].scaled_mcc + "</td>");
-                        tr.append("<td>" + table_json[key].precision + "</td>");
-                        tr.append("<td>" + table_json[key].mcc + "</td>");
-                        tr.append("<td>" + table_json[key].lift + "</td>");
-                        tr.append("<td>" + table_json[key].recall + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].precision).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].lift).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].recall).toFixed(2) + "</td>");
                         tr.append("<td>" + table_json[key].i + "</td>");
-                        tr.append("<td>" + table_json[key].f1 + "</td>");
-                        tr.append("<td>" + table_json[key].leverage + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].f1).toFixed(2) + "</td>");
+                        tr.append("<td>" + parseFloat(table_json[key].leverage).toFixed(2) + "</td>");
                         tr.append("<td>" + table_json[key].cost + "</td>");
                         tr.append("<td>" + table_json[key].tnv + "</td>");
                         cnta = cnta+1
                         $('table').append(tr);
                     }
                     
-                    $('#summary_table').dataTable();
+                    $('#summary_table').dataTable({
+                        "order": [[ 7, "desc" ]]
+                        });
                     
                     //for(var key in table_json) {
                     //    console.log(table_json[key].event);
