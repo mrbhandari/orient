@@ -234,7 +234,7 @@
                     //Being table creation
                     
                     //First add filter div at top
-                    summary_table_cols = ['Negative Predictive Value','Significance','# People Clicked','FPV','TPV','# Users','Scaled_MCC','Precision','MCC','Lift','Recall','i','F1','Leverage','Cost','TNV']
+                    summary_table_cols = ['# People Clicked','# Users','Scaled_MCC','MCC','Lift','Leverage','Recall','Precision','i','F1','Cost','FPV','TPV','FNV']
                     
                     filter_area = '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><div class="container"><div class="form-group form-inline">'
 
@@ -256,22 +256,25 @@
                         '<thead>'+
                         '<tr>'+
                             '<th>Event</th>'+
-                            '<th>Negative Predictive Value</th>'+
-                            '<th>Significance</th>'+
+
+                            
                             '<th># People Clicked</th>'+
-                            '<th>FPV</th>'+
-                            '<th>TPV</th>'+
+                            
                             '<th># Users</th>'+
                             '<th>Scaled_MCC</th>'+
-                            '<th>Precision</th>'+
+                            
                             '<th>MCC</th>'+
                             '<th>Lift</th>'+
+                            '<th>Leverage</th>'+
                             '<th>Recall</th>'+
+                            '<th>Precision</th>'+
                             '<th>i</th>'+
                             '<th>F1</th>'+
-                            '<th>Leverage</th>'+
+                            
                             '<th>Cost</th>'+
-                            '<th>TNV</th>'+
+                            '<th>FPV</th>'+
+                            '<th>TPV</th>'+
+                            '<th>FNV</th>'+
                         '</tr>'+
                     '</thead>'+
                     '</table>'
@@ -283,49 +286,54 @@
                             
                             tr = $('<tr/>'); //#summary_table tbody tr
                             tr.append("<td><a href='#" + cnta.toString() +"'>" + table_json[key].event + "</a></td>");
-                            tr.append("<td>" + parseFloat(table_json[key].negative_predictive_value).toFixed(2) + "</td>");
-                            tr.append("<td>" + parseFloat(table_json[key].significance).toFixed(2) + "</td>");
+                        
+                            
                             tr.append("<td>" + table_json[key].num_people_clicked + "</td>");
-                            tr.append("<td>" + table_json[key].fpv + "</td>");
-                            tr.append("<td>" + table_json[key].tpv + "</td>");
+                            
                             tr.append("<td>" + table_json[key].num_users + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>");
-                            tr.append("<td>" + parseFloat(table_json[key].precision).toFixed(2) + "</td>");
+                            
                             tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].lift).toFixed(2) + "</td>");
+                            tr.append("<td>" + parseFloat(table_json[key].leverage).toFixed(2) + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].recall).toFixed(2) + "</td>");
+                            tr.append("<td>" + parseFloat(table_json[key].precision).toFixed(2) + "</td>");
                             tr.append("<td>" + table_json[key].i + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].f1).toFixed(2) + "</td>");
-                            tr.append("<td>" + parseFloat(table_json[key].leverage).toFixed(2) + "</td>");
+                            
                             tr.append("<td>" + table_json[key].cost + "</td>");
-                            tr.append("<td>" + table_json[key].tnv + "</td>");
+                            tr.append("<td>" + table_json[key].fpv + "</td>");
+                            tr.append("<td>" + table_json[key].tpv + "</td>");
+                            tr.append("<td>" + table_json[key].fnv + "</td>");
                             cnta = cnta+1
                             $('#summary_table').append(tr);
                     }
                     
                      var sum_table = $('#summary_table').dataTable({
-                        "order": [[ 7, "desc" ]],
+                        "order": [[ 3, "desc" ]],
                         });
                     
                     //create dynamic filters
                     sum_table.yadcf([
                         //{column_number : 0  ,  filter_type: "auto_complete", filter_container_id: "Event_filter_container", filter_match_mode: "contains"},
-                        {column_number : 1  ,  filter_type: "range_number_slider", filter_container_id: "NegativePredictiveValue_filter_container"},
-                        {column_number : 2  ,  filter_type: "range_number_slider", filter_container_id: "Significance_filter_container"},
-                        {column_number : 3  ,  filter_type: "range_number_slider", filter_container_id: "PeopleClicked_filter_container"},
-                        {column_number : 4  ,  filter_type: "range_number_slider", filter_container_id: "FPV_filter_container"},
-                        {column_number : 5  ,  filter_type: "range_number_slider", filter_container_id: "TPV_filter_container"},
-                        {column_number : 6  ,  filter_type: "range_number_slider", filter_container_id: "Users_filter_container"},
-                        {column_number : 7  ,  filter_type: "range_number_slider", filter_container_id: "Scaled_MCC_filter_container"},
-                        {column_number : 8  ,  filter_type: "range_number_slider", filter_container_id: "Precision_filter_container"},
-                        {column_number : 9  ,  filter_type: "range_number_slider", filter_container_id: "MCC_filter_container"},
-                        {column_number : 10  ,  filter_type: "range_number_slider", filter_container_id: "Lift_filter_container"},
-                        {column_number : 11  ,  filter_type: "range_number_slider", filter_container_id: "Recall_filter_container"},
-                        {column_number : 12 ,  filter_type: "range_number_slider", filter_container_id: "i_filter_container"},
-                        {column_number : 13 ,  filter_type: "range_number_slider", filter_container_id: "F1_filter_container"},
-                        {column_number : 14 ,  filter_type: "range_number_slider", filter_container_id: "Leverage_filter_container"},
-                        {column_number : 15  ,  filter_type: "range_number_slider", filter_container_id: "Cost_filter_container"},
-                        {column_number : 16  ,  filter_type: "range_number_slider", filter_container_id: "TNV_filter_container"},
+                        
+                        {column_number : 1  ,  filter_type: "range_number", filter_container_id: "PeopleClicked_filter_container"},
+                        
+                        {column_number : 2  ,  filter_type: "range_number", filter_container_id: "Users_filter_container"},
+                        {column_number : 3  ,  filter_type: "range_number", filter_container_id: "Scaled_MCC_filter_container"},
+                        
+                        {column_number : 4  ,  filter_type: "range_number", filter_container_id: "MCC_filter_container"},
+                        {column_number : 5  ,  filter_type: "range_number", filter_container_id: "Lift_filter_container"},
+                        {column_number : 6 ,  filter_type: "range_number", filter_container_id: "Leverage_filter_container"},
+                        {column_number : 7  ,  filter_type: "range_number", filter_container_id: "Recall_filter_container"},
+                        {column_number : 8  ,  filter_type: "range_number", filter_container_id: "Precision_filter_container"},
+                        {column_number : 9 ,  filter_type: "range_number", filter_container_id: "i_filter_container"},
+                        {column_number : 10 ,  filter_type: "range_number", filter_container_id: "F1_filter_container"},
+                        
+                        {column_number : 11  ,  filter_type: "range_number", filter_container_id: "Cost_filter_container"},
+                        {column_number : 12 ,  filter_type: "range_number", filter_container_id: "FPV_filter_container"},
+                        {column_number : 13 ,  filter_type: "range_number", filter_container_id: "TPV_filter_container"},
+                        {column_number : 14  ,  filter_type: "range_number", filter_container_id: "FNV_filter_container"},
                         //{column_number : 2, data: ["Yes", "No"], filter_default_label: "Select Yes/No"},
                         //{column_number : 3, text_data_delimiter: ",", filter_type: "auto_complete"},
                         //{column_number : 4, column_data_type: "html", html_data_type: "text", filter_default_label: "Select tag"}
