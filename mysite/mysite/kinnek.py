@@ -352,12 +352,12 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         
         for the_file in os.listdir(folder):
             file_path = os.path.join(folder, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        except Exception, e:
-            print "No files in this directory"
-            print e
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception, e:
+                print "No files in this directory"
+                print e
     
         print "finished deleting files in " + folder
     

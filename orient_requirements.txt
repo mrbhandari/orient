@@ -15,11 +15,11 @@
 #sorted table DONE
 #rounded numbers DONE
 #default sort on scaled_MCC DONE
-
-# on first click of point wierd stuff is happening
+#back to top DONE
+#on first click of point wierd stuff is happening DONE
 #when you submit does the table refresh
 
-#back to top
+#table should have filters
 #have datatables on all screens
 #table too wide
    
