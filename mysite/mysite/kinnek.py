@@ -265,7 +265,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         print "executing %s" % (query1)
         cur.execute(query1)
 
-        index_query1 = """ alter table failure_uids add index (uid); """ % (user_folder_)
+        index_query1 = """ alter table %sfailure_uids add index (uid); """ % (user_folder_)
 
         print "executing ",index_query1
         cur.execute(index_query1)
