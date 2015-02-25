@@ -234,7 +234,7 @@
                     //Being table creation
                     
                     //First add filter div at top
-                    summary_table_cols = ['# People Clicked','# Users','ScaledMCC','MCC','Lift','Leverage','Recall','Precision','i','F1','Cost','FPV','TPV','FNV']
+                    summary_table_cols = ['# People Clicked','# Users','ScaledMCC','MCC','Lift','Leverage','Recall','Precision','i','F1','Cost','FPV','TPV','FNV','ave_clicks']
                     
                     filter_area = '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><div class="container"><div class="form-group form-inline">'
 
@@ -275,6 +275,7 @@
                             '<th>FPV</th>'+
                             '<th>TPV</th>'+
                             '<th>FNV</th>'+
+                            '<th>Ave_clicks</th>'+
                         '</tr>'+
                     '</thead>'+
                     '</table>'
@@ -305,6 +306,7 @@
                             tr.append("<td>" + table_json[key].fpv + "</td>");
                             tr.append("<td>" + table_json[key].tpv + "</td>");
                             tr.append("<td>" + table_json[key].fnv + "</td>");
+                            tr.append("<td>" + parseFloat(table_json[key].ave_clicks).toFixed(2) + "</td>");
                             cnta = cnta+1
                             $('#summary_table').append(tr);
                     }
@@ -334,6 +336,7 @@
                         {column_number : 12 ,  filter_type: "range_number", filter_container_id: "FPV_filter_container"},
                         {column_number : 13 ,  filter_type: "range_number", filter_container_id: "TPV_filter_container"},
                         {column_number : 14  ,  filter_type: "range_number", filter_container_id: "FNV_filter_container"},
+                        {column_number : 15  ,  filter_type: "range_number", filter_container_id: "ave_clicks_container"},
                         //{column_number : 2, data: ["Yes", "No"], filter_default_label: "Select Yes/No"},
                         //{column_number : 3, text_data_delimiter: ",", filter_type: "auto_complete"},
                         //{column_number : 4, column_data_type: "html", html_data_type: "text", filter_default_label: "Select tag"}

@@ -101,7 +101,6 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         output_dict["i"] = i
         output_dict["tpv"] = tpv
         output_dict["fpv"] = fpv
-        output_dict["tnv"] = tnv
         output_dict["fnv"] = fnv
         output_dict["mcc"] = mcc
         output_dict["precision"] = precision
@@ -291,7 +290,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         
         query4 = """
                     CREATE TABLE %ssuccess_uids_events_cnt
-    SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
+    SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr, min(hc),
           COUNT(*) AS cnt
     FROM %ssuccess_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
@@ -301,7 +300,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         
         query5 = """
                     CREATE  TABLE %sfailure_uids_events_cnt
-    SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr,
+    SELECT uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr, min(hc) as hc,
           COUNT(*) AS cnt
     FROM %sfailure_uids_events
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
@@ -320,11 +319,13 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     """ % (user_folder_))
         
         
-        cur.execute("""
+        query6 = """
                     CREATE table %sall_uid_events_cnt
     SELECT %ssuccess_uids_events_cnt.* FROM %ssuccess_uids_events_cnt
     UNION SELECT %sfailure_uids_events_cnt.* FROM %sfailure_uids_events_cnt;
-                    """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_))
+                    """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_)
+        print "EXECUTING ", query6            
+        cur.execute(query6)
     
         cur.execute("""
                 CREATE table %sall_segment_events
@@ -380,9 +381,12 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         prev_uid = ""
         prev_conv = 0
         agg_event_ctr = {}
+        hc_ctr = {}
+        hc_ave_ctr = {}
+        event_total = {}
         column_names = cur.description
         for row in cur.fetchall(): 
-            #print "OUTPUT:" +  str(row)
+            print "OUTPUT:" +  str(row)
             uid = row[0]
             if prev_uid != uid:
                 if prev_uid != "":
@@ -403,7 +407,17 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                             if event_signature not in nc_events:
                                 nc_events[event_signature] = []
                             nc_events[event_signature].append(agg_event_ctr[event_signature])
-                agg_event_ctr = {} 
+                    for event in hc_ctr:
+                        if event not in event_total:
+                            event_total[event] = 0
+                        event_total[event] += 1
+                        if event not in hc_ave_ctr:
+                            hc_ave_ctr[event] = 0
+                        hc_ave_ctr[event] += hc_ctr[event]
+                        print "HC:",prev_uid, event, hc_ctr[event]
+
+                agg_event_ctr.clear()
+                hc_ctr.clear()
            
             prev_conv = row[-1]
             prev_uid = uid
@@ -411,9 +425,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
             is_conv = row[-1]
             event_signatures = set()
             event_signature_str = ""
-            for i in range(1,len(row) - 2):
+            for i in range(1,len(row) - 3):
                 field_name = column_names[i][0]
-                if str(row[i]).strip() == "":
+                if str(row[i]).strip() == "" or str(row[i]).strip() == "null" or str(row[i]).strip() == "undefined":
                     continue
                 if event_signature_str == "":
                     event_signature_str = field_name+ "=" + str(row[i])
@@ -425,9 +439,15 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                         agg_event_ctr[event_signature_temp] = agg_event_ctr[event_signature_temp] + row[-2]
                     else:
                         agg_event_ctr[event_signature_temp] = row[-2]
-    #        print "EVENT SIGNATURE",event_signature_str
+                    if event_signature_temp in hc_ctr:
+                        hc_ctr[event_signature_temp] = min(hc_ctr[event_signature_temp],row[-3])
+                    else:
+                        hc_ctr[event_signature_temp] = row[-3]
+            #print "EVENT SIGNATURE",event_signature_str
             event_signatures.add(event_signature_str)
             for event_signature in event_signatures:
+                hc_ctr[event_signature] = row[-3]
+
                 if event_signature in event_metadata:
                     event_metadata[event_signature] += 1
                 else:
@@ -437,12 +457,16 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     if event_signature not in conv_events:
                         conv_events[event_signature] = []
                     conv_events[event_signature].append(row[-2])
+                    
                 else:
                     nc_uids.add(row[0])
                     if event_signature not in nc_events:
                         nc_events[event_signature] = []
                     nc_events[event_signature].append(row[-2])
-    
+        
+        for e in event_total.keys():
+            hc_ave_ctr[e] = (hc_ave_ctr[e] + 0.0)/(0.0 + event_total[e])
+            print e, "\t", hc_ave_ctr[e]
         ctr = 0
         total_conv = len(conv_uids)
         total_nc = len(nc_uids)
@@ -488,9 +512,10 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
                     event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
                     event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
+                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
                     ctr += 1
                 summary_file_writer.write(str(summary_dict))
                 summary_file_writer.close()
 
-#generate_event_files(False, False, "start_hc <= 5", "path='body|div.container messages|div.row|div.col-md-9|div#send_messages_container|div.row|div.col-md-9|form.form-horizontal ng-pristine ng-valid|div.form-group|div.col-sm-offset-3 col-sm-9|button.btn btn-primary'", "kinnek", "admin")
+generate_event_files(False, False, "start_hc <= 5 and (landing_url like '%kinnek.com/' or landing_url like '%kinnek.com/?%' )", "url like '%kinnek.com/post/#justcreated'", "kinnek", "admin")
