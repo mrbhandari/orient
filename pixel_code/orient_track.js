@@ -809,23 +809,23 @@
                 
                 parsedData = copyOf(data);
 	
-				parsedData.type = "click";
-				parsedData.element = clickedElement.tagName;
-				parsedData.cssclass = clickedElement.className;
-				parsedData.path = pathHref.path;
+                parsedData.type = "click";
+                parsedData.element = clickedElement.tagName;
+                parsedData.cssclass = clickedElement.className;
+                parsedData.path = pathHref.path;
                 parsedData.name = clickedElement.getAttribute("name");
-				console.log("inner html" + clickedElement.innerHtml);
+                parsedData.element_txt = clickedElement.textContent;
+
                 if (clickedElement.tagName == "INPUT") {
                   parsedData.label = clickedElement.parentElement.innerText;
                   parsedData.input_type = clickedElement.getAttribute("type");
                   parsedData.value = clickedElement.getAttribute("value");
-                  parsedData.element_txt = clickedElement.element_txt;
+                  parsedData.element_txt = clickedElement.getAttribute("placeholder");
                 }
                 
-                if (clickedElement.tagName == "BUTTON" || "SELECT" || "TEXTAREA" || "OPTION") {
-                  parsedData.element_txt = clickedElement.getAttribute("value");  
+                if (clickedElement.tagName == "BUTTON" || clickedElement.tagName ==  "SELECT" || clickedElement.tagName ==  "TEXTAREA" || clickedElement.tagName ==  "OPTION") {
+                  parsedData.element_txt = clickedElement.getAttribute("value");
                 }
-                
                 
                 if (clickedElement.tagName == "IMG") {
                   parsedData.img_src = clickedElement.getAttribute("src");
@@ -836,8 +836,8 @@
                   parsedData.element_txt = clickedElement.textContent;
                   parsedData.href = clickedElement.getAttribute("href");
                 }
-                            
-				pixelLog(parsedData)
+		
+                pixelLog(parsedData);
         }
         
         document.onclick = clickListener;
