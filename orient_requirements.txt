@@ -72,7 +72,7 @@ use orient;
 drop table user_events;
 
 #create for each merchant
-CREATE TABLE `user_events` (
+CREATE TABLE `kinnek_user_events` (
   `uid` varchar(100) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `visit_id` int(11) DEFAULT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE `user_events` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 
-LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
+LOAD DATA LOCAL  INFILE '/data/kinnek_visits_cut.tsv' into table kinnek_user_events FIELDS terminated by '\t' lines terminated by '\n' (time_period, uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
 
 
 
@@ -187,5 +187,8 @@ sudo chmod -R 777 /data/
 
 sudo python manage.py makemigrations userprofile
 sudo python manage.py migrate
+
+Go to /accounts/profile/
+
 
 ALTER TABLE `kinnek_user_events` ADD INDEX `uid` (`uid`);

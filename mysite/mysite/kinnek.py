@@ -518,4 +518,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 summary_file_writer.write(str(summary_dict))
                 summary_file_writer.close()
 
-generate_event_files(False, False, "start_hc <= 5 and (landing_url like '%kinnek.com/' or landing_url like '%kinnek.com/?%' )", "url like '%kinnek.com/post/#justcreated'", "kinnek", "admin")
+#generate_event_files(False, False, "start_hc <= 5 and (landing_url like '%kinnek.com/' or landing_url like '%kinnek.com/?%' )", "url like '%kinnek.com/post/#justcreated'", "kinnek", "admin")
