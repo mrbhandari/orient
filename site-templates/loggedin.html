@@ -32,6 +32,10 @@
     <!-- Sliders Jquery -->
     <link href="{% static 'jquery-ui-1.11.2/jquery-ui.css' %}" rel="stylesheet" type="text/css" />
     <script src="{% static 'jquery-ui-1.11.2/jquery-ui.js' %}"></script>
+    
+    
+
+
 
 
   <div class="container">
@@ -236,11 +240,11 @@
                     //First add filter div at top
                     summary_table_cols = ['# People Clicked','# Users','ScaledMCC','MCC','Lift','Leverage','Recall','Precision','i','F1','Cost','FPV','TPV','FNV','ave_clicks']
                     
-                    filter_area = '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><div class="container"><div class="form-group form-inline">'
+                    filter_area = '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><br><div class="container"><div class="form-group">'
 
                     //loop through a create a label and div with id of the filter container area for all containers
                     for (var i=0; i < summary_table_cols.length; i++) {
-                        filter_area += '<div class="col-sm-3 container">'
+                        filter_area += '<div class="col-sm-6 container form-group">'
                         filter_area += '<label class="control-label">'+summary_table_cols[i]+'</label>' //class="control-label"
                         filter_area += '<div id="' + summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container' + '"></div>'
                         console.log(summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container')
@@ -319,10 +323,10 @@
                     sum_table.yadcf([
                         //{column_number : 0  ,  filter_type: "auto_complete", filter_container_id: "Event_filter_container", filter_match_mode: "contains"},
                         
-                        {column_number : 1  ,  filter_type: "range_number", filter_container_id: "PeopleClicked_filter_container"},
+                        {column_number : 1  ,  filter_type: "range_number", filter_container_id: "PeopleClicked_filter_container", filter_reset_button_text: "Reset"},
                         
-                        {column_number : 2  ,  filter_type: "range_number", filter_container_id: "Users_filter_container"},
-                        {column_number : 3  ,  filter_type: "range_number", filter_container_id: "ScaledMCC_filter_container"},
+                        {column_number : 2  ,  filter_type: "range_number", filter_container_id: "Users_filter_container", filter_reset_button_text: "Reset"},
+                        {column_number : 3  ,  filter_type: "range_number", filter_container_id: "ScaledMCC_filter_container", filter_reset_button_text: "Reset"},
                         
                         {column_number : 4  ,  filter_type: "range_number", filter_container_id: "MCC_filter_container"},
                         {column_number : 5  ,  filter_type: "range_number", filter_container_id: "Lift_filter_container"},

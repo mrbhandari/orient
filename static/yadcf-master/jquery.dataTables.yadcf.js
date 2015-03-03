@@ -967,9 +967,13 @@ var yadcf = (function ($) {
 		$(filter_selector_string).append("<input placeholder=\"" + filter_default_label[1] + "\" id=\"" + toId + "\" class=\"yadcf-filter-range-number yadcf-filter-range\" onkeyup=\"yadcf.rangeNumberKeyUP('" + table_selector_jq_friendly + "',event);\">" +
 			"</input>");
 
+			
 		if (filter_reset_button_text !== false) {
-			$(filter_selector_string_tmp).append("<button type=\"button\" onmousedown=\"yadcf.stopPropagation(event);\" " +
-				"onclick=\"yadcf.stopPropagation(event);yadcf.rangeClear('" + table_selector_jq_friendly + "',event); return false;\" class=\"yadcf-filter-reset-button\">" + filter_reset_button_text + "</button>");
+			
+			//$(filter_selector_string).append("<span class=\"yadcf-filter-range-number-seperator\" >" +
+			//				 "</span>");
+			//$(filter_selector_string).append("<button type=\"reset\" onmousedown=\"yadcf.stopPropagation(event);\" " +
+			//	"onclick=\"yadcf.stopPropagation(event);yadcf.rangeClear('" + table_selector_jq_friendly + "',event); return false;\" class=\"btn\">" + filter_reset_button_text + "</button>");
 		}
 
 		$.fn.dataTableExt.iApiIndex = oTablesIndex[table_selector_jq_friendly];
@@ -1108,7 +1112,9 @@ var yadcf = (function ($) {
 			"</input>");
 
 		if (filter_reset_button_text !== false) {
-			$(filter_selector_string_tmp).append("<button type=\"button\" onmousedown=\"yadcf.stopPropagation(event);\" " +
+			$(filter_selector_string_tmp).append(
+							     
+							     "<button type=\"button\" onmousedown=\"yadcf.stopPropagation(event);\" " +
 				"onclick=\"yadcf.stopPropagation(event);yadcf.rangeClear('" + table_selector_jq_friendly + "',event); return false;\" class=\"yadcf-filter-reset-button\">" + filter_reset_button_text + "</button>");
 		}
 
