@@ -6565,4 +6565,13 @@ button.close {
     display: none !important;
   }
 }
+
+/*
+ * from http://getbootstrap.com/examples/dashboard/dashboard.css
+ */
+
+.sub-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
 /*# sourceMappingURL=bootstrap.css.map */

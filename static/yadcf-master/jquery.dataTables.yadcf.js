@@ -993,6 +993,7 @@ var yadcf = (function ($) {
 		resetIApiIndex();
 
 		if (oTable.fnSettings().oFeatures.bServerSide !== true) {
+			console.log("EXECUTING FAILED CODE")
 			addRangeNumberFilterCapability(table_selector_jq_friendly, fromId, toId, column_number, ignore_char);
 		}
 
