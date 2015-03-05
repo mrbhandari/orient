@@ -751,11 +751,17 @@ var yadcf = (function ($) {
 	}
 
 	function addRangeNumberFilterCapability(table_selector_jq_friendly, fromId, toId, col_num, ignore_char) {
+		
+		    
 
 		$.fn.dataTableExt.afnFiltering.push(
 			function (oSettings, aData, iDataIndex) {
-				var min = document.getElementById(fromId).value,
-					max = document.getElementById(toId).value,
+				
+				
+				try {var minex = document.getElementById(fromId).value;} catch(err) {var minex = -1000000000000}
+				try {var maxex = document.getElementById(toId).value;} catch(err) {var maxex = 10000000000000}
+				var min = minex, 
+					max = maxex,
 					val = aData[col_num] === "-" ? 0 : aData[col_num],
 					retVal = false,
 					table_selector_jq_friendly_local = table_selector_jq_friendly,
@@ -791,6 +797,8 @@ var yadcf = (function ($) {
 				return retVal;
 			}
 		);
+
+
 	}
 
 	function addCustomFunctionFilterCapability(table_selector_jq_friendly, filterId, col_num) {

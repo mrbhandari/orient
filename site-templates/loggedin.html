@@ -16,7 +16,7 @@
     <script src="{% static 'jquery-cookie-1.4.1/jquery.cookie.js' %}"></script>
     
     <!--bootstrap data tables-->
-    <script src="{% static 'datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
@@ -408,8 +408,8 @@
   '<div class="panel-body collapse in" id="content'+ counter +'">',
     '<ul id="tabs" class="nav nav-tabs" data-tabs="tabs">',
         '<li class="active"><a href="#graph', (counter), '" data-toggle="tab">Graph</a></li>',
-        '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src="', event_detail_url,'";\'', '>Visualize</a></li>',
-        '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src="', user_detail_url,'";\'', '>User List</a></li>',
+        '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
+        '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
     '</ul>',
     '<div id="my-tab-content" class="tab-content">',
         '<br>',
