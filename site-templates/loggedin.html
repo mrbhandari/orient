@@ -458,9 +458,9 @@
                         //                     "'>User ID List</a>",].join(''))
                         
                         
-                        $('#graphs').append( "<div id='container" + counter + "' counter='" + counter + "'></div>" )
+                        $('#graph_area_' + counter).append( "<div id='container" + counter + "' counter='" + counter + "'></div>" )
                         //console.log(data.series[6]);
-                        $('#graph_area_' + counter).highcharts({
+                        $('#container' + counter).highcharts({
                             chart: {
                                 type: 'spline'
                             },
@@ -548,7 +548,7 @@
                             point: {
                                 events: {
                                     click: function (e) {
-                                        
+                                        console.log(e)
                                         
                                         var target = $( e.target )
                                         var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
@@ -581,7 +581,7 @@
                                         hs.htmlExpand(null, {
                                             headingText: 'Details',
                                             maincontentText:  row1 + row2 + row3 + row4 + row5 + row6 + row7,
-                                            width: 300
+                                            width: 400
                                         });
                                     }
                                 },
