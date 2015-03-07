@@ -427,7 +427,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
             event_signature_str = ""
             for i in range(1,len(row) - 3):
                 field_name = column_names[i][0]
-                if str(row[i]).strip() == "" or str(row[i]).strip() == "null" or str(row[i]).strip() == "undefined":
+                if str(row[i]).strip() == "" or str(row[i]).strip() == "null" or str(row[i]).strip() == "undefined" || field_name == "is_conversion":
                     continue
                 if event_signature_str == "":
                     event_signature_str = field_name+ "=" + str(row[i])
