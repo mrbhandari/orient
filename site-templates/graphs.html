@@ -1,0 +1,237 @@
+{% extends "base_no_header.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+     
+    <!--high charts-->
+    <script type='text/javascript' src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
+    <script type='text/javascript' src="{% static 'highslide-4.1.13/highslide/highslide-full.js' %}"></script>
+    
+    <!--highslide-->
+    <script type='text/javascript' src="http://highcharts.com/highslide/highslide.config.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://highcharts.com/highslide/highslide.css"/>
+    
+    <!--forcookie management - csrf tokesn-->
+    <script src="{% static 'jquery-cookie-1.4.1/jquery.cookie.js' %}"></script>
+    
+    <!--bootstrap data tables-->
+    <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
+    <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
+    
+    <!--scroll to top widget-->
+    <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
+    <link href="{% static 'Scroll-To-Top/css/easing.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'Scroll-To-Top/css/scrollToTop.css' %}" rel="stylesheet" media="screen">
+        
+    <!-- DataTables Column Filter -->
+    <link href="{% static 'yadcf-master/jquery.dataTables.yadcf.css' %}" rel="stylesheet" type="text/css" />
+    <script src="{% static 'yadcf-master/jquery.dataTables.yadcf.js' %}"></script>
+    <!-- Sliders Jquery -->
+    <link href="{% static 'jquery-ui-1.11.2/jquery-ui.css' %}" rel="stylesheet" type="text/css" />
+    <script src="{% static 'jquery-ui-1.11.2/jquery-ui.js' %}"></script>
+    
+    
+
+    
+    <div id='graphs'>
+    </div>
+    
+    
+    <script>
+        
+        
+    
+        
+    $(document).ready(function() {
+        
+        console.log('document ready')
+            $.getJSON('/ajax/read_graph_data', function(datacollection) {
+                console.log('read graph data successful')
+                
+                function convert_title_to_url(graph_title, prepend_string) {
+                    absoulute_url_prepend = '/accounts/loggedin/'
+                    detail_param = encodeURI(graph_title.replace(/&/g, "%26").replace(/::/g, "&").replace(/#/g, "%23"))
+                    return absoulute_url_prepend + prepend_string + detail_param
+                }
+                
+                    counter = {{graph_id}}
+                    graph_param = 5; //TODO this is a global variable that should be returned with the API
+                    
+                    console.log("pre-loop")
+                    //for (counter = 0; counter < datacollection.each_graph.length; counter++) {
+                        console.log("in-loop")    
+                        var data = datacollection.each_graph[counter]
+                        var event_detail_url = convert_title_to_url(data.title, '\get_event_details?')
+                        var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
+                        
+                        
+                        
+
+                        $('#graphs').append(
+                             [
+            '<div id="graph_area_', (counter), '"></div>',
+       
+].join('')
+                        )//end append
+                        
+                        
+                        
+                        
+                        
+                        $('#graph_area_' + counter).append( "<div id='container" + counter + "' counter='" + counter + "'></div>" )
+                        //console.log(data.series[6]);
+                        $('#container' + counter).highcharts({
+                            chart: {
+                                type: 'spline'
+                            },
+                            title: {
+                                text: '',
+                                style: {
+                                display: 'none'
+                            }
+                            },
+                            counter_no: {
+                                value: counter
+                            },
+                            xAxis: {
+                                type: 'linear',
+                                labels: {
+                                    overflow: 'justify'
+                                }
+                            },
+                            yAxis: {
+                                title: {
+                                    text: data.series[graph_param].name
+                                },
+                                //min: 0,
+                                //max: 1,
+                                minorGridLineWidth: 0,
+                                gridLineWidth: 0,
+                                alternateGridColor: null,
+                                plotBands: [{ // No correlation
+                                    from: 0.0,
+                                    to: 0.1,
+                                    color: 'rgba(68, 170, 213, 0.1)',
+                                    label: {
+                                        text: 'No correlation',
+                                        style: {
+                                            color: '#606060'
+                                        }
+                                    }
+                                }, { // Weak
+                                    from: 0.1,
+                                    to: 0.25,
+                                    color: 'rgba(0, 0, 0, 0)',
+                                    label: {
+                                        text: 'Weak',
+                                        style: {
+                                            color: '#606060'
+                                        }
+                                    }
+                                }, { // Strong
+                                    from: 0.25,
+                                    to: 0.5,
+                                    color: 'rgba(68, 170, 213, 0.1)',
+                                    label: {
+                                        text: 'Strong',
+                                        style: {
+                                            color: '#606060'
+                                        }
+                                    }
+                                }, { // Very Strong
+                                    from: 0.5,
+                                    to: 1,
+                                    color: 'rgba(0, 0, 0, 0)',
+                                    label: {
+                                        text: 'Very Strong',
+                                        style: {
+                                            color: '#606060'
+                                        }
+                                    }
+                                }]
+                            },
+                            tooltip: {
+                                //valueSuffix: '',
+                                shared: true,
+                                crosshairs: true,
+                            },
+                            plotOptions: {
+                                spline: {
+                                    lineWidth: 4,
+                                    states: {
+                                        hover: {
+                                            lineWidth: 5
+                                        }
+                                    },
+                            allowPointSelect: true,
+                                    
+                            point: {
+                                events: {
+                                    click: function (e) {
+                                        console.log(e)
+                                        
+                                        var target = $( e.target )
+                                        var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
+                                        graph_title  = datacollection.each_graph[graph_no].title
+                                        var tp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tp&cnt=' + this.category.toString() + '&')
+                                        var fp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fp&cnt=' + this.category.toString() + '&')
+                                        var tn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tn&cnt=' + this.category.toString() + '&')
+                                        var fn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fn&cnt=' + this.category.toString() + '&')
+                                        
+                                        
+                                        console.log("graph name:", graph_title)
+                                        console.log(datacollection.each_graph[graph_no].series)
+                                        console.log(datacollection.each_graph[graph_no].series[5].data[this.category][1])
+                                        var tp = datacollection.each_graph[graph_no].series[1].data[this.category][1]
+                                        var fp = datacollection.each_graph[graph_no].series[2].data[this.category][1]
+                                        var tn = datacollection.each_graph[graph_no].series[3].data[this.category][1]
+                                        var fn = datacollection.each_graph[graph_no].series[4].data[this.category][1]
+                                        var mcc = datacollection.each_graph[graph_no].series[5].data[this.category][1]
+                                        console.log(datacollection.each_graph[graph_no].series[5].data[this.category][1])
+                                        var chi_squared = datacollection.each_graph[graph_no].series[6].data[this.category][1]
+                                        var scaled_mcc = mcc *(tp + fp)
+                                        var expected_value = 10* tp + -1*fp
+                                        var row1 = "<table class='table'><tr><th> </th><th>+ (Did event "+this.category+"+ times)</th><th>- (Didn't do event "+this.category+"+ times)</th></tr>"
+                                        var row2 = "<tr><th scope='row'>Y goal</th><td class='success'><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td class='danger'><a target='_blank' href='" + fn_detail_url + "'>" + fn + "</a></td></tr>"
+                                        var row3 = "<tr><th>N goal</th><td class='danger'><a target='_blank' href='" + fp_detail_url + "'>" + fp + "</a></td><td class='success'><a target='_blank' href='" + tn_detail_url + "'>" + tn + "</a></td></tr></table>"
+                                        var row4 = "<br>Chi squared: " + chi_squared
+                                        var row5 = "<br>MCC: " + mcc
+                                        var row6 = "<br>Expected value: " + expected_value
+                                        var row7 = "<br>Scaled MCC: " + scaled_mcc
+                                        hs.htmlExpand(null, {
+                                            headingText: 'Details',
+                                            maincontentText:  row1 + row2 + row3 + row4 + row5 + row6 + row7,
+                                            width: 400
+                                        });
+                                    }
+                                },
+                                marker: {
+                                        enabled: true
+                                },
+                            },
+                                    
+                                                                    
+                                    
+                                }
+                            },
+                            series: [data.series[graph_param]],
+                            navigation: {
+                                menuItemStyle: {
+                                    fontSize: '10px'
+                                }
+                            }
+                        }); //end highcharts container
+                        
+                    
+                    //};//end for datacollection loop
+                
+                //myApp.hidePleaseWait();
+                }); //end getJSON
+            });  //end document.ready
+                </script>
+
+
+{% endblock %}

@@ -18,10 +18,15 @@
 #back to top DONE
 #on first click of point wierd stuff is happening DONE
 #when you submit does the table refresh DONE
-# if read graph data errors - stop showing the loader and show an error message
-#table should have filters 
-#have datatables on all screens
-#table too wide
+# if read graph data errors - stop showing the loader and show an error message DEON
+#table should have filters DONE
+#have datatables on all screens DONE
+#table too wide DONE
+#fix link cliks on the iframe pop up no longer relative DONE
+#Still takes a while to load 
+#Collapse all boxes at beginning
+#Make them pills
+
    
 <!--   'fnv': 103,
         'tnv': 414,
