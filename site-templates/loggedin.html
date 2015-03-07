@@ -121,7 +121,20 @@
             detail_param = encodeURI(graph_title.replace(/&/g, "%26").replace(/::/g, "&").replace(/#/g, "%23"))
             return prepend_string + detail_param
         }
-
+        
+        function create_iframe(div_tag, url){
+                    append_string = ['<div class="embed-responsive embed-responsive-16by9">',
+                                         '<iframe id="graph_detail_'+ counter +'" class="embed-responsive-item" src="',
+                                         url ,
+                                         '">',
+                                         '</iframe>',
+                                    
+                                    '</div>',//end responsive div
+                                    '</div>',//end tab pane div]
+                                    ].join('')
+                    console.log(append_string)
+                    $('#'+div_tag).append(append_string)
+                 };
         
         $(document).ready(function() {
             $('#loading').hide()
@@ -217,6 +230,7 @@
             execute_graph_refresh();
             var graph_param = {{graph_num}};
             console.log(graph_param)
+            console.log("!!!!!!")
             
             function test_graph_refresh(dataToBeSent) {
                 $('#status_update').empty();
@@ -389,6 +403,8 @@
                     ]*/);
                     
                     
+                    
+                    
                     $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div>')
                     //create the graphs
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
@@ -396,18 +412,18 @@
                         var data = datacollection.each_graph[counter]
                         var event_detail_url = convert_title_to_url(data.title, '\get_event_details?')
                         var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
+                        var graph_detail_url = 'print_graph/?graph_id=6' //TODO: fix graph id
                         
-                        
-                        
+                        create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);\''
 
                         $('#graphs').append(
                              ['<div class="panel panel-primary">',
-                              '<div class="panel-heading" data-toggle="collapse" data-target="#content' + counter +'">',
+                              '<div class="panel-heading collapsed" data-toggle="collapse" data-target="#content' + counter +'">',
                               '<h3 class="panel-title" id=' + (counter+1) + ">", '<span class="badge">',(counter+1),'</span>', " ", data.title, '</h3>',
                               '</div>', //panel heading div
-  '<div class="panel-body collapse in" id="content'+ counter +'">',
-    '<ul id="tabs" class="nav nav-tabs" data-tabs="tabs">',
-        '<li class="active"><a href="#graph', (counter), '" data-toggle="tab">Graph</a></li>',
+  '<div class="panel-body collapse" id="content'+ counter +'">',
+    '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
+        '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
         '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
         '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
     '</ul>',
@@ -415,29 +431,27 @@
         '<br>',
         '<div class="tab-pane active" id="graph', (counter), '">',
 
-            '<div id="graph_area_', (counter), '"></div>',
+            
         '</div>',
         '<div class="tab-pane" id="visualize',  (counter), '">',
             
-            //"<a target='_blank' href='",
-            //                                 event_detail_url,
-            //                                 "'>Event Details</a>",
+            
                                              '<div class="embed-responsive embed-responsive-16by9">',
                                              '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
                                              //event_detail_url ,
-                                             '"></iframe>',
+                                             '">',
+                                             '</iframe>',
                                             '</div>',
         '</div>', //end tab pane div
         
         '<div class="tab-pane" id="user_list', (counter), '">',
             
-            //"    <a target='_blank' href='",
-            //                                 user_detail_url,
-            //                                 "'>User ID List</a>",
+            
             '<div class="embed-responsive embed-responsive-16by9">',
                                              '<iframe id="user_detail_'+ counter +'" class="embed-responsive-item" src="',
                                              //user_detail_url ,
-                                             '"></iframe>',
+                                             '">',
+                                             '</iframe>',
             '</div>',
         '</div>',//end tab pane div
     '</div>',
@@ -448,159 +462,6 @@
                         
                         
                         
-                        //old graph tab
-                        //$('#graphs').append(["<h4 id="+ (counter+1) +" class='container'>", (counter+1), " ", data.title, "</h4>",
-                        //                     "<a target='_blank' href='",
-                        //                     event_detail_url,
-                        //                     "'>Event Details</a>",
-                        //                     "    <a target='_blank' href='",
-                        //                     user_detail_url,
-                        //                     "'>User ID List</a>",].join(''))
-                        
-                        
-                        $('#graph_area_' + counter).append( "<div id='container" + counter + "' counter='" + counter + "'></div>" )
-                        //console.log(data.series[6]);
-                        $('#container' + counter).highcharts({
-                            chart: {
-                                type: 'spline'
-                            },
-                            title: {
-                                text: '',
-                                style: {
-                                display: 'none'
-                            }
-                            },
-                            counter_no: {
-                                value: counter
-                            },
-                            xAxis: {
-                                type: 'linear',
-                                labels: {
-                                    overflow: 'justify'
-                                }
-                            },
-                            yAxis: {
-                                title: {
-                                    text: data.series[graph_param].name
-                                },
-                                //min: 0,
-                                //max: 1,
-                                minorGridLineWidth: 0,
-                                gridLineWidth: 0,
-                                alternateGridColor: null,
-                                plotBands: [{ // No correlation
-                                    from: 0.0,
-                                    to: 0.1,
-                                    color: 'rgba(68, 170, 213, 0.1)',
-                                    label: {
-                                        text: 'No correlation',
-                                        style: {
-                                            color: '#606060'
-                                        }
-                                    }
-                                }, { // Weak
-                                    from: 0.1,
-                                    to: 0.25,
-                                    color: 'rgba(0, 0, 0, 0)',
-                                    label: {
-                                        text: 'Weak',
-                                        style: {
-                                            color: '#606060'
-                                        }
-                                    }
-                                }, { // Strong
-                                    from: 0.25,
-                                    to: 0.5,
-                                    color: 'rgba(68, 170, 213, 0.1)',
-                                    label: {
-                                        text: 'Strong',
-                                        style: {
-                                            color: '#606060'
-                                        }
-                                    }
-                                }, { // Very Strong
-                                    from: 0.5,
-                                    to: 1,
-                                    color: 'rgba(0, 0, 0, 0)',
-                                    label: {
-                                        text: 'Very Strong',
-                                        style: {
-                                            color: '#606060'
-                                        }
-                                    }
-                                }]
-                            },
-                            tooltip: {
-                                //valueSuffix: '',
-                                shared: true,
-                                crosshairs: true,
-                            },
-                            plotOptions: {
-                                spline: {
-                                    lineWidth: 4,
-                                    states: {
-                                        hover: {
-                                            lineWidth: 5
-                                        }
-                                    },
-                            allowPointSelect: true,
-                                    
-                            point: {
-                                events: {
-                                    click: function (e) {
-                                        console.log(e)
-                                        
-                                        var target = $( e.target )
-                                        var graph_no = target.parent().parent().parent().parent().parent().attr('counter')
-                                        graph_title  = datacollection.each_graph[graph_no].title
-                                        var tp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tp&cnt=' + this.category.toString() + '&')
-                                        var fp_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fp&cnt=' + this.category.toString() + '&')
-                                        var tn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=tn&cnt=' + this.category.toString() + '&')
-                                        var fn_detail_url = convert_title_to_url(graph_title, '\get_user_quad_details?quadrant=fn&cnt=' + this.category.toString() + '&')
-                                        
-                                        
-                                        console.log("graph name:", graph_title)
-                                        console.log(datacollection.each_graph[graph_no].series)
-                                        console.log(datacollection.each_graph[graph_no].series[5].data[this.category][1])
-                                        var tp = datacollection.each_graph[graph_no].series[1].data[this.category][1]
-                                        var fp = datacollection.each_graph[graph_no].series[2].data[this.category][1]
-                                        var tn = datacollection.each_graph[graph_no].series[3].data[this.category][1]
-                                        var fn = datacollection.each_graph[graph_no].series[4].data[this.category][1]
-                                        var mcc = datacollection.each_graph[graph_no].series[5].data[this.category][1]
-                                        console.log(datacollection.each_graph[graph_no].series[5].data[this.category][1])
-                                        var chi_squared = datacollection.each_graph[graph_no].series[6].data[this.category][1]
-                                        var scaled_mcc = mcc *(tp + fp)
-                                        var expected_value = 10* tp + -1*fp
-                                        var row1 = "<table class='table'><tr><th> </th><th>+ (Did event "+this.category+"+ times)</th><th>- (Didn't do event "+this.category+"+ times)</th></tr>"
-                                        var row2 = "<tr><th scope='row'>Y goal</th><td class='success'><a target='_blank' href='" + tp_detail_url + "'>" + tp + "</a></td><td class='danger'><a target='_blank' href='" + fn_detail_url + "'>" + fn + "</a></td></tr>"
-                                        var row3 = "<tr><th>N goal</th><td class='danger'><a target='_blank' href='" + fp_detail_url + "'>" + fp + "</a></td><td class='success'><a target='_blank' href='" + tn_detail_url + "'>" + tn + "</a></td></tr></table>"
-                                        var row4 = "<br>Chi squared: " + chi_squared
-                                        var row5 = "<br>MCC: " + mcc
-                                        var row6 = "<br>Expected value: " + expected_value
-                                        var row7 = "<br>Scaled MCC: " + scaled_mcc
-                                        hs.htmlExpand(null, {
-                                            headingText: 'Details',
-                                            maincontentText:  row1 + row2 + row3 + row4 + row5 + row6 + row7,
-                                            width: 400
-                                        });
-                                    }
-                                },
-                                marker: {
-                                        enabled: true
-                                },
-                            },
-                                    
-                                                                    
-                                    
-                                }
-                            },
-                            series: [data.series[graph_param]],
-                            navigation: {
-                                menuItemStyle: {
-                                    fontSize: '10px'
-                                }
-                            }
-                        }); //end highcharts container
                         
                     
                     };//end for datacollection loop

@@ -164,6 +164,13 @@ def read_graph_data(request):
   
   return HttpResponse(json_results)
 
+def print_graph(request):
+  request_dict = dict(request.GET._iterlists())
+  
+  graph_id = request_dict['graph_id'][0]
+  return render_to_response('graphs.html', {
+            'graph_id': graph_id,
+    })
 
 def get_graph_data(request):
   
