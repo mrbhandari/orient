@@ -280,7 +280,8 @@
                                           //'FPV',
                                           //'TPV',
                                           //'FNV',
-                                          'Event depth']
+                                          'Avg clicks to event',
+                                          'Avg clicks percentile rank']
                     filter_area = '<div class="page-header"><h2>Table view <small>Filter to view relevant events</small></h2></div>'
                     filter_area += '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><br><div class="container"><div class="form-group">'
                     console.log('d')
@@ -362,6 +363,7 @@
                             //tr.append("<td>" + table_json[key].tpv + "</td>");
                             //tr.append("<td>" + table_json[key].fnv + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].ave_clicks).toFixed(2) + "</td>");
+                            tr.append("<td>" + parseFloat(table_json[key].ave_clicks_rank) + "</td>");
                             cnta = cnta+1
                             $('#summary_table').append(tr);
                     }
