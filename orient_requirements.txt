@@ -24,8 +24,9 @@
 #table too wide DONE
 #fix link cliks on the iframe pop up no longer relative DONE
 #Still takes a while to load 
-#Collapse all boxes at beginning
-#Make them pills
+#Collapse all boxes at beginning DONE
+#Make them pills DONE
+# IF chart exists don't append again
 
    
 <!--   'fnv': 103,

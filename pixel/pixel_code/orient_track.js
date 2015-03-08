@@ -558,7 +558,7 @@
       for (var key in loggingData) {
 		if (key === "type" || key === "title" || key === "link" || 
 			key === "path" || key === "time" || key == "href" ||
-			key == "element_txt" || key == "element" || 
+			key == "element_txt" || key == "element" || key == "input_type" ||
 			key == "cssclass" || key == "img_src" || key == "label" ||
 		   	key == "name") {
           params.push(makeParam(key, loggingData[key]));
@@ -824,7 +824,7 @@
                   parsedData.element_txt = clickedElement.getAttribute("placeholder");
                 }
                 
-                if (clickedElement.tagName == "BUTTON" || clickedElement.tagName ==  "SELECT" || clickedElement.tagName ==  "TEXTAREA" || clickedElement.tagName ==  "OPTION") {
+                if (clickedElement.tagName == "BUTTON" || clickedElement.tagName ==  "SELECT" || clickedElement.tagName ==  "TEXTAREA" || clickedElement.tagName ==  "OPTION" || clickedElement.tagName ==  "OPTION") {
                   parsedData.element_txt = clickedElement.getAttribute("value");
                 }
                 
