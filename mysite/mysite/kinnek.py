@@ -386,7 +386,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         event_total = {}
         column_names = cur.description
         for row in cur.fetchall(): 
-            print "OUTPUT:" +  str(row)
+            #print "OUTPUT:" +  str(row)
             uid = row[0]
             if prev_uid != uid:
                 if prev_uid != "":
@@ -414,7 +414,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                         if event not in hc_ave_ctr:
                             hc_ave_ctr[event] = 0
                         hc_ave_ctr[event] += hc_ctr[event]
-                        print "HC:",prev_uid, event, hc_ctr[event]
+                        #print "HC:",prev_uid, event, hc_ctr[event]
 
                 agg_event_ctr.clear()
                 hc_ctr.clear()
@@ -466,7 +466,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         
         for e in event_total.keys():
             hc_ave_ctr[e] = (hc_ave_ctr[e] + 0.0)/(0.0 + event_total[e])
-            print e, "\t", hc_ave_ctr[e]
+            #print e, "\t", hc_ave_ctr[e]
         ctr = 0
         total_conv = len(conv_uids)
         total_nc = len(nc_uids)
@@ -507,14 +507,18 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
-                    print "event",event_max_column_value_attributes[ind]["event"]
-                    print "npc",event_max_column_value_attributes[ind]["num_people_clicked"]
-                    print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
+                    #print "event",event_max_column_value_attributes[ind]["event"]
+                    #print "npc",event_max_column_value_attributes[ind]["num_people_clicked"]
+                    #print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
                     event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
                     event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
                     event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
                     ctr += 1
+                summary_df = pd.DataFrame.from_dict(summary_dict).transpose()
+                summary_df["ave_clicks_rank"] = ceil(summary_df.ave_clicks.rank()/(top_k_metrics_to_print/100))
+                summary_dict.clear()
+                summary_dict = summary_df.transpose().to_dict()
                 summary_file_writer.write(str(summary_dict))
                 summary_file_writer.close()
 
