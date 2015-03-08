@@ -30,9 +30,9 @@ img {
 
   {% for row in sql_results %}
     {% for cell in row %}
-        {% cycle '<tr>' '' '' '' '' '' '' '' %}
+        {% cycle '<tr>' '' '' '' '' '' '' '' '' '' %}
           <td>{{ cell |safe |truncatechars_html:80 }}</td>
-        {% cycle '' '' '' '' '' '' '' '</tr>' %}
+        {% cycle '' '' '' '' '' '' '' '' '' '</tr>' %}
     {% endfor %}
   {% endfor %}
 

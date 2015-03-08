@@ -12,8 +12,15 @@ import csv
 from kinnek import generate_event_files, create_foldername_for_user
 import urllib2
 import pandas as pd
-
+import urlparse
 import datetime
+
+
+def get_domain(source_url):
+  parsed_uri = urlparse.urlparse( source_url)
+  domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+  return domain
+
 
 def convert_date(timestamp):
   return(
@@ -227,6 +234,64 @@ def return_user_event_details(request):
     })
 
 
+#returns html associated with object 
+def visualize_sql(sql_object):
+  #print sql_object['element']
+  
+  
+  href_domain = get_domain(sql_object['url'])
+  
+  output_str = ''
+  
+  print sql_object
+  
+  if sql_object['name_attr']:
+    output_str += 'Name: ' + sql_object['name_attr']
+  
+  if sql_object['element'] == 'option':
+    output_str += '<select>'
+    
+  if sql_object['element'] == 'input' and sql_object['label'] != 'null':
+    output_str += '<div>' + sql_object['label'] + '<div>'
+  
+  output_str += '<' + sql_object['element'] + ' class="' +  sql_object['css_class'] + '" '#open tag
+  if sql_object['element_txt'] != 'null' and sql_object['element'] in ["textarea",]:
+    output_str += 'value="' + sql_object['element_txt']  +'" '
+  
+  if sql_object['element'] == 'a':
+    link_ref = urlparse.urljoin(href_domain, sql_object['href'])
+    print link_ref
+    output_str += 'href="' +   link_ref  +'" target="_blank" class="livepreview" '
+    
+  if sql_object['element'] == 'input' and sql_object['element_txt'] != 'null':
+    output_str += 'placeholder="' + sql_object['element_txt']  +'" '
+    #output_str += 'type="' + sql_object['input_type']  +'" ' TODO: Need to add input type
+  
+  
+  if sql_object['element'] == 'img' and sql_object['img_src'] != 'null':
+    link_ref = urlparse.urljoin(href_domain, sql_object['img_src'])
+    output_str += 'src="' + link_ref  +'" '
+    
+  if sql_object['element'] == 'img' and sql_object['element_txt'] != 'null':
+    output_str += 'alt="' + sql_object['element_txt']  +'" '
+  
+  output_str += '>' #close opening tab
+
+  
+  
+  if sql_object['element_txt'] != 'null' and sql_object['element'] not in [ "select", "textarea", "input", "img"]:
+    output_str += sql_object['element_txt']
+  
+  
+  
+  output_str += '</' + sql_object['element'] + '>' #ending tab
+  
+  if sql_object['element'] == 'option':
+    output_str += '</select>'
+  print output_str
+  return output_str
+  
+  
 def return_event_detail(request):
     table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
@@ -234,14 +299,28 @@ def return_event_detail(request):
     sql_query = create_event_sql_query(request_dict, table_prefix)
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
-    for i in range(0,len(sql_results)):
-      
-      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1]  +"'> "+ sql_results[i][1] +"</a>"
-      sql_results[i][6] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][6]  +"'></a>"
-    
-    
     print sql_results
-    sql_results.insert(0, ['cnt', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr'])
+    col_heading = ['cnt', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href']
+    
+    print('lensql_results', len(sql_results))
+    
+    for i in range(0,len(sql_results)):
+      sql_object = {}
+      for n in range(0, len(sql_results[i])):
+        sql_object[col_heading[n]] = sql_results[i][n]
+      #print sql_object
+      #print "XXXXXX"
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1]  +"'> "+ sql_results[i][1] +"</a>"
+      if sql_results[i][6] != '':
+        sql_results[i][6] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][6]  +"'> "+ sql_results[i][6][:20] +"...</a>"
+      
+      
+      #append the visualize column
+      sql_results[i].append(visualize_sql(sql_object))
+    
+    #add the last column on that you were appending
+    col_heading.append('visualize')
+    sql_results.insert(0, col_heading)
     
     
     
@@ -332,10 +411,11 @@ def create_user_event_sql_query(query_dict, table_prefix):
     return sql_query
 
 
+
 def create_event_sql_query(query_dict, table_prefix):
-    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr  from %sall_segment_events where """ % (table_prefix)
+    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr, href  from %sall_segment_events where """ % (table_prefix)
     sql_query += join_where_clause(query_dict)
-    sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr order by cnt desc"""
+    sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr, href order by cnt desc limit 1000"""
     return sql_query
 
 def create_uid_quad_sql_query(query_dict, table, sign, table_prefix):
