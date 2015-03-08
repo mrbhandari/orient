@@ -802,6 +802,7 @@
         
         function clickListener(e) 
         {   
+            setOrCookieIfNeededNew();
             var clickedElement=(window.event)
                                 ? window.event.srcElement
                                 : e.target;
