@@ -414,7 +414,7 @@
                         var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
                         var graph_detail_url = 'print_graph/?graph_id=' + counter //TODO: fix graph id
                         
-                        create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);\''
+                        create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\''
 
                         $('#graphs').append(
                              ['<div class="panel panel-primary">',
