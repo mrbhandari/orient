@@ -245,7 +245,7 @@ def visualize_sql(sql_object):
   
   print sql_object
   
-  if sql_object['name_attr']:
+  if sql_object['name_attr'] and sql_object['name_attr']!= 'null':
     output_str += 'Name: ' + sql_object['name_attr']
   
   if sql_object['element'] == 'option':
