@@ -257,7 +257,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     'Users considered': user_segment_count[0],
                     'Users who attained success goal': success_uids_count[0]}
 
-    
+            
         query1 = """
         CREATE TABLE %sfailure_uids
         SELECT distinct A.uid from %suser_segment A where A.uid not in (select uid from %ssuccess_uids);
@@ -384,6 +384,8 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         agg_event_ctr = {}
         hc_ctr = {}
         hc_ave_ctr = {}
+        hc_sqrd_ctr = {}
+        hc_stdev_ctr = {}
         event_total = {}
         column_names = cur.description
         for row in cur.fetchall(): 
@@ -414,7 +416,10 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                         event_total[event] += 1
                         if event not in hc_ave_ctr:
                             hc_ave_ctr[event] = 0
+                            hc_sqrd_ctr[event] = 0
+
                         hc_ave_ctr[event] += hc_ctr[event]
+                        hc_sqrd_ctr[event] += (hc_ctr[event] * hc_ctr[event])
                         #print "HC:",prev_uid, event, hc_ctr[event]
 
                 agg_event_ctr.clear()
@@ -466,6 +471,10 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     nc_events[event_signature].append(row[-2])
         
         for e in event_total.keys():
+            if event_total[e] > 1:
+                hc_stdev_ctr[e] =  math.sqrt((event_total[e] * hc_sqrd_ctr[e] - hc_ave_ctr[e]*hc_ave_ctr[e])/(event_total[e] * (event_total[e]-1)))
+            else:
+                hc_stdev_ctr[e] =  0
             hc_ave_ctr[e] = (hc_ave_ctr[e] + 0.0)/(0.0 + event_total[e])
             #print e, "\t", hc_ave_ctr[e]
         ctr = 0
@@ -514,14 +523,13 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_stdev":hc_stdev_ctr[ind]})
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind][metric + "_dict"]
                     ctr += 1
                 print "summary dataframe1"
-                starttime = time.time()
                 summary_df = pd.DataFrame.from_dict(summary_dict).transpose()
                 summary_df["ave_clicks_rank"] = np.ceil(summary_df.ave_clicks.astype(float).rank()/(top_k_metrics_to_print/100))
                 print "summary dataframe2"
-                print "It took ", (time.time() - starttime), " seconds"
                 summary_dict.clear()
                 summary_dict = summary_df.transpose().to_dict()
                 print "summary dataframe3"
