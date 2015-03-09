@@ -517,7 +517,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     ctr += 1
                 print "summary dataframe1"
                 summary_df = pd.DataFrame.from_dict(summary_dict).transpose()
-                summary_df["ave_clicks_rank"] = ceil(summary_df.ave_clicks.rank()/(top_k_metrics_to_print/100))
+                summary_df["ave_clicks_rank"] = math.ceil(summary_df.ave_clicks.rank()/(top_k_metrics_to_print/100))
                 print "summary dataframe2"
                 summary_dict.clear()
                 summary_dict = summary_df.transpose().to_dict()
