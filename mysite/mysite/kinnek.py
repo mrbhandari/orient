@@ -7,6 +7,7 @@ import csv
 import math
 import MySQLdb as mdb
 import base64
+import time
 
 event_max_column_values = {}
 event_max_column_value_attributes = {}
@@ -516,9 +517,11 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind][metric + "_dict"]
                     ctr += 1
                 print "summary dataframe1"
+                starttime = time.time()
                 summary_df = pd.DataFrame.from_dict(summary_dict).transpose()
-                summary_df["ave_clicks_rank"] = math.ceil(summary_df.ave_clicks.rank()/(top_k_metrics_to_print/100))
+                summary_df["ave_clicks_rank"] = np.ceil(summary_df.ave_clicks.astype(float).rank()/(top_k_metrics_to_print/100))
                 print "summary dataframe2"
+                print "It took ", (time.time() - starttime), " seconds"
                 summary_dict.clear()
                 summary_dict = summary_df.transpose().to_dict()
                 print "summary dataframe3"
@@ -526,5 +529,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 print "summary dataframe4"
                 summary_file_writer.close()
                 print "done"
-
-#generate_event_files(False, False, "start_hc <= 5 and (landing_url like '%kinnek.com/' or landing_url like '%kinnek.com/?%' )", "url like '%kinnek.com/post/#justcreated'", "kinnek", "admin")
+#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
