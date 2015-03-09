@@ -141,7 +141,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
     str_output = ""
     if significance_higher:
         event_max_column_values[feature] = {"mcc_max": mcc_max, "precision_max":precision_max,"recall_max":recall_max,"cost_max":cost_max,"npv_max":npv_max,"f1_max":f1_max, "scaled_mcc_max":scaled_mcc_max}
-        event_max_column_value_attributes[feature].update({"precision_max_dict":precision_max_dict,"scaled_mcc_max_dict":scaled_mcc_max_dict})
+        event_max_column_value_attributes[feature].update({"precision_max_dict":precision_max_dict,"scaled_mcc_max_dict":scaled_mcc_max_dict,"mcc_max_dict":mcc_max_dict})
 
         
         if print_all:
@@ -489,7 +489,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     
         if not print_all:
             #metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
-            metrics = ["scaled_mcc_max"]
+            metrics = ["mcc_max"]
             df = pd.DataFrame(event_max_column_values).transpose()
             ctr = 0
             top_k_metrics_to_print = 400
@@ -503,23 +503,28 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
                     writer = open(fname,"wb")
-                    writer.write(str(event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]))
+                    writer.write(str(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
                     #print "event",event_max_column_value_attributes[ind]["event"]
                     #print "npc",event_max_column_value_attributes[ind]["num_people_clicked"]
                     #print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
-                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
-                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
-                    event_max_column_value_attributes[ind]["scaled_mcc_max_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
-                    summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"event":event_max_column_value_attributes[ind]["event"]})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
+                    summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind][metric + "_dict"]
                     ctr += 1
+                print "summary dataframe1"
                 summary_df = pd.DataFrame.from_dict(summary_dict).transpose()
                 summary_df["ave_clicks_rank"] = ceil(summary_df.ave_clicks.rank()/(top_k_metrics_to_print/100))
+                print "summary dataframe2"
                 summary_dict.clear()
                 summary_dict = summary_df.transpose().to_dict()
+                print "summary dataframe3"
                 summary_file_writer.write(str(summary_dict))
+                print "summary dataframe4"
                 summary_file_writer.close()
+                print "done"
 
 #generate_event_files(False, False, "start_hc <= 5 and (landing_url like '%kinnek.com/' or landing_url like '%kinnek.com/?%' )", "url like '%kinnek.com/post/#justcreated'", "kinnek", "admin")
