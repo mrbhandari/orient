@@ -428,6 +428,7 @@
         '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
         '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
         '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
+        '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', '>Recommended Action</a></li>',
     '</ul>',
     '<div id="my-tab-content" class="tab-content">',
         '<br>',
@@ -456,6 +457,16 @@
                                              '</iframe>',
             '</div>',
         '</div>',//end tab pane div
+        
+        '<div class="tab-pane" id="recommended_action', (counter), '">',
+            
+                '<p>If the recall is low [insert recall] then expose this feature to more people </p>',
+                '<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',
+            '<div class="container">',
+                    
+            '</div>',
+        '</div>',//end tab pane div
+        
     '</div>',
 '</div>',
 '</div>', //end example div

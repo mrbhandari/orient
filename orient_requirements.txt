@@ -106,7 +106,7 @@ CREATE TABLE `kinnek_user_events` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 
-LOAD DATA LOCAL  INFILE '/data/kinnek_visits_cut.tsv' into table kinnek_user_events FIELDS terminated by '\t' lines terminated by '\n' (time_period, uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
+LOAD DATA LOCAL  INFILE '/data/kinnek_visits.tsv' into table kinnek_user_events FIELDS terminated by '\t' lines terminated by '\n' (time_period, uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
 
 
 
