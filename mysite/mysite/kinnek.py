@@ -221,32 +221,41 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 except:
                     pass
 
+        start_time = time.time()
         querya = """
                     CREATE %s TABLE %s%suser_segment
             select distinct %suser_events.uid from %suser_events where %s;""" % (temp_prefix, user_folder_, temp_table_prefix, merchant_name_, merchant_name_, filter_query)
         print "executing %s" % (querya)
+        start_time = time.time()
         cur.execute(querya) 
+        print "Took ", (time.time() - start_time), " seconds"
         
         queryb = """
                     CREATE %s TABLE %s%ssuccess_uids
     SELECT DISTINCT t1.uid,min(t1.log_time) as log_time FROM %suser_events t1 join %s%suser_segment t2 on (t1.uid=t2.uid) where %s group by t1.uid; """ % (temp_prefix, user_folder_, temp_table_prefix, merchant_name_, user_folder_, temp_table_prefix, success_query)
         print "executing %s" % (queryb)
+        start_time = time.time()
         cur.execute(queryb)
+
+        print "Took ", (time.time() - start_time), " seconds"
     
         if testing == True:
             print "Testing is true so just returning numbers"
             
             #Find total users
+            start_time = time.time()
             cur.execute("""select count(*) from (select distinct uid from %suser_events) x;""" % (merchant_name_))
             total_user_count = cur.fetchone()
             print ['total_user_count', total_user_count]
             
+            start_time = time.time()
             cur.execute("""
                     SELECT count(*) from %s%suser_segment;
                     """ % (user_folder_, temp_table_prefix))
             user_segment_count = cur.fetchone()
             print ['user_segment_count', user_segment_count]
             
+            start_time = time.time()
             cur.execute("""
                     SELECT count(*) from %s%ssuccess_uids;
                     """ % (user_folder_, temp_table_prefix))
@@ -263,12 +272,16 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         SELECT distinct A.uid from %suser_segment A where A.uid not in (select uid from %ssuccess_uids);
         """ % (user_folder_, user_folder_, user_folder_ )
         print "executing %s" % (query1)
+        start_time = time.time()
         cur.execute(query1)
+        print "Took ", (time.time() - start_time), " seconds"
 
         index_query1 = """ alter table %sfailure_uids add index (uid); """ % (user_folder_)
 
         print "executing ",index_query1
+        start_time = time.time()
         cur.execute(index_query1)
+        print "Took ", (time.time() - start_time), " seconds"
     
         query2 = """
                     CREATE TABLE %sfailure_uids_events
@@ -277,7 +290,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     where a.uid = b.uid;
                     """ % (user_folder_, merchant_name_, user_folder_)
         print "executing %s" % (query2)
+        start_time = time.time()
         cur.execute(query2)
+        print "Took ", (time.time() - start_time), " seconds"
         
         query3 = """
                     CREATE TABLE %ssuccess_uids_events
@@ -286,7 +301,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     where a.uid = b.uid and a.log_time < b.log_time;
     """ % (user_folder_, merchant_name_, user_folder_)
         print "executing %s" % (query3)
+        start_time = time.time()
         cur.execute(query3)
+        print "Took ", (time.time() - start_time), " seconds"
         
         
         query4 = """
@@ -297,7 +314,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
                     """ % (user_folder_, user_folder_)
         print "executing %s" % (query4)
+        start_time = time.time()
         cur.execute(query4)
+        print "Took ", (time.time() - start_time), " seconds"
         
         query5 = """
                     CREATE  TABLE %sfailure_uids_events_cnt
@@ -307,17 +326,23 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     GROUP BY uid, etype, url, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, name_attr order by cnt desc;
                     """ % (user_folder_, user_folder_)
         print "executing %s" % (query5)
+        start_time = time.time()
         cur.execute(query5)
+        print "Took ", (time.time() - start_time), " seconds"
         
         
+        start_time = time.time()
         cur.execute("""
                     Alter table %ssuccess_uids_events_cnt add converted boolean default True;
                     """ % (user_folder_))
+        print "Took ", (time.time() - start_time), " seconds"
         
         
+        start_time = time.time()
         cur.execute("""
                     Alter table %sfailure_uids_events_cnt add converted boolean default False;
                     """ % (user_folder_))
+        print "Took ", (time.time() - start_time), " seconds"
         
         
         query6 = """
@@ -326,21 +351,31 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     UNION SELECT %sfailure_uids_events_cnt.* FROM %sfailure_uids_events_cnt;
                     """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_)
         print "EXECUTING ", query6            
+        start_time = time.time()
         cur.execute(query6)
+        print "Took ", (time.time() - start_time), " seconds"
     
+        start_time = time.time()
         cur.execute("""
                 CREATE table %sall_segment_events
                 SELECT %ssuccess_uids_events.* FROM %ssuccess_uids_events
                 UNION SELECT %sfailure_uids_events.* FROM %sfailure_uids_events;
                                 """ % (user_folder_, user_folder_,user_folder_, user_folder_,user_folder_))    
+        print "Took ", (time.time() - start_time), " seconds"
         
+        print "select count(*) from all_uid_events_cnt"
+        start_time = time.time()
         cur.execute("""
                     SELECT count(*) from %sall_uid_events_cnt;
                     """ % (user_folder_))
+        print "Took ", (time.time() - start_time), " seconds"
         
+        print "last query"
+        start_time = time.time()
         cur.execute("""
                     SELECT * from %sall_uid_events_cnt order by uid;
                     """ % (user_folder_))
+        print "Took ", (time.time() - start_time), " seconds"
         print "HERE"
         
         #managing output directory, 
@@ -383,11 +418,14 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         prev_conv = 0
         agg_event_ctr = {}
         hc_ctr = {}
+        all_min_hc = {}
         hc_ave_ctr = {}
         hc_sqrd_ctr = {}
         hc_stdev_ctr = {}
         event_total = {}
         column_names = cur.description
+        start_time = time.time()
+        print "Starting to go through all rows"
         for row in cur.fetchall(): 
             #print "OUTPUT:" +  str(row)
             uid = row[0]
@@ -398,6 +436,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     
                     for event_signature in agg_event_ctr.keys():
                         #print "outputting ", event_signature, agg_event_ctr[event_signature]
+
                         if event_signature in event_metadata:
                             event_metadata[event_signature] += 1
                         else:
@@ -417,7 +456,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                         if event not in hc_ave_ctr:
                             hc_ave_ctr[event] = 0
                             hc_sqrd_ctr[event] = 0
-
+                        if event not in all_min_hc:
+                            all_min_hc[event] = []
+                        all_min_hc[event].append(hc_ctr[event])
                         hc_ave_ctr[event] += hc_ctr[event]
                         hc_sqrd_ctr[event] += (hc_ctr[event] * hc_ctr[event])
                         #print "HC:",prev_uid, event, hc_ctr[event]
@@ -470,6 +511,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                         nc_events[event_signature] = []
                     nc_events[event_signature].append(row[-2])
         
+        print "Took ", (time.time() - start_time), " seconds"
         for e in event_total.keys():
             if event_total[e] > 1:
                 hc_stdev_ctr[e] =  math.sqrt((event_total[e] * hc_sqrd_ctr[e] - hc_ave_ctr[e]*hc_ave_ctr[e])/(event_total[e] * (event_total[e]-1)))
@@ -496,7 +538,9 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 filename = os.path.join(folder, "event" + str(ctr) + ".txt")
                 get_matthew_corr_coef(event,filename, print_all, MIN_CORRELATION, conv_events, nc_events)
                 ctr += 1
-    
+   
+        start_time = time.time()
+        print "starting to output data"
         if not print_all:
             #metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
             metrics = ["mcc_max"]
@@ -524,6 +568,12 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"num_people_clicked":event_max_column_value_attributes[ind]["num_people_clicked"]})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks":hc_ave_ctr[ind]})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_stdev":hc_stdev_ctr[ind]})
+                    first_percentile = np.percentile(np.array(all_min_hc[ind]),25)
+                    second_percentile = np.percentile(np.array(all_min_hc[ind]),50)
+                    third_percentile = np.percentile(np.array(all_min_hc[ind]),75)
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_25th_percentile":first_percentile})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind][metric + "_dict"]
                     ctr += 1
                 print "summary dataframe1"
@@ -537,4 +587,5 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 print "summary dataframe4"
                 summary_file_writer.close()
                 print "done"
+            print "Took ", (time.time() - start_time), " seconds"
 #generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
