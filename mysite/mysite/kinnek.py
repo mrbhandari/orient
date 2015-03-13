@@ -298,7 +298,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     CREATE TABLE %ssuccess_uids_events
     Select a.* from %suser_events a,
     %ssuccess_uids as b
-    where a.uid = b.uid and a.log_time < b.log_time;
+    where a.uid = b.uid and a.log_time <= b.log_time;
     """ % (user_folder_, merchant_name_, user_folder_)
         print "executing %s" % (query3)
         start_time = time.time()
@@ -556,11 +556,6 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 for ind in df.sort(metric,ascending=False)[:top_k_metrics_to_print].index:
                     fname = os.path.join(folder, "event" + str(ctr +1) + ".txt")
                     print ctr + 1, " file "
-                    writer = open(fname,"wb")
-                    writer.write(str(event_max_column_value_attributes[ind][metric + "_dict"]))
-                    writer.write("\n")
-                    writer.write(event_data[ind])
-                    writer.close()
                     #print "event",event_max_column_value_attributes[ind]["event"]
                     #print "npc",event_max_column_value_attributes[ind]["num_people_clicked"]
                     #print "dict",event_max_column_value_attributes[ind]["scaled_mcc_max_dict"]
@@ -574,6 +569,11 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_25th_percentile":first_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
+                    writer = open(fname,"wb")
+                    writer.write(str(event_max_column_value_attributes[ind][metric + "_dict"]))
+                    writer.write("\n")
+                    writer.write(event_data[ind])
+                    writer.close()
                     summary_dict[str(ctr+1)] = event_max_column_value_attributes[ind][metric + "_dict"]
                     ctr += 1
                 print "summary dataframe1"
@@ -588,4 +588,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 summary_file_writer.close()
                 print "done"
             print "Took ", (time.time() - start_time), " seconds"
-#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
