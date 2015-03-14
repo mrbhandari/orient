@@ -147,7 +147,7 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
         
         if print_all:
             writer = open(fname,"wb")
-            writer.write(str(scaled_mcc_mac_dict))
+            writer.write(str(scaled_mcc_max_dict))
             writer.write("\n");
             writer.write(feature)
             writer.write("\n");
@@ -588,4 +588,4 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 summary_file_writer.close()
                 print "done"
             print "Took ", (time.time() - start_time), " seconds"
-generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
