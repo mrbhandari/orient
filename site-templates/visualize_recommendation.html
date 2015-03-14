@@ -1,0 +1,49 @@
+{% extends "base_no_header.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+<link href="{% static 'jquery-live-preview-master/css/livepreview-demo.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'jquery-live-preview-master/js/jquery-live-preview.min.js' %}"></script>
+
+
+
+<div class="container">
+    
+
+<br>
+    
+
+<br>
+<br>
+<style>
+img { 
+    max-width: 100px;
+    max-height: 100px;
+}
+
+</style>
+
+
+<table class="table table-bordered table-condensed table-hover table-striped">
+
+  {% for row in sql_results %}
+    {% for cell in row %}
+        {% cycle '<tr>' '' '' '' '' '' '' '' '' '' %}
+          <td>{{ cell |safe |truncatechars_html:80 }}</td>
+        {% cycle '' '' '' '' '' '' '' '' '' '</tr>' %}
+    {% endfor %}
+  {% endfor %}
+
+</table>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() { 
+          $(".livepreview").livePreview();
+    });
+    
+    
+</script>
+{% endblock %}
