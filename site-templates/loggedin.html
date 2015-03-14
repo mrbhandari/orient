@@ -147,6 +147,7 @@
         }
         
         function create_iframe(div_tag, url){
+            //creates string for reponsive iframe for graph
                     append_string = ['<div class="embed-responsive embed-responsive-16by9">',
                                          '<iframe id="graph_detail_'+ counter +'" class="embed-responsive-item" src="',
                                          url ,
@@ -159,6 +160,12 @@
                     console.log(append_string)
                     $('#'+div_tag).append(append_string)
                  };
+        
+        function OpenInNewTab(url) {
+            //opens a new URL in a new tab
+                        var win = window.open(url, '_blank');
+                        win.focus();
+                    }
         
         $(document).ready(function() {
             $('#loading').hide()
@@ -512,6 +519,8 @@
                     }
                     
                     
+                    
+                    
                     $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
                     //create the graphs
                     
@@ -598,8 +607,9 @@
                 '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
                     '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("visualize_recommendation_'+ counter +'").src=\"', visualize_recommendation_url,'";\'', '>Summary</a></li>',
                     '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
-                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize (Detailed)</a></li>',
-                    '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
+                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'OpenInNewTab("', event_detail_url,'");return false;\'', '>Visualize <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></li>',
+                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'OpenInNewTab("', user_detail_url,'");return false;\'', '>User List <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></li>',
+                    //'<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>', //old version where its iframed for reference
                     
                 '</ul>',
                 '<div id="my-tab-content" class="tab-content">',
@@ -609,21 +619,16 @@
                     '</div>',
                     
                     '<div class="tab-pane" id="visualize',  (counter), '">',
-                        '<div class="embed-responsive embed-responsive-16by9">',
-                            '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
-                            //event_detail_url ,
-                            '">',
-                            '</iframe>',
-                       '</div>',
+                       // '<div class="embed-responsive embed-responsive-16by9">',
+                       //     '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
+                       //     //event_detail_url ,
+                       //     '">',
+                       //     '</iframe>',
+                       //'</div>',
                     '</div>', //end tab pane div
                     
                     '<div class="tab-pane" id="user_list', (counter), '">',    
-                        '<div class="embed-responsive embed-responsive-16by9">',
-                                '<iframe id="user_detail_'+ counter +'" class="embed-responsive-item" src="',
-                                //user_detail_url ,
-                                '">',
-                                '</iframe>',
-                        '</div>',
+
                     '</div>',//end tab pane div
                 
                     '<div class="tab-pane" id="recommended_action', (counter), '">',
