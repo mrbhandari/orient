@@ -221,7 +221,7 @@ def return_user_event_details(request):
     for i in range(0,len(sql_results)):
       print sql_results[i][0]
       sql_results[i][0] = convert_date(sql_results[i][0])
-      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2]  +"'> "+ sql_results[i][2] +"</a>"
+      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2].replace("loginkey", "lk")  +"'> "+ sql_results[i][2] +"</a>"
       sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
       sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
     print sql_results
@@ -232,6 +232,8 @@ def return_user_event_details(request):
             'sql_query': sql_query,
             'sql_results': sql_results
     })
+
+
 
 
 #returns html associated with object 
@@ -254,7 +256,11 @@ def visualize_sql(sql_object):
   if sql_object['element'] == 'input' and sql_object['label'] != 'null':
     output_str += '<div>' + sql_object['label'] + '<div>'
   
-  output_str += '<' + sql_object['element'] + ' class="' +  sql_object['css_class'] + '" '#open tag
+  output_str += '<' + sql_object['element'] + ' '
+  
+  if sql_object['css_class'] and sql_object['css_class'] != 'null':
+    output_str += ' class="' +  sql_object['css_class'] + '" '#open tag
+  
   if sql_object['element_txt'] != 'null' and sql_object['element'] in ["textarea",]:
     output_str += 'value="' + sql_object['element_txt']  +'" '
   
@@ -289,10 +295,13 @@ def visualize_sql(sql_object):
   if sql_object['element'] == 'option':
     output_str += '</select>'
   print output_str
+  
+  if output_str == "< ></>":
+    output_str = "Pageview"
+  
   return output_str
-  
-  
-def return_event_detail(request):
+
+def create_full_event_detail(request):
     table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
@@ -300,7 +309,7 @@ def return_event_detail(request):
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
     print sql_results
-    col_heading = ['cnt', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href']
+    col_heading = ['count', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href']
     
     print('lensql_results', len(sql_results))
     
@@ -310,7 +319,7 @@ def return_event_detail(request):
         sql_object[col_heading[n]] = sql_results[i][n]
       #print sql_object
       #print "XXXXXX"
-      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1]  +"'> "+ sql_results[i][1] +"</a>"
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1].replace("loginkey", "lk")  +"'> "+ sql_results[i][1].replace("loginkey", "lk") +"</a>"
       if sql_results[i][6] != '':
         sql_results[i][6] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][6]  +"'> "+ sql_results[i][6][:20] +"...</a>"
       
@@ -322,15 +331,30 @@ def return_event_detail(request):
     col_heading.append('visualize')
     sql_results.insert(0, col_heading)
     
-    
-    
-    
-    return render_to_response('event_details.html', {
-            'mydict': request_dict,
+    return {'mydict': request_dict,
             'sql_query': sql_query,
-            'sql_results': sql_results
-    })
+            'sql_results': sql_results }
+    
+    
+def return_event_detail(request):
+    return render_to_response('event_details.html', create_full_event_detail(request))
 
+
+def visualize_recommendation(request):
+  
+  num_results = 5
+  full_response = create_full_event_detail(request)
+  sql_results = full_response['sql_results']
+  short_sql_results = []
+  
+  for i in range(0,
+                 min(num_results +1, len(sql_results))
+                 ): #get max of num results or the lenght of the array
+    short_sql_results.append([sql_results[i][0], sql_results[i][9], sql_results[i][1]])
+
+  return render_to_response('visualize_recommendation.html',
+                            {'sql_results': short_sql_results })
+  
 quadrant_definitions = {
   'tp': {
     'table': 'success',
@@ -392,7 +416,7 @@ def return_user_detail (request):
     
     for i in range(0,len(sql_results)):
       print "doing this"
-      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2]  +"'> "+ sql_results[i][2] +"</a>"
+      sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2].replace("loginkey", "lk")  +"'> "+ sql_results[i][2].replace("loginkey", "lk") +"</a>"
       sql_results[i][7] = "<a target='_blank'   href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
       
     sql_results.insert(0, ['cnt', 'uid', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr'])

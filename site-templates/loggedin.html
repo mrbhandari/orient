@@ -18,8 +18,11 @@
     <!--bootstrap data tables-->
     <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
+    
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
     
     <!--scroll to top widget-->
     <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
@@ -34,7 +37,25 @@
     <script src="{% static 'jquery-ui-1.11.2/jquery-ui.js' %}"></script>
     
     
+<style>
 
+    
+    body .modal-content {
+      width: 190%; /* desired relative width */
+      left: -45%; /* (100%-width)/2 */
+      /* place center */
+      margin-left:auto;
+      margin-right:auto; 
+    }
+    
+    /*controls the max width of the name column */
+/*    .dataTable td > a {
+        max-width: 30px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;        
+    }*/
+</style>
 
 
 
@@ -81,6 +102,8 @@
     </div>
   
   
+
+  
   <div class="container">
 
 
@@ -119,10 +142,12 @@
         //converts a title url to a grph url - replaces the parameters and hashes
         function convert_title_to_url(graph_title, prepend_string) {
             detail_param = encodeURI(graph_title.replace(/&/g, "%26").replace(/::/g, "&").replace(/#/g, "%23"))
+            console.log(prepend_string, detail_param) 
             return prepend_string + detail_param
         }
         
         function create_iframe(div_tag, url){
+            //creates string for reponsive iframe for graph
                     append_string = ['<div class="embed-responsive embed-responsive-16by9">',
                                          '<iframe id="graph_detail_'+ counter +'" class="embed-responsive-item" src="',
                                          url ,
@@ -135,6 +160,12 @@
                     console.log(append_string)
                     $('#'+div_tag).append(append_string)
                  };
+        
+        function OpenInNewTab(url) {
+            //opens a new URL in a new tab
+                        var win = window.open(url, '_blank');
+                        win.focus();
+                    }
         
         $(document).ready(function() {
             $('#loading').hide()
@@ -266,9 +297,10 @@
                     
                     //First add filter div at top
                     summary_table_cols = [
-                                          '# users clicked',
-                                          'Correlight score',
                                           'Correlation',
+                                          '# users clicked once',
+                                          //'Correlight score',
+                                          
                                           '# times to get max correlation - i',
                                           '# users clicked i times',
                                           //'Lift',
@@ -322,6 +354,7 @@
                         '<thead>'+
                         '<tr>'+
                             '<th>Event</th>'+
+                            '<th>Event_full_hidden</th>'+
                             header_string+
                         '</tr>'+
                     '</thead>'+
@@ -329,6 +362,7 @@
                     
                     
                     function truncate(string, chars){
+                        //TODO RB remove deprecated - done using CSS now
                         if (string.length > chars)
                            return string.substring(0,chars)+'...';
                         else
@@ -342,15 +376,20 @@
                         for (var key in table_json) {
                             
                             tr = $('<tr/>'); //#summary_table tbody tr
-                            tr.append("<td><a href='#" + cnta.toString() +"'>" + truncate(table_json[key].event, 50) + "</a></td>");
-                        
+                            tr.append("<td><a href='#" + cnta.toString() +"'>" + truncate(table_json[key].event, 50) + "</a>" +
+                                      //'<span class="glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal" aria-hidden="true"></span>'+
+                                      ' <button type="button" class="btn btn-xs btn-default" data-toggle="modal" data-target="#' + cnta.toString() + '_modal">+</button>' +
+                                      "</td>");
                             
+                            tr.append("<td>" + table_json[key].event + "</td>");
+                            
+                            tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
                             tr.append("<td>" + table_json[key].num_people_clicked + "</td>");
                             
                             
-                            tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>");
+                            //tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>"); //correlight score
                             
-                            tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
+                            
                             
                             tr.append("<td>" + table_json[key].i + "</td>");
                             tr.append("<td>" + table_json[key].num_users + "</td>");
@@ -379,11 +418,58 @@
                     console.log($('#summary_table'))
                     
                     
-                    
+                    //COMEBACKHERE
                     var sum_table = ''
                     var sum_table = $('#summary_table').DataTable({
                         destroy: true,
                         "order": [[ 2, "desc" ]],
+                        "columnDefs": [
+                        {
+                            "targets": [ 1 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 4 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 5 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 6 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 7 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 8 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 9 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 10 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 11 ],
+                            "visible": false,
+                            "searchable": true
+                        }],
+                        "dom": 'C<"clear">lfrtip'
                         });
                     
                     
@@ -394,7 +480,7 @@
                     var i=0
                     for (var i=0; i < summary_table_cols.length; i++) {
                         div_id = summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container'
-                        add_dict = {column_number : (i+1)  ,  filter_type: "range_number", filter_container_id: div_id, filter_reset_button_text: "Reset"}
+                        add_dict = {column_number : (i+2)  ,  filter_type: "range_number", filter_container_id: div_id, filter_reset_button_text: "Reset"}
                         console.log(add_dict)
                         yadcf_string.push(add_dict)
                     };
@@ -420,72 +506,165 @@
                         }
                     } );
                     
+                            //converts a title url to a grph url - replaces the parameters and hashes
+                    function gen_recommendation(meta_metrics) {
+                        recommend_txt = ''
+                        if (meta_metrics.recall < 0.3) {
+                            //increase recall if low
+                            recommend_txt += '<p>Expose this feature to more people because the recall was low @</p>' +  parseFloat(meta_metrics.recall).toFixed(2)
+                        //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
+                        }
+                        
+                        return recommend_txt
+                    }
                     
-                    $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div>')
+                    
+                    
+                    
+                    $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
                     //create the graphs
+                    
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
                         
-                        var data = datacollection.each_graph[counter]
-                        var event_detail_url = convert_title_to_url(data.title, '\get_event_details?')
-                        var user_detail_url = convert_title_to_url(data.title, '\get_user_details?')
-                        var graph_detail_url = 'print_graph/?graph_id=' + counter //TODO: fix graph id
+                        var data = datacollection.each_graph[counter];
+                        var event_detail_url = convert_title_to_url(data.title, '\get_event_details?');
+                        var user_detail_url = convert_title_to_url(data.title, '\get_user_details?');
+                        var graph_detail_url = 'print_graph/?graph_id=' + counter;
+                        var visualize_recommendation_url = convert_title_to_url(data.title, '\vvisualize_recommendation?'); //TODO don't kow why this requires to vvs?
+                        console.log(visualize_recommendation_url)
                         
-                        create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\''
+                        create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\'';
 
+//                        $('#graphs').append(
+//                             ['<div class="panel panel-primary">',
+//                              '<div class="panel-heading collapsed" data-toggle="collapse" data-target="#content' + counter +'">',
+//                              '<h3 class="panel-title" id=' + (counter+1) + ">", '<span class="badge">',(counter+1),'</span>', " ", data.title, '</h3>',
+//                              '</div>', //panel heading div
+//  '<div class="panel-body collapse" id="content'+ counter +'">',
+//    '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
+//        '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
+//        '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
+//        '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
+//        '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', '>Recommended Action</a></li>',
+//    '</ul>',
+//    '<div id="my-tab-content" class="tab-content">',
+//        '<br>',
+//        '<div class="tab-pane active" id="graph', (counter), '">',
+//
+//            
+//        '</div>',
+//        '<div class="tab-pane" id="visualize',  (counter), '">',
+//            
+//            
+//                                             '<div class="embed-responsive embed-responsive-16by9">',
+//                                             '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
+//                                             //event_detail_url ,
+//                                             '">',
+//                                             '</iframe>',
+//                                            '</div>',
+//        '</div>', //end tab pane div
+//        
+//        '<div class="tab-pane" id="user_list', (counter), '">',
+//            
+//            
+//            '<div class="embed-responsive embed-responsive-16by9">',
+//                                             '<iframe id="user_detail_'+ counter +'" class="embed-responsive-item" src="',
+//                                             //user_detail_url ,
+//                                             '">',
+//                                             '</iframe>',
+//            '</div>',
+//        '</div>',//end tab pane div
+//        
+//        '<div class="tab-pane" id="recommended_action', (counter), '">',
+//            
+//                '<p>If the recall is low [insert recall] then expose this feature to more people </p>',
+//                '<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',
+//            '<div class="container">',
+//                    
+//            '</div>',
+//        '</div>',//end tab pane div
+//        
+//    '</div>',
+//'</div>',
+//'</div>', //end example div
+//].join('')
+                             
+                              //)//end append for panels
+                        
                         $('#graphs').append(
-                             ['<div class="panel panel-primary">',
-                              '<div class="panel-heading collapsed" data-toggle="collapse" data-target="#content' + counter +'">',
-                              '<h3 class="panel-title" id=' + (counter+1) + ">", '<span class="badge">',(counter+1),'</span>', " ", data.title, '</h3>',
-                              '</div>', //panel heading div
-  '<div class="panel-body collapse" id="content'+ counter +'">',
-    '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
-        '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
-        '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
-        '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
-        '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', '>Recommended Action</a></li>',
-    '</ul>',
-    '<div id="my-tab-content" class="tab-content">',
-        '<br>',
-        '<div class="tab-pane active" id="graph', (counter), '">',
 
-            
-        '</div>',
-        '<div class="tab-pane" id="visualize',  (counter), '">',
-            
-            
-                                             '<div class="embed-responsive embed-responsive-16by9">',
-                                             '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
-                                             //event_detail_url ,
-                                             '">',
-                                             '</iframe>',
-                                            '</div>',
-        '</div>', //end tab pane div
-        
-        '<div class="tab-pane" id="user_list', (counter), '">',
-            
-            
-            '<div class="embed-responsive embed-responsive-16by9">',
-                                             '<iframe id="user_detail_'+ counter +'" class="embed-responsive-item" src="',
-                                             //user_detail_url ,
-                                             '">',
-                                             '</iframe>',
-            '</div>',
-        '</div>',//end tab pane div
-        
-        '<div class="tab-pane" id="recommended_action', (counter), '">',
-            
-                '<p>If the recall is low [insert recall] then expose this feature to more people </p>',
-                '<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',
-            '<div class="container">',
+<!-- Modal -->
+['<div class="modal fade" id="' + (counter+1) + '_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">',
+    '<div class="modal-dialog">',
+        '<div class="modal-content">',
+            '<div class="modal-header">',
+                '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>',
+                '<h4 class="modal-title" id="myModalLabel">',
+                data.title,
+                '</h4>',
+            '</div>', //end modal haeader
+            '<div class="modal-body">',//PILS SECTION
+                '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
+                    '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("visualize_recommendation_'+ counter +'").src=\"', visualize_recommendation_url,'";\'', '>Summary</a></li>',
+                    '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
+                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'OpenInNewTab("', event_detail_url,'");return false;\'', '>Visualize <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></li>',
+                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'OpenInNewTab("', user_detail_url,'");return false;\'', '>User List <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a></li>',
+                    //'<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>', //old version where its iframed for reference
                     
-            '</div>',
-        '</div>',//end tab pane div
-        
-    '</div>',
-'</div>',
-'</div>', //end example div
+                '</ul>',
+                '<div id="my-tab-content" class="tab-content">',
+                    '<br>',
+                    '<div class="tab-pane active" id="graph', (counter), '">',
+            
+                    '</div>',
+                    
+                    '<div class="tab-pane" id="visualize',  (counter), '">',
+                       // '<div class="embed-responsive embed-responsive-16by9">',
+                       //     '<iframe id="event_detail_'+ counter +'" class="embed-responsive-item" src="',
+                       //     //event_detail_url ,
+                       //     '">',
+                       //     '</iframe>',
+                       //'</div>',
+                    '</div>', //end tab pane div
+                    
+                    '<div class="tab-pane" id="user_list', (counter), '">',    
+
+                    '</div>',//end tab pane div
+                
+                    '<div class="tab-pane" id="recommended_action', (counter), '">',
+                    //
+                        '<p>Get users to do this (sample event visualizations below) at least <b>'+ data.meta_metrics.i + 'times</b> to maximize chances of getting to goal</p>',
+                        '<div class="embed-responsive embed-responsive-16by9">',
+                            '<iframe id="visualize_recommendation_'+ counter +'" class="embed-responsive-item" src="',
+                            //visualize_recommendation_url ,
+                            '">',
+                            '</iframe>',
+                        '</div>',
+                        
+                        gen_recommendation(data.meta_metrics),
+                        
+                        '<p>'+ data.meta_metrics +'</p>',
+                        
+                        
+                    '</div>',    //end recommended action
+                            
+                    
+                                
+                        
+                '</div>',//end my-tab-content
+            '</div>',//end modal body
+        '</div>', // modal content
+    '</div>', // modal dialog
+'</div>', // modal
 ].join('')
-                        )//end append
+                             
+                                    )//end apppend for modals
+                             
+                             
+                             
+                             
+                             
+                       
                         
                         
                         

@@ -546,7 +546,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
             metrics = ["mcc_max"]
             df = pd.DataFrame(event_max_column_values).transpose()
             ctr = 0
-            top_k_metrics_to_print = 400
+            top_k_metrics_to_print = 500
             for metric in metrics:
                 print metric
                 summary_fname = os.path.join(folder, "table.json")
