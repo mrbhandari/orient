@@ -18,8 +18,11 @@
     <!--bootstrap data tables-->
     <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
+    
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
     
     <!--scroll to top widget-->
     <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
@@ -35,10 +38,23 @@
     
     
 <style>
-    .modal-dialog{
-        width: auto !important",
-        height: auto !important",
+
+    
+    body .modal-content {
+      width: 190%; /* desired relative width */
+      left: -45%; /* (100%-width)/2 */
+      /* place center */
+      margin-left:auto;
+      margin-right:auto; 
     }
+    
+    /*controls the max width of the name column */
+/*    .dataTable td > a {
+        max-width: 30px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;        
+    }*/
 </style>
 
 
@@ -274,9 +290,10 @@
                     
                     //First add filter div at top
                     summary_table_cols = [
-                                          '# users clicked',
-                                          'Correlight score',
                                           'Correlation',
+                                          '# users clicked once',
+                                          //'Correlight score',
+                                          
                                           '# times to get max correlation - i',
                                           '# users clicked i times',
                                           //'Lift',
@@ -330,6 +347,7 @@
                         '<thead>'+
                         '<tr>'+
                             '<th>Event</th>'+
+                            '<th>Event_full_hidden</th>'+
                             header_string+
                         '</tr>'+
                     '</thead>'+
@@ -337,6 +355,7 @@
                     
                     
                     function truncate(string, chars){
+                        //TODO RB remove deprecated - done using CSS now
                         if (string.length > chars)
                            return string.substring(0,chars)+'...';
                         else
@@ -354,14 +373,16 @@
                                       //'<span class="glyphicon glyphicon-plus" data-toggle="modal" data-target="#myModal" aria-hidden="true"></span>'+
                                       ' <button type="button" class="btn btn-xs btn-default" data-toggle="modal" data-target="#' + cnta.toString() + '_modal">+</button>' +
                                       "</td>");
-                        
                             
+                            tr.append("<td>" + table_json[key].event + "</td>");
+                            
+                            tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
                             tr.append("<td>" + table_json[key].num_people_clicked + "</td>");
                             
                             
-                            tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>");
+                            //tr.append("<td>" + parseFloat(table_json[key].scaled_mcc).toFixed(2) + "</td>"); //correlight score
                             
-                            tr.append("<td>" + parseFloat(table_json[key].mcc).toFixed(2) + "</td>");
+                            
                             
                             tr.append("<td>" + table_json[key].i + "</td>");
                             tr.append("<td>" + table_json[key].num_users + "</td>");
@@ -390,11 +411,58 @@
                     console.log($('#summary_table'))
                     
                     
-                    
+                    //COMEBACKHERE
                     var sum_table = ''
                     var sum_table = $('#summary_table').DataTable({
                         destroy: true,
                         "order": [[ 2, "desc" ]],
+                        "columnDefs": [
+                        {
+                            "targets": [ 1 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 4 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 5 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 6 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 7 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 8 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 9 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 10 ],
+                            "visible": false,
+                            "searchable": true
+                        },
+                        {
+                            "targets": [ 11 ],
+                            "visible": false,
+                            "searchable": true
+                        }],
+                        "dom": 'C<"clear">lfrtip'
                         });
                     
                     
@@ -405,7 +473,7 @@
                     var i=0
                     for (var i=0; i < summary_table_cols.length; i++) {
                         div_id = summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container'
-                        add_dict = {column_number : (i+1)  ,  filter_type: "range_number", filter_container_id: div_id, filter_reset_button_text: "Reset"}
+                        add_dict = {column_number : (i+2)  ,  filter_type: "range_number", filter_container_id: div_id, filter_reset_button_text: "Reset"}
                         console.log(add_dict)
                         yadcf_string.push(add_dict)
                     };
@@ -430,6 +498,18 @@
                             $(this).addClass('selected');
                         }
                     } );
+                    
+                            //converts a title url to a grph url - replaces the parameters and hashes
+                    function gen_recommendation(meta_metrics) {
+                        recommend_txt = ''
+                        if (meta_metrics.recall < 0.3) {
+                            //increase recall if low
+                            recommend_txt += '<p>Expose this feature to more people because the recall was low @</p>' +  parseFloat(meta_metrics.recall).toFixed(2)
+                        //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
+                        }
+                        
+                        return recommend_txt
+                    }
                     
                     
                     $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
@@ -516,10 +596,11 @@
             '</div>', //end modal haeader
             '<div class="modal-body">',//PILS SECTION
                 '<ul id="tabs" class="nav nav-pills" data-tabs="tabs">',
+                    '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("visualize_recommendation_'+ counter +'").src=\"', visualize_recommendation_url,'";\'', '>Summary</a></li>',
                     '<li><a href="#graph', (counter), '" data-toggle="tab"', create_string, '>Graph</a></li>',
-                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize</a></li>',
+                    '<li><a href="#visualize', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("event_detail_'+ counter +'").src=\"', event_detail_url,'";\'', '>Visualize (Detailed)</a></li>',
                     '<li><a href="#user_list', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("user_detail_'+ counter +'").src=\"', user_detail_url,'";\'', '>User List</a></li>',
-                    '<li><a href="#recommended_action', (counter), '" data-toggle="tab"', 'onClick=\'document.getElementById("visualize_recommendation_'+ counter +'").src=\"', visualize_recommendation_url,'";\'', '>Recommended Action</a></li>',
+                    
                 '</ul>',
                 '<div id="my-tab-content" class="tab-content">',
                     '<br>',
@@ -547,16 +628,19 @@
                 
                     '<div class="tab-pane" id="recommended_action', (counter), '">',
                     //
-                        '<p>If the recall is low [insert recall] then expose this feature to more people </p>',
-                        '<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',
-                        '<p>'+ data.meta_metrics +'</p>',
-                        
+                        '<p>Get users to do this (sample event visualizations below) at least <b>'+ data.meta_metrics.i + 'times</b> to maximize chances of getting to goal</p>',
                         '<div class="embed-responsive embed-responsive-16by9">',
                             '<iframe id="visualize_recommendation_'+ counter +'" class="embed-responsive-item" src="',
                             //visualize_recommendation_url ,
                             '">',
                             '</iframe>',
                         '</div>',
+                        
+                        gen_recommendation(data.meta_metrics),
+                        
+                        '<p>'+ data.meta_metrics +'</p>',
+                        
+                        
                     '</div>',    //end recommended action
                             
                     

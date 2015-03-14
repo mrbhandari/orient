@@ -8,14 +8,8 @@
 
 
 
-<div class="container">
-    
 
-<br>
     
-
-<br>
-<br>
 <style>
 img { 
     max-width: 100px;
@@ -29,15 +23,14 @@ img {
 
   {% for row in sql_results %}
     {% for cell in row %}
-        {% cycle '<tr>' '' '' '' '' '' '' '' '' '' %}
+        {% cycle '<tr>' '' ''  %}
           <td>{{ cell |safe |truncatechars_html:80 }}</td>
-        {% cycle '' '' '' '' '' '' '' '' '' '</tr>' %}
+        {% cycle '' '' '</tr>' %}
     {% endfor %}
   {% endfor %}
 
 </table>
 
-</div>
 
 <script type="text/javascript">
     $(document).ready(function() { 
