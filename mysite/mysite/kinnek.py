@@ -1,4 +1,5 @@
 import sys
+import string
 import os
 import numpy as np
 import pandas as pd
@@ -8,6 +9,8 @@ import math
 import MySQLdb as mdb
 import base64
 import time
+import resource
+import json
 
 event_max_column_values = {}
 event_max_column_value_attributes = {}
@@ -169,7 +172,6 @@ def get_matthew_corr_coef(feature,fname, print_all, MIN_CORRELATION, conv_events
             event_data[feature] = str_output 
     return
 
-import string
 
 def create_foldername_for_user(username):
     print "GENERATING FOLDERNAME"
@@ -399,7 +401,6 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         print "finished deleting files in " + folder
     
         #write a summary of what you've just outputted in sql
-        import json
         summary_json = {
             'users_considered': filter_query,
             'success_users': success_query,
@@ -570,7 +571,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
                     writer = open(fname,"wb")
-                    writer.write(str(event_max_column_value_attributes[ind][metric + "_dict"]))
+                    writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
