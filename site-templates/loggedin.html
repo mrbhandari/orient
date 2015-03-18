@@ -509,11 +509,38 @@
                             //converts a title url to a grph url - replaces the parameters and hashes
                     function gen_recommendation(meta_metrics) {
                         recommend_txt = ''
-                        if (meta_metrics.recall < 0.3) {
+                        
+                        if (meta_metrics.mcc > 0.2) {
+                            recommend_txt += '<p>Since correlation (<b>' + meta_metrics.mcc.toFixed(2) + '</b>) is high, get users to do this (sample event visualizations below) at least <b>'+ meta_metrics.i + ' times</b> to maximize chances of getting to goal</p>'
+                            recommend_txt += '<li>Move earlier in the funnel because most users got here within <b>'+ meta_metrics.ave_clicks_25th_percentile.toFixed(1) + '-' + meta_metrics.ave_clicks_75th_percentile.toFixed(1) + ' clicks</b></li>'
+                            
+                            if (meta_metrics.cost > 0) {
+                                recommend_txt += '<li>Direct users who did this but did not reach the goal via push messaging. Value created would be <b>$' + meta_metrics.cost.toFixed(0) + '</b></li>'
+                            }
+                        }
+                        
+                        if (meta_metrics.mcc < 0.2) {
+                            recommend_txt += '<p>Since correlation (<b>' + meta_metrics.mcc.toFixed(2) + '</b>) is low, here are some ways improve the correlation:</p>'
+                            recommend_txt += '<li>Consider eliminating or moving this event further down the funnel.' +  'Most users got here within <b>'+ meta_metrics.ave_clicks_25th_percentile.toFixed(1) + '-' + meta_metrics.ave_clicks_75th_percentile.toFixed(1) + ' clicks</b></li>'
+                        }
+                        
+                        
+                        if ((meta_metrics.recall - 0.1) > meta_metrics.precision) {
                             //increase recall if low
-                            recommend_txt += '<p>Expose this feature to more people because the recall was low @</p>' +  parseFloat(meta_metrics.recall).toFixed(2)
+                            recommend_txt += '<li>Improve the precision of this feature by improving experience on this event - current precision was only <b>' +  parseFloat(meta_metrics.precision).toFixed(2) +'</b></li>'
                         //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
                         }
+                        
+                        if ((meta_metrics.precision - 0.1) > meta_metrics.recall) {
+                            //increase recall if low
+                            recommend_txt += '<li>Move above the fold, add appealing call to action, add product features to encourage this (this will increase recall which is currently <b>' + meta_metrics.recall.toFixed(2)  + '</b>)</li>'
+                        //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
+                        }
+                       
+                        
+                        
+                        
+                        
                         
                         return recommend_txt
                     }
@@ -534,6 +561,7 @@
                         console.log(visualize_recommendation_url)
                         
                         create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\'';
+                        meta_metrics= JSON.parse(data.meta_metrics)
 
 //                        $('#graphs').append(
 //                             ['<div class="panel panel-primary">',
@@ -633,7 +661,12 @@
                 
                     '<div class="tab-pane" id="recommended_action', (counter), '">',
                     //
-                        '<p>Get users to do this (sample event visualizations below) at least <b>'+ data.meta_metrics.i + 'times</b> to maximize chances of getting to goal</p>',
+                        //'<p>If correlation (' + meta_metrics.mcc.toFixed(2) + ') is high, get users to do this (sample event visualizations below) at least <b>'+ meta_metrics.i + ' times</b> to maximize chances of getting to goal</p>',
+                        //'<p>Ways to do this:</p>',
+                        //'<li>Move earlier in the funnel because most users got here within <b>'+ meta_metrics.ave_clicks_25th_percentile + '-' + meta_metrics.ave_clicks_75th_percentile + ' clicks</b></li>',
+                        //'<li>Move above the fold, add appealing call to action, add product features to encourage this (this will increase recall which is currently <b>' + meta_metrics.recall.toFixed(2)  + '</b>)</li>',
+                        //'<li>Target \'failed\' users via push messaging to do this action via a landing page and messages that encourage them</li>',
+                        gen_recommendation(meta_metrics),
                         '<div class="embed-responsive embed-responsive-16by9">',
                             '<iframe id="visualize_recommendation_'+ counter +'" class="embed-responsive-item" src="',
                             //visualize_recommendation_url ,
@@ -641,9 +674,9 @@
                             '</iframe>',
                         '</div>',
                         
-                        gen_recommendation(data.meta_metrics),
                         
-                        '<p>'+ data.meta_metrics +'</p>',
+                        
+                        //'<p>'+ meta_metrics +'</p>',
                         
                         
                     '</div>',    //end recommended action
