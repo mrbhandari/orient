@@ -19,10 +19,12 @@
     <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.fixedHeader.js' %}"></script> 
     
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.fixedHeader.css' %}" rel="stylesheet" media="screen">
     
     <!--scroll to top widget-->
     <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
@@ -301,8 +303,8 @@
                                           '# users clicked once',
                                           //'Correlight score',
                                           
-                                          '# times to get max correlation - i',
-                                          '# users clicked i times',
+                                          '# of times users must repeat',
+                                          '# users clicked i or more times',
                                           //'Lift',
                                           //'Leverage',
                                           'Recall',
@@ -315,8 +317,12 @@
                                           'Avg clicks to event',
                                           'Avg clicks percentile rank',
                                           'Avg clicks 25th percentile',
-                                          'Avg clicks 50th percentile',
+                                          'Median clicks to event',
                                           'Avg clicks 75th percentile']
+                    
+                    
+                    
+                    
                     filter_area = '<div class="page-header"><h2>Table view <small>Filter to view relevant events</small></h2></div>'
                     filter_area += '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><br><div class="container"><div class="form-group">'
                     console.log('d')
@@ -431,7 +437,7 @@
                         },
                         {
                             "targets": [ 4 ],
-                            "visible": false,
+                            "visible": true,
                             "searchable": true
                         },
                         {
@@ -465,13 +471,14 @@
                             "searchable": true
                         },
                         {
-                            "targets": [ 11 ],
+                            "targets": [ 12 ],
                             "visible": false,
                             "searchable": true
                         }],
                         "dom": 'C<"clear">lfrtip'
                         });
                     
+                    new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
                     
                     console.log(sum_table)
                     console.log('h')
@@ -548,7 +555,7 @@
                     
                     
                     
-                    $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
+                    //$('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
                     //create the graphs
                     
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
