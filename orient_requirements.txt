@@ -102,8 +102,11 @@ CREATE TABLE `kinnek_user_events` (
   `landing_url` varchar(1000) DEFAULT NULL,
   `name_attr` varchar(500) DEFAULT NULL,
   `time_period` varchar(20) DEFAULT NULL,
-  `hc` int(11) DEFAULT NULL
+  `hc` int(11) DEFAULT NULL,
+  `input_type` varchar(200) DEFAULT NULL,
+  `value_attr` varchar(2000) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 
 
 LOAD DATA LOCAL  INFILE '/data/kinnek_visits.tsv' into table kinnek_user_events FIELDS terminated by '\t' lines terminated by '\n' (time_period, uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
@@ -198,3 +201,6 @@ Go to /accounts/profile/
 
 
 ALTER TABLE `kinnek_user_events` ADD INDEX `uid` (`uid`);
+
+#To kill all processes on that port
+sudo lsof -i tcp:8000
