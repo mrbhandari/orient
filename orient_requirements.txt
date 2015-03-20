@@ -204,3 +204,16 @@ ALTER TABLE `kinnek_user_events` ADD INDEX `uid` (`uid`);
 
 #To kill all processes on that port
 sudo lsof -i tcp:8000
+
+
+
+ 
+ # SECURITY WARNING: don't run with debug turned on in production!
+-DEBUG = True
++DEBUG = False
+ 
+ TEMPLATE_DEBUG = True
+ 
+-ALLOWED_HOSTS = []
++ALLOWED_HOSTS = ['*']
+ 
