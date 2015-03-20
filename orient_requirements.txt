@@ -108,10 +108,7 @@ CREATE TABLE `kinnek_user_events` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 
-
-LOAD DATA LOCAL  INFILE '/data/kinnek_visits.tsv' into table kinnek_user_events FIELDS terminated by '\t' lines terminated by '\n' (time_period, uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr, hc);
-
-
+ LOAD DATA LOCAL  INFILE '/data/sorted_budsies.tsv' into table budsies_user_events FIELDS terminated by '\t' lines terminated by '\n' (uid,start_time, visit_id, etype,url, is_conversion, referrer        ,ip_address,      user_agent,element, element_txt,     css_class,       path,    log_time ,       title ,  ref_domain,  img_src, label,   start_hc   ,     href ,   landing_url  ,   name_attr  ,     time_period    , input_type,value_attr, hc);
 
 
 
@@ -170,7 +167,6 @@ python manage.py createsuperuser
 #load data
  mysql -u root -p --local-infile
  use orient;
-LOAD DATA LOCAL  INFILE '/data/all_visits.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path);
 
 
 sudo apt-get install python-dev
@@ -180,7 +176,6 @@ sudo pip install pandas
 
 
 
-LOAD DATA LOCAL  INFILE '/data/visits_20150206.tsv' into table user_events FIELDS terminated by '\t' lines terminated by '\n' (uid, start_time, ip_address, user_agent,referrer, visit_id, url, etype, log_time, is_conversion, element, element_txt, css_class, path, title, img_src, label, href, start_hc, ref_domain,landing_url, name_attr);
 
 pip install pandas==0.13.1
 
