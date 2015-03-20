@@ -19,10 +19,12 @@
     <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.fixedHeader.js' %}"></script> 
     
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.fixedHeader.css' %}" rel="stylesheet" media="screen">
     
     <!--scroll to top widget-->
     <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
@@ -301,8 +303,8 @@
                                           '# users clicked once',
                                           //'Correlight score',
                                           
-                                          '# times to get max correlation - i',
-                                          '# users clicked i times',
+                                          '# of times users must repeat',
+                                          '# users clicked i or more times',
                                           //'Lift',
                                           //'Leverage',
                                           'Recall',
@@ -315,8 +317,12 @@
                                           'Avg clicks to event',
                                           'Avg clicks percentile rank',
                                           'Avg clicks 25th percentile',
-                                          'Avg clicks 50th percentile',
+                                          'Median clicks to event',
                                           'Avg clicks 75th percentile']
+                    
+                    
+                    
+                    
                     filter_area = '<div class="page-header"><h2>Table view <small>Filter to view relevant events</small></h2></div>'
                     filter_area += '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><br><div class="container"><div class="form-group">'
                     console.log('d')
@@ -431,7 +437,7 @@
                         },
                         {
                             "targets": [ 4 ],
-                            "visible": false,
+                            "visible": true,
                             "searchable": true
                         },
                         {
@@ -465,13 +471,14 @@
                             "searchable": true
                         },
                         {
-                            "targets": [ 11 ],
+                            "targets": [ 12 ],
                             "visible": false,
                             "searchable": true
                         }],
                         "dom": 'C<"clear">lfrtip'
                         });
                     
+                    new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
                     
                     console.log(sum_table)
                     console.log('h')
@@ -509,11 +516,43 @@
                             //converts a title url to a grph url - replaces the parameters and hashes
                     function gen_recommendation(meta_metrics) {
                         recommend_txt = ''
-                        if (meta_metrics.recall < 0.3) {
+                        
+                        if (meta_metrics.mcc > 0.2) {
+                            recommend_txt += '<p>Since correlation (<b>' + meta_metrics.mcc.toFixed(2) + '</b>) is high, get users to do this (sample event visualizations below) at least <b>'+ meta_metrics.i + ' times</b> to maximize chances of getting to goal</p>'
+                            recommend_txt += '<li>Move earlier in the funnel because most users got here within <b>'+ meta_metrics.ave_clicks_25th_percentile.toFixed(0) + '-' + meta_metrics.ave_clicks_75th_percentile.toFixed(0) + ' clicks</b></li>'
+                            
+                            if (meta_metrics.cost > 0) {
+                                recommend_txt += '<li>Direct users who did this but did not reach the goal via email. Value created would be <b>$' + meta_metrics.cost.toFixed(0) + '</b></li>'
+                            }
+                        }
+                        
+                        if (meta_metrics.mcc < 0.2 && meta_metrics.mcc > 0.1 ) {
+                            recommend_txt += '<p>Correlation (<b>' + meta_metrics.mcc.toFixed(2) + '</b>) is weak but has potential, get users to do this (sample event visualizations below) at least <b>'+ meta_metrics.i + ' times</b> to maximize chances of getting to goal</p>'
+                        }
+                        
+                        
+                        if (meta_metrics.mcc < 0.1) {
+                            recommend_txt += '<p>Since correlation (<b>' + meta_metrics.mcc.toFixed(2) + '</b>) is low, here are some ways improve the correlation:</p>'
+                            recommend_txt += '<li>Consider eliminating or moving this event further down the funnel.' +  'Most users got here within <b>'+ meta_metrics.ave_clicks_25th_percentile.toFixed(1) + '-' + meta_metrics.ave_clicks_75th_percentile.toFixed(1) + ' clicks</b></li>'
+                        }
+                        
+                        
+                        if ((meta_metrics.recall - 0.1) > meta_metrics.precision) {
                             //increase recall if low
-                            recommend_txt += '<p>Expose this feature to more people because the recall was low @</p>' +  parseFloat(meta_metrics.recall).toFixed(2)
+                            recommend_txt += '<li>Improve the precision of this feature by improving experience on this event - current precision was only <b>' +  parseFloat(meta_metrics.precision).toFixed(2) +'</b></li>'
                         //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
                         }
+                        
+                        if ((meta_metrics.precision - 0.1) > meta_metrics.recall) {
+                            //increase recall if low
+                            recommend_txt += '<li>Move above the fold, add appealing call to action, add product features to encourage this (this will increase recall which is currently <b>' + meta_metrics.recall.toFixed(2)  + '</b>)</li>'
+                        //'<p>If the average clicks is low [insert average clicks vs 20th percentile click] then reduce the number of clicks. Clearly some users got there still. </p>',  
+                        }
+                       
+                        
+                        
+                        
+                        
                         
                         return recommend_txt
                     }
@@ -521,7 +560,7 @@
                     
                     
                     
-                    $('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
+                    //$('#graphs').append('<div class="page-header"><h2>Detailed view <small>See graphs and visualize events</small></h2></div><p>Depricated for now.</p>')
                     //create the graphs
                     
                     for (counter = 0; counter < datacollection.each_graph.length; counter++) {
@@ -534,6 +573,7 @@
                         console.log(visualize_recommendation_url)
                         
                         create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\'';
+                        meta_metrics= JSON.parse(data.meta_metrics)
 
 //                        $('#graphs').append(
 //                             ['<div class="panel panel-primary">',
@@ -632,8 +672,8 @@
                     '</div>',//end tab pane div
                 
                     '<div class="tab-pane" id="recommended_action', (counter), '">',
-                    //
-                        '<p>Get users to do this (sample event visualizations below) at least <b>'+ data.meta_metrics.i + 'times</b> to maximize chances of getting to goal</p>',
+
+                        gen_recommendation(meta_metrics),
                         '<div class="embed-responsive embed-responsive-16by9">',
                             '<iframe id="visualize_recommendation_'+ counter +'" class="embed-responsive-item" src="',
                             //visualize_recommendation_url ,
@@ -641,9 +681,9 @@
                             '</iframe>',
                         '</div>',
                         
-                        gen_recommendation(data.meta_metrics),
                         
-                        '<p>'+ data.meta_metrics +'</p>',
+                        
+                        //'<p>'+ meta_metrics +'</p>',
                         
                         
                     '</div>',    //end recommended action
