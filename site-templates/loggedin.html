@@ -6,6 +6,8 @@
     
     <!--high charts-->
     <script type='text/javascript' src="{% static 'highcharts-4.0.4js/highcharts.js' %}"></script>
+    <script type='text/javascript' src="{% static 'highcharts-4.0.4js/highcharts-more.js' %}"></script>
+    
     <script type='text/javascript' src="{% static 'highslide-4.1.13/highslide/highslide-full.js' %}"></script>
     
     <!--highslide-->
@@ -144,7 +146,7 @@
         //converts a title url to a grph url - replaces the parameters and hashes
         function convert_title_to_url(graph_title, prepend_string) {
             detail_param = encodeURI(graph_title.replace(/&/g, "%26").replace(/::/g, "&").replace(/#/g, "%23"))
-            console.log(prepend_string, detail_param) 
+            //console.log(prepend_string, detail_param) 
             return prepend_string + detail_param
         }
         
@@ -283,16 +285,85 @@
                 myApp.showPleaseWait();
                 $.getJSON('/ajax/read_graph_data', function(datacollection) {
                     console.log('read graph data success')
+                    query_json_summary = JSON.parse(datacollection.meta.metrics)
+                    
                     //creates the title block for the graphs section
                     append_string = '<div class="page-header"><h2>Summary <small>What did you run?</small></h2></div>'
                     append_string += '<div class="bs-callout bs-callout-success" id="callout-helper-context-color-specificity">'
-                    //append_string += "<h4>Users considered and goal</h4>"
                     append_string += "<h4>Users Considered</h4>"
                     append_string += "<p>" + datacollection.meta.users_considered + "</p>"
                     append_string +="<h4>Success Goal</h4>"
                     append_string += "<p>" + datacollection.meta.success_users + "</p>"
+                    append_string +="<h4>Successful Users</h4>"
+                    append_string += "<p>" + datacollection.meta.metrics + "</p>"
+                    append_string += "<div id='query_summary_graph' style='min-width: 310px; height: 200px; margin: 0 auto'></div>"
+                    
+                    //query_json_summary["Total users"])
+                    console.log("TESTING THIS")
                     append_string += '</div>'
                     $('#graph_area_title').append(append_string)
+                    
+                    
+                    $(function () {
+                        $('#query_summary_graph').highcharts({
+                            chart: {
+                                type: 'waterfall'
+                            },
+                    
+                            title: {
+                                text: 'Successful visitors'
+                            },
+                    
+                            xAxis: {
+                                type: 'category'
+                            },
+                    
+                            yAxis: {
+                                title: {
+                                    text: 'Number of visitors'
+                                }
+                            },
+                    
+                            legend: {
+                                enabled: false
+                            },
+                    
+                            tooltip: {
+                                pointFormat: '<b>{point.y}</b> Visitors'
+                            },
+                    
+                            series: [{
+                                upColor: '#e0e0e0 ',
+                                color: '#e0e0e0',
+                                data: [{
+                                    name: 'Total visitors',
+                                    y: parseInt(query_json_summary["Total users"])
+                                }, {
+                                    name: 'Visitors not meeting consideration criteria',
+                                    y: query_json_summary["Users considered"] - query_json_summary["Total users"]
+                                }, {
+                                    name: 'Visitors Considered',
+                                    isIntermediateSum: true,
+                                    color: '#337ab7'
+                                }, {
+                                    name: 'Unsuccessful visitors',
+                                    y: query_json_summary["Users who attained success goal"] - query_json_summary["Users considered"]
+                                }, {
+                                    name: 'Successful visitors',
+                                    isSum: true,
+                                    color: '#337ab7'
+                                }],
+                                dataLabels: {
+                                    enabled: true,
+                                    //formatter: function () {
+                                    //    return Highcharts.numberFormat(this.y / 1000, 0, ',') + 'k';
+                                    //},
+                                },
+                                pointPadding: 0
+                            }]
+                        });
+                    });
+                    
                     
                     
                     //Being table creation
@@ -325,37 +396,36 @@
                     
                     filter_area = '<div class="page-header"><h2>Table view <small>Filter to view relevant events</small></h2></div>'
                     filter_area += '<div class="bs-callout bs-callout-success"><h4>Table Filters</h4><br><div class="container"><div class="form-group">'
-                    console.log('d')
+                    
                     //loop through a create a label and div with id of the filter container area for all containers
                     for (var i=0; i < summary_table_cols.length; i++) {
                         filter_area += '<div class="col-sm-6 container form-group">'
                         filter_area += '<label class="control-label">'+summary_table_cols[i]+'</label>' //class="control-label"
                         filter_area += '<div id="' + summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container' + '"></div>'
-                        console.log(summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container')
                         filter_area += '</div>'
                     };
                     
-                    console.log('c')
+                    
                     filter_area += '</div></div></div>'
                     $('#graphs').append(filter_area)
                     
-                    console.log('b')
+                    
                     //add jquery table
                     table_json = JSON.parse(datacollection.table_json.table_data)
                     
-                    console.log('a')
+                    
                     header_string = ''
                     //loop through a create a header row for table
-                    console.log(summary_table_cols)
-                    console.log(i)
+                    
+                    
                     var i=0
-                    console.log(i)
+                    
                     for (var i=0; i < summary_table_cols.length; i++) {
                         header_string += '<th>'
                         header_string += summary_table_cols[i]
                         header_string += '</th>'
                     };
-                    console.log('e')
+                    
                     table_html = '<table id="summary_table" class="table table-striped table-bordered" cellspacing="0" width="100%">' +
                         '<thead>'+
                         '<tr>'+
@@ -374,7 +444,7 @@
                         else
                            return string;
                      };
-                     console.log('f')
+                     
         
                     $('#graphs').append(table_html)
                         var tr;
@@ -419,7 +489,7 @@
                             $('#summary_table').append(tr);
                     }
                     
-                    console.log('g')
+                    
                     console.log(sum_table)
                     console.log($('#summary_table'))
                     
@@ -478,17 +548,17 @@
                         "dom": 'C<"clear">lfrtip'
                         });
                     
+                    $('.fixedHeader').remove();
                     new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
                     
                     console.log(sum_table)
-                    console.log('h')
+                    
                     yadcf_string = []
                     //loop through a create a header row for table
                     var i=0
                     for (var i=0; i < summary_table_cols.length; i++) {
                         div_id = summary_table_cols[i].replace(/ /g,'').replace(/#/g,'') + '_filter_container'
                         add_dict = {column_number : (i+2)  ,  filter_type: "range_number", filter_container_id: div_id, filter_reset_button_text: "Reset"}
-                        console.log(add_dict)
                         yadcf_string.push(add_dict)
                     };
                     console.log(yadcf_string)
@@ -570,7 +640,7 @@
                         var user_detail_url = convert_title_to_url(data.title, '\get_user_details?');
                         var graph_detail_url = 'print_graph/?graph_id=' + counter;
                         var visualize_recommendation_url = convert_title_to_url(data.title, '\vvisualize_recommendation?'); //TODO don't kow why this requires to vvs?
-                        console.log(visualize_recommendation_url)
+                        //console.log(visualize_recommendation_url)
                         
                         create_string = 'onClick=\'create_iframe("graph' + counter +'", "' + graph_detail_url + '&quot);  this.onclick=null;\'';
                         meta_metrics= JSON.parse(data.meta_metrics)

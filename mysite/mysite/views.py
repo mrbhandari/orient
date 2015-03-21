@@ -271,7 +271,9 @@ def visualize_sql(sql_object):
     
   if sql_object['element'] == 'input' and sql_object['element_txt'] != 'null':
     output_str += 'placeholder="' + sql_object['element_txt']  +'" '
-    #output_str += 'type="' + sql_object['input_type']  +'" ' TODO: Need to add input type
+    
+  if sql_object['element'] == 'input' and sql_object['input_type'] != 'null':
+    output_str += 'type="' + sql_object['input_type']  +'" ' 
   
   
   if sql_object['element'] == 'img' and sql_object['img_src'] != 'null':
@@ -309,7 +311,7 @@ def create_full_event_detail(request):
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
     print sql_results
-    col_heading = ['count', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href']
+    col_heading = ['count', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href', 'input_type']
     
     print('lensql_results', len(sql_results))
     
@@ -325,10 +327,10 @@ def create_full_event_detail(request):
       
       
       #append the visualize column
-      sql_results[i].append(visualize_sql(sql_object))
+      sql_results[i].insert(2, visualize_sql(sql_object))
     
     #add the last column on that you were appending
-    col_heading.append('visualize')
+    col_heading.insert(2, 'visualize')
     sql_results.insert(0, col_heading)
     
     return {'mydict': request_dict,
@@ -350,7 +352,7 @@ def visualize_recommendation(request):
   for i in range(0,
                  min(num_results +1, len(sql_results))
                  ): #get max of num results or the lenght of the array
-    short_sql_results.append([sql_results[i][0], sql_results[i][9], sql_results[i][1]])
+    short_sql_results.append([sql_results[i][0], sql_results[i][2], sql_results[i][1]])
 
   return render_to_response('visualize_recommendation.html',
                             {'sql_results': short_sql_results })
@@ -437,9 +439,9 @@ def create_user_event_sql_query(query_dict, table_prefix):
 
 
 def create_event_sql_query(query_dict, table_prefix):
-    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr, href  from %sall_segment_events where """ % (table_prefix)
+    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr, href, input_type  from %sall_segment_events where """ % (table_prefix)
     sql_query += join_where_clause(query_dict)
-    sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr, href order by cnt desc limit 1000"""
+    sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr, href, input_type order by cnt desc limit 1000"""
     return sql_query
 
 def create_uid_quad_sql_query(query_dict, table, sign, table_prefix):

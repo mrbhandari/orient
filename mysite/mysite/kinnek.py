@@ -240,33 +240,35 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         cur.execute(queryb)
 
         print "Took ", (time.time() - start_time), " seconds"
-    
-        if testing == True:
-            print "Testing is true so just returning numbers"
-            
-            #Find total users
-            start_time = time.time()
-            cur.execute("""select count(*) from (select distinct uid from %suser_events) x;""" % (merchant_name_))
-            total_user_count = cur.fetchone()
-            print ['total_user_count', total_user_count]
-            
-            start_time = time.time()
-            cur.execute("""
-                    SELECT count(*) from %s%suser_segment;
-                    """ % (user_folder_, temp_table_prefix))
-            user_segment_count = cur.fetchone()
-            print ['user_segment_count', user_segment_count]
-            
-            start_time = time.time()
-            cur.execute("""
-                    SELECT count(*) from %s%ssuccess_uids;
-                    """ % (user_folder_, temp_table_prefix))
-            success_uids_count = cur.fetchone()
-            print ['success_uids_count', success_uids_count]
-            
-            return {'Total users': total_user_count[0],
+
+        print "Testing is true so just returning numbers"
+        
+        #Find total users
+        start_time = time.time()
+        cur.execute("""select count(*) from (select distinct uid from %suser_events) x;""" % (merchant_name_))
+        total_user_count = cur.fetchone()
+        print ['total_user_count', total_user_count]
+        
+        start_time = time.time()
+        cur.execute("""
+                SELECT count(*) from %s%suser_segment;
+                """ % (user_folder_, temp_table_prefix))
+        user_segment_count = cur.fetchone()
+        print ['user_segment_count', user_segment_count]
+        
+        start_time = time.time()
+        cur.execute("""
+                SELECT count(*) from %s%ssuccess_uids;
+                """ % (user_folder_, temp_table_prefix))
+        success_uids_count = cur.fetchone()
+        print ['success_uids_count', success_uids_count]
+        
+        summary_metrics = {'Total users': total_user_count[0],
                     'Users considered': user_segment_count[0],
                     'Users who attained success goal': success_uids_count[0]}
+        
+        if testing == True:    
+            return summary_metrics
 
             
         query1 = """
@@ -404,6 +406,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         summary_json = {
             'users_considered': filter_query,
             'success_users': success_query,
+            'metrics': json.dumps(summary_metrics),
         }
         with open(os.path.join(folder, 'summary.json'), 'w') as outfile:
             json.dump(summary_json, outfile)
