@@ -576,7 +576,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
                     writer = open(fname,"wb")
-                    writer.write(json.dump(event_max_column_value_attributes[ind][metric + "_dict"]))
+                    writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
