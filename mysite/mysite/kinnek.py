@@ -11,6 +11,7 @@ import base64
 import time
 import resource
 import json
+from guppy import hpy
 
 event_max_column_values = {}
 event_max_column_value_attributes = {}
@@ -548,6 +549,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
         if not print_all:
             #metrics = ["f1_max","precision_max","recall_max","cost_max","npv_max","mcc_max"]
             metrics = ["mcc_max"]
+            print "Total number of unique events with significant correlation values ", len(event_max_column_values)
             df = pd.DataFrame(event_max_column_values).transpose()
             ctr = 0
             top_k_metrics_to_print = 500
@@ -574,7 +576,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
                     writer = open(fname,"wb")
-                    writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
+                    writer.write(json.dump(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
                     writer.write(event_data[ind])
                     writer.close()
@@ -592,4 +594,16 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                 summary_file_writer.close()
                 print "done"
             print "Took ", (time.time() - start_time), " seconds"
+    event_max_column_values.clear()
+    event_max_column_value_attributes.clear()
+    event_data.clear()
+    print "cleared all dicts"
+
+#h = hpy()
+
 #generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+#print h.heap()
+#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+#print h.heap()
+#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+#print h.heap()
