@@ -21,12 +21,14 @@
     <script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
     <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
-    <script src="{% static 'datatables/dataTables.fixedHeader.js' %}"></script> 
+    <script src="{% static 'datatables/dataTables.fixedHeader.js' %}"></script>
+    <script src="{% static 'datatables/TableTools-2.2.3/js/dataTables.tableTools.min.js' %}"></script> 
     
     <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'datatables/dataTables.fixedHeader.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/TableTools-2.2.3/css/dataTables.tableTools.min.css' %}" rel="stylesheet" media="screen">
     
     <!--scroll to top widget-->
     <script src="{% static 'Scroll-To-Top/src/jquery-scrollToTop.js' %}"></script>
@@ -494,7 +496,7 @@
                     console.log($('#summary_table'))
                     
                     
-                    //COMEBACKHERE
+                    
                     var sum_table = ''
                     var sum_table = $('#summary_table').DataTable({
                         destroy: true,
@@ -545,11 +547,16 @@
                             "visible": false,
                             "searchable": true
                         }],
-                        "dom": 'C<"clear">lfrtip'
+                        "dom": 'C<"clear">lfrtip', //edit columns
+                        "dom": 'T<"clear">lfrtip', //Tabletools
+                        "tableTools": {
+                            "sSwfPath": "/static/datatables/TableTools-2.2.3/swf/copy_csv_xls_pdf.swf" //COMEBACK
+                        }
                         });
                     
                     $('.fixedHeader').remove();
                     new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
+                    
                     
                     console.log(sum_table)
                     

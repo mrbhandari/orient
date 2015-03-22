@@ -174,7 +174,7 @@ sudo pip install numpy
 sudo pip install pandas
 
 create table travefy_adjacency_graph (url1 varchar(2000), url2 varchar(2000), event1 varchar(2000), event2 varchar(2000), num_pairs int, num_source int);
- LOAD DATA LOCAL  INFILE '/data/travefy_adj_graph.tsv' into table travefy_adjacency_graph FIELDS terminated by '\t' lines terminated by '\n' (url1,event1,url2,event2, num_pairs, num_source); 
+ LOAD DATA LOCAL  INFILE '/data/travefy_adj_graph.txt' into table travefy_adjacency_graph FIELDS terminated by '\t' lines terminated by '\n' (url1,event1,url2,event2, num_pairs, num_source); 
 
 
 
