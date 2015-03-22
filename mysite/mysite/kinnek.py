@@ -11,7 +11,7 @@ import base64
 import time
 import resource
 import json
-from guppy import hpy
+#from guppy import hpy
 
 event_max_column_values = {}
 event_max_column_value_attributes = {}
