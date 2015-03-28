@@ -9,6 +9,7 @@ import math
 import MySQLdb as mdb
 import base64
 import time
+import urlparse
 import resource
 import json
 #from guppy import hpy
@@ -180,6 +181,79 @@ def create_foldername_for_user(username):
     valid_chars = "-_%s%s" % (string.ascii_letters, string.digits)
     file_name_string = ''.join(c for c in username if c in valid_chars)
     return file_name_string
+
+
+def get_domain(source_url):
+  parsed_uri = urlparse.urlparse( source_url)
+  domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+  return domain
+  
+  
+def visualize_sql(sql_object):
+  #print sql_object['element']
+  
+  href_domain = get_domain(sql_object['url'])
+  
+  output_str = ''
+  
+  print "dict",sql_object
+  
+  if 'name_attr' in sql_object  and sql_object['name_attr']!= 'null':
+    output_str += 'Name: ' + sql_object['name_attr']
+  
+  if 'element' in sql_object:
+    if sql_object['element'] == 'option':
+        output_str += '<select>'
+    
+    if 'label' in sql_object and sql_object['element'] == 'input' and sql_object['label'] != 'null':
+        output_str += '<div>' + sql_object['label'] + '<div>'
+  
+    output_str += '<' + sql_object['element'] + ' '
+  
+    if 'css_class' in sql_object and sql_object['css_class'] != 'null':
+        output_str += ' class="' +  sql_object['css_class'] + '" '#open tag
+  
+    if 'element_txt' in sql_object and sql_object['element_txt'] != 'null' and sql_object['element'] in ["textarea",]:
+        output_str += 'value="' + sql_object['element_txt']  +'" '
+  
+    if sql_object['element'] == 'a':
+        link_ref = '';
+        if 'href' in sql_object:
+            link_ref = urlparse.urljoin(href_domain, sql_object['href'])
+            print link_ref
+            output_str += 'href="' +   link_ref  +'" target="_blank" class="livepreview" '
+    
+    if 'element_txt' in sql_object and sql_object['element'] == 'input' and sql_object['element_txt'] != 'null':
+        output_str += 'placeholder="' + sql_object['element_txt']  +'" '
+    
+    if 'input_type' in sql_object and sql_object['element'] == 'input' and sql_object['input_type'] != 'null':
+        output_str += 'type="' + sql_object['input_type']  +'" ' 
+  
+  
+    if 'img_src' in sql_object and sql_object['element'] == 'img' and sql_object['img_src'] != 'null':
+        link_ref = urlparse.urljoin(href_domain, sql_object['img_src'])
+        output_str += 'src="' + link_ref  +'" '
+    
+    if 'element_txt' in sql_object and sql_object['element'] == 'img' and sql_object['element_txt'] != 'null':
+        output_str += 'alt="' + sql_object['element_txt']  +'" '
+  
+    output_str += '>' #close opening tab
+
+    if 'element_txt' in sql_object and sql_object['element_txt'] != 'null' and sql_object['element'] not in [ "select", "textarea", "input", "img"]:
+        output_str += sql_object['element_txt']
+  
+    output_str += '</' + sql_object['element'] + '>' #ending tab
+  
+    if sql_object['element'] == 'option':
+        output_str += '</select>'
+    #print output_str
+  
+  if output_str == "< ></>":
+    output_str = "Pageview"
+ 
+  print output_str
+  return output_str
+
 
 
 def generate_event_files(testing, print_all, filter_query, success_query, merchant_name, username, MIN_CORRELATION=0.2):
@@ -586,7 +660,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_25th_percentile":first_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
-                    event_max_column_value_attributes[ind][metric + "_dict"].update({"pixel_data":common_pixel_data[ind]})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"pixel_data":visualize_sql(common_pixel_data[ind])})
                     writer = open(fname,"wb")
                     writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
