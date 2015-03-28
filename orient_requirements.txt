@@ -78,7 +78,7 @@ use orient;
 drop table user_events;
 
 #create for each merchant
-CREATE TABLE `kinnek_user_events` (
+CREATE TABLE `travefy_user_events` (
   `uid` varchar(100) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `visit_id` int(11) DEFAULT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE `kinnek_user_events` (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 
- LOAD DATA LOCAL  INFILE '/data/sorted_budsies.tsv' into table budsies_user_events FIELDS terminated by '\t' lines terminated by '\n' (uid,start_time, visit_id, etype,url, is_conversion, referrer        ,ip_address,      user_agent,element, element_txt,     css_class,       path,    log_time ,       title ,  ref_domain,  img_src, label,   start_hc   ,     href ,   landing_url  ,   name_attr  ,     time_period    , input_type,value_attr, hc);
+ LOAD DATA LOCAL  INFILE '/data/sorted_kinnek.tsv' into table budsies_user_events FIELDS terminated by '\t' lines terminated by '\n' (uid,start_time, visit_id, etype,url, is_conversion, referrer        ,ip_address,      user_agent,element, element_txt,     css_class,       path,    log_time ,       title ,  ref_domain,  img_src, label,   start_hc   ,     href ,   landing_url  ,   name_attr  ,     time_period    , input_type,value_attr, hc);
 
 
 
@@ -213,4 +213,6 @@ sudo lsof -i tcp:8000
  
 -ALLOWED_HOSTS = []
 +ALLOWED_HOSTS = ['*']
- 
+
+autossh -M 20000 -L 3306:localhost:3306 -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com
+

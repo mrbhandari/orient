@@ -80,13 +80,11 @@ DATABASES = {
     #'default': {
     #    'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
     #    'NAME': 'orient',
-    #        #os.path.join(PROJECT_ROOT, 'mysql.db'),                      # Or path to database file if using sqlite3.
     #    'USER': 'root',                      # Not used with sqlite3.
     #    'PASSWORD': 'thebakery',                  # Not used with sqlite3.
-    #    'HOST': 'ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com',                      # Set to empty string for localhost. Not used with sqlite3.
+    #    'HOST': '127.0.0.1',                      # Set to empty string for localhost. Not used with sqlite3.
     #    'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.
-    #    'OPTIONS': {'ssl': {'key': '/../../../../Users/PEM-Mac/Downloads/rahulkey.pem'}},
-    #}
+    #},
 }
 
 
