@@ -661,6 +661,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"pixel_data":visualize_sql(common_pixel_data[ind])})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"pixel_url":common_pixel_data[ind]['url']})
                     writer = open(fname,"wb")
                     writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
@@ -687,7 +688,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
 
 #h = hpy()
 
-#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
 #print h.heap()
 #generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
 #print h.heap()
