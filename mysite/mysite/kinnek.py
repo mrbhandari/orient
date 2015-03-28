@@ -16,6 +16,7 @@ import json
 event_max_column_values = {}
 event_max_column_value_attributes = {}
 event_data = {}
+common_pixel_data = {}
 
 #Runs the data
 
@@ -441,7 +442,6 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
     
                     for event_signature in agg_event_ctr.keys():
                         #print "outputting ", event_signature, agg_event_ctr[event_signature]
-
                         if event_signature in event_metadata:
                             event_metadata[event_signature] += 1
                         else:
@@ -477,26 +477,37 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
             is_conv = row[-1]
             event_signatures = set()
             event_signature_str = ""
+            pixel_data = {}
+            canonicalized_event_signatures = []
             for i in range(1,len(row) - 3):
                 field_name = column_names[i][0]
+                
                 if str(row[i]).strip() == "" or str(row[i]).strip() == "null" or str(row[i]).strip() == "undefined" or field_name == "is_conversion":
                     continue
+                pixel_data[field_name] = str(row[i])
                 if event_signature_str == "":
                     event_signature_str = field_name+ "=" + str(row[i])
                 else:
                     event_signature_str = event_signature_str + "::" + field_name + "=" + str(row[i])
-                event_signature_temp = field_name + "=" + str(row[i])
-                if event_signature_temp:
-                    if event_signature_temp in agg_event_ctr:
-                        agg_event_ctr[event_signature_temp] = agg_event_ctr[event_signature_temp] + row[-2]
+                canonicalized_event_signature = field_name + "=" + str(row[i])
+                if canonicalized_event_signature:
+                    canonicalized_event_signatures.append(canonicalized_event_signature)
+                    if canonicalized_event_signature in agg_event_ctr:
+                        agg_event_ctr[canonicalized_event_signature] = agg_event_ctr[canonicalized_event_signature] + row[-2]
                     else:
-                        agg_event_ctr[event_signature_temp] = row[-2]
-                    if event_signature_temp in hc_ctr:
-                        hc_ctr[event_signature_temp] = min(hc_ctr[event_signature_temp],row[-3])
+                        agg_event_ctr[canonicalized_event_signature] = row[-2]
+                    if canonicalized_event_signature in hc_ctr:
+                        hc_ctr[canonicalized_event_signature] = min(hc_ctr[canonicalized_event_signature],row[-3])
                     else:
-                        hc_ctr[event_signature_temp] = row[-3]
+                        hc_ctr[canonicalized_event_signature] = row[-3]
             #print "EVENT SIGNATURE",event_signature_str
             event_signatures.add(event_signature_str)
+            if event_signature_str not in common_pixel_data:
+               
+                common_pixel_data[event_signature_str] = pixel_data
+            for ces in canonicalized_event_signatures:
+                if ces not in common_pixel_data:
+                    common_pixel_data[ces] = pixel_data
             for event_signature in event_signatures:
                 hc_ctr[event_signature] = row[-3]
 
@@ -575,6 +586,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_25th_percentile":first_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_50th_percentile":second_percentile})
                     event_max_column_value_attributes[ind][metric + "_dict"].update({"ave_clicks_75th_percentile":third_percentile})
+                    event_max_column_value_attributes[ind][metric + "_dict"].update({"pixel_data":common_pixel_data[ind]})
                     writer = open(fname,"wb")
                     writer.write(json.dumps(event_max_column_value_attributes[ind][metric + "_dict"]))
                     writer.write("\n")
@@ -601,7 +613,7 @@ def generate_event_files(testing, print_all, filter_query, success_query, mercha
 
 #h = hpy()
 
-#generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
+generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
 #print h.heap()
 #generate_event_files(False,False,"start_hc <= 5","element_txt='send invite' or css_class='ember-view ember-text-area paste-emails send-invite-email ui-autocomplete-input ui-autocomplete-loading' or element_txt='tweet link' or element_txt='invite friends'","travefy","admin")
 #print h.heap()
