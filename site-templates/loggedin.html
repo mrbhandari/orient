@@ -383,7 +383,7 @@
                                           'Recall',
                                           'Precision',
                                           //'F1',
-                                          //'Cost',
+                                          
                                           //'FPV',
                                           //'TPV',
                                           //'FNV',
@@ -391,7 +391,10 @@
                                           'Avg clicks percentile rank',
                                           'Avg clicks 25th percentile',
                                           'Median clicks to event',
-                                          'Avg clicks 75th percentile']
+                                          'Avg clicks 75th percentile',
+                                          'Targeting value',
+                                          'Sample Visualization',
+                                          'Sample URL',]
                     
                     
                     
@@ -478,7 +481,7 @@
                             
                             //tr.append("<td>" + parseFloat(table_json[key].f1).toFixed(2) + "</td>");
                             
-                            //tr.append("<td>" + table_json[key].cost + "</td>");
+                            
                             //tr.append("<td>" + table_json[key].fpv + "</td>");
                             //tr.append("<td>" + table_json[key].tpv + "</td>");
                             //tr.append("<td>" + table_json[key].fnv + "</td>");
@@ -487,6 +490,9 @@
                             tr.append("<td>" + parseFloat(table_json[key].ave_clicks_25th_percentile) + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].ave_clicks_50th_percentile) + "</td>");
                             tr.append("<td>" + parseFloat(table_json[key].ave_clicks_75th_percentile) + "</td>");
+                            tr.append("<td>" + table_json[key].cost + "</td>");
+                            tr.append("<td>" + table_json[key].pixel_data + "</td>");
+                            tr.append("<td>" + table_json[key].pixel_url + "</td>");
                             cnta = cnta+1
                             $('#summary_table').append(tr);
                     }
@@ -546,7 +552,15 @@
                             "targets": [ 12 ],
                             "visible": false,
                             "searchable": true
-                        }],
+                        },
+                        {
+                            "targets": [ 13 ],
+                            "visible": false,
+                            "searchable": true
+                        }                        
+                        
+                        
+                        ],
                         "dom": 'CT<"clear">lfrtip', //edit columns and tabletools
                         "tableTools": {
                             "sSwfPath": "/static/datatables/TableTools-2.2.3/swf/copy_csv_xls_pdf.swf" //COMEBACK
