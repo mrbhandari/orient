@@ -14,6 +14,7 @@ import urllib2
 import pandas as pd
 import urlparse
 import datetime
+import urllib
 
 
 def get_domain(source_url):
@@ -102,7 +103,6 @@ def read_graph_data(request):
        min_max[k] = {'min':df[k].min(),'max':df[k].max()}
     print min_max
     min_max = json.dumps(min_max, ensure_ascii=False)
-    print "XXXXXXSJKJSLDKJLSDKJFLSDKJFLSDKJFLSKDJFLSDKJFLSDKJ"
     table_json =  json.dumps(table_json_dict, ensure_ascii=False)
   
   for filename in newlist:
@@ -219,12 +219,12 @@ def return_user_event_details(request):
     sql_results = [list(i) for i in sql_results]
     #convert startime
     for i in range(0,len(sql_results)):
-      print sql_results[i][0]
+      #print sql_results[i][0]
       sql_results[i][0] = convert_date(sql_results[i][0])
       sql_results[i][2] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][2].replace("loginkey", "lk")  +"'> "+ sql_results[i][2] +"</a>"
       sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
       sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
-    print sql_results
+    #print sql_results
     sql_results.insert(0, ['log_time', 'visit_id', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'referrer'])
     
     return render_to_response('user_event_details.html', {
@@ -307,7 +307,10 @@ def create_full_event_detail(request):
     table_prefix = create_foldername_for_user(request.user.username) +"_"
     request_dict = dict(request.GET._iterlists())
     request_dict = translate_hash(request_dict)
-    sql_query = create_event_sql_query(request_dict, table_prefix)
+    
+    merchant, username = request.user.profile.merchant, request.user.username
+    
+    sql_query = create_event_sql_query(request_dict, table_prefix, merchant)
     sql_results =  list(get_sql_data(sql_query))
     sql_results = [list(i) for i in sql_results]
     print sql_results
@@ -438,10 +441,24 @@ def create_user_event_sql_query(query_dict, table_prefix):
 
 
 
-def create_event_sql_query(query_dict, table_prefix):
-    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr, href, input_type  from %sall_segment_events where """ % (table_prefix)
+def create_event_sql_query(query_dict, table_prefix, merchant):
+    analysis_type = ''
+    try:
+      analysis_type = query_dict['analysis_type'][0]
+    except:
+      pass
+    query_dict.pop("analysis_type", None)
+    print analysis_type
+    print "XXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    if analysis_type == 'exit_rate':
+      table_name = merchant + '_user_events'
+    else:
+      table_name = table_prefix + 'all_segment_events'
+    print table_name
+    sql_query = """select count(*) as cnt, url, css_class, element, element_txt, label, img_src, name_attr, href, input_type  from %s where """ % (table_name)
     sql_query += join_where_clause(query_dict)
     sql_query += """group by url, css_class, element, element_txt, label, img_src, name_attr, href, input_type order by cnt desc limit 1000"""
+    
     return sql_query
 
 def create_uid_quad_sql_query(query_dict, table, sign, table_prefix):
@@ -512,5 +529,57 @@ def get_sql_data(sql_query):
   with con:
       cur = con.cursor()
       cur.execute(sql_query)
-      return cur.fetchall() 
-      
+      return cur.fetchall()
+    
+    
+#Exit rate stuff
+def exit_rate(request):
+    request_dict = dict(request.GET._iterlists())
+    merchant, username = request.user.profile.merchant, request.user.username
+    
+    sql_query = """SELECT 
+        a.*, a.visit_cnt / (1.0 + a.num_source) AS exit_rate
+    FROM
+        (SELECT 
+            LOWER(url1),
+                LOWER(event1),
+                SUM(num_pairs) AS visit_cnt,
+                num_source
+        FROM
+            %s_adjacency_graph
+        WHERE
+            event2 = '"EXIT"'
+        GROUP BY LOWER(url1) , LOWER(event1)
+        ORDER BY visit_cnt DESC) AS a
+    WHERE
+        a.num_source > 100
+    ORDER BY exit_rate DESC
+    LIMIT 100;""" % (merchant)
+  
+    print sql_query
+    sql_results = get_sql_data(sql_query)
+    sql_results =  list(get_sql_data(sql_query))
+    sql_results = [list(i) for i in sql_results]
+    # LOWER(url1), LOWER(event1), visit_cnt, num_source, exit_rate
+
+
+    for i in range(0,len(sql_results)):
+    #  print sql_results[i][0]
+    #  sql_results[i][0] = convert_date(sql_results[i][0])
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_event_details/?', '&analysis_type=exit_rate')  +"'> "+ sql_results[i][1] +"</a>"
+    #  sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
+    #  sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
+    
+    sql_results.insert(0, ['URL', 'Event', 'Exits', 'Total Visits', 'Exit Rate'])
+    
+    
+    return render_to_response('exit_rate.html', {
+            'mydict': request_dict,
+            'sql_query': sql_query,
+            'sql_results': sql_results,
+    })
+
+def convert_title_to_url(graph_title, prepend_string, postpend_string):
+  detail_param = urllib.quote(graph_title[1:(len(graph_title)-1)].replace("&", "%26").replace("::", "&").replace("#", "%23"), safe='~@#$&()*!+=:;,.?/\'');
+  print (prepend_string, detail_param) 
+  return prepend_string + detail_param + postpend_string

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block content %}
+<link href="{% static 'jquery-live-preview-master/css/livepreview-demo.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'jquery-live-preview-master/js/jquery-live-preview.min.js' %}"></script>
+
+
+<script src="{% static 'datatables/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.colVis.js' %}"></script>
+    <script src="{% static 'datatables/dataTables.fixedHeader.js' %}"></script>
+    <script src="{% static 'datatables/TableTools-2.2.3/js/dataTables.tableTools.min.js' %}"></script> 
+    
+    <link href="{% static 'datatables/jquery.dataTables.min.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.bootstrap.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.colVis.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/dataTables.fixedHeader.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'datatables/TableTools-2.2.3/css/dataTables.tableTools.min.css' %}" rel="stylesheet" media="screen">
+    
+
+    
+<style>
+img { 
+    max-width: 100px;
+    max-height: 100px;
+}
+
+</style>
+
+<div class="container">
+    <h1>Exit Rate analysis</h1>
+    
+    
+    <table id="foo" class="table table-bordered table-condensed table-hover table-striped">
+    
+    {% for row in sql_results %}
+        {% if forloop.first %}
+             <thead>
+            {% for cell in row %}
+                {% cycle '<tr>' '' '' '' ''  %}
+                    <th>{{ cell |safe |truncatechars_html:80 }}</th>
+                {% cycle '' '' '' '' '</tr>' %}
+            {% endfor %}
+            </thead>
+        {% else %}
+            {% for cell in row %}
+                {% cycle '<tr>' '' '' '' ''  %}
+                    <td>{{ cell |safe |truncatechars_html:80 }}</td>
+                {% cycle '' '' '' '' '</tr>' %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    
+    </table>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() { 
+          $(".livepreview").livePreview();
+          
+          
+           var sum_table = $('#foo').DataTable({
+                        //destroy: true,
+                        "order": [[ 4, "desc" ]],
+                        });
+           console.log('testing')
+    });
+    
+    
+</script>
+{% endblock %}
