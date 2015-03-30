@@ -566,7 +566,7 @@ def exit_rate(request):
     for i in range(0,len(sql_results)):
     #  print sql_results[i][0]
     #  sql_results[i][0] = convert_date(sql_results[i][0])
-      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_event_details/?', '&analysis_type=exit_rate')  +"'> "+ sql_results[i][1] +"</a>"
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_event_details/?', '&analysis_type=exit_rate')  +"'> "+ sql_results[i][1] + "</a><a target='_blank' type='button' class='btn btn-default dropdown-toggle' href='"+ convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_next_events/?', '&analysis_type=exit_rate') +"'>Solution</a>"
     #  sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
     #  sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
     
@@ -578,6 +578,90 @@ def exit_rate(request):
             'sql_query': sql_query,
             'sql_results': sql_results,
     })
+
+def get_next_events(request):
+    query_dict = dict(request.GET._iterlists())
+    merchant, username = request.user.profile.merchant, request.user.username
+    table_prefix = create_foldername_for_user(request.user.username) +"_"
+    sql_query = next_event_sql_query(query_dict, table_prefix, merchant)
+    print sql_query
+    sql_results = get_sql_data(sql_query)
+    sql_results =  list(get_sql_data(sql_query))
+    sql_results = [list(i) for i in sql_results]
+    # LOWER(url1), LOWER(event1), visit_cnt, num_source, exit_rate
+
+
+
+
+
+
+    col_heading = ['count', 'url', 'css_class', 'element', 'element_txt', 'label', 'img_src', 'name_attr', 'href', 'input_type']
+    
+    
+    
+    for i in range(0,len(sql_results)):
+      sql_object = {}
+      for n in range(0, len(sql_results[i])):
+        sql_object[col_heading[n]] = sql_results[i][n]
+      
+      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1].replace("loginkey", "lk")  +"'> "+ sql_results[i][1].replace("loginkey", "lk") +"</a>"
+      if sql_results[i][6] != '':
+        sql_results[i][6] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][6]  +"'> "+ sql_results[i][6][:20] +"...</a>"
+      
+      
+      #append the visualize column
+      sql_results[i].insert(2, visualize_sql(sql_object))
+    
+    #add the last column on that you were appending
+    col_heading.insert(2, 'visualize')
+    sql_results.insert(0, col_heading)
+
+    return render_to_response('get_next_events.html', {
+            'mydict': query_dict,
+            'sql_query': sql_query,
+            'sql_results': sql_results,
+    })
+
+def next_event_sql_query(query_dict, table_prefix, merchant):
+  analysis_type = ''
+  try:
+    analysis_type = query_dict['analysis_type'][0]
+  except:
+    pass
+  query_dict.pop("analysis_type", None)
+  if analysis_type == 'exit_rate':
+    table_name = merchant + '_user_events'
+  else:
+    table_name = table_prefix + 'all_segment_events'
+  print table_name
+  
+  sql_query = """SELECT 
+    COUNT(*) AS count,
+    t2.url,
+    t2.css_class,
+    t2.element,
+    t2.element_txt,
+    t2.label,
+    t2.img_src,
+    t2.name_attr,
+    t2.href,
+    t2.input_type
+    FROM
+        (SELECT 
+            uid, log_time, visit_id
+        FROM
+            %s
+        WHERE
+            %s ) t1
+            JOIN
+        %s t2 ON (t1.uid = t2.uid
+            
+            AND t1.visit_id = t2.visit_id)
+    GROUP BY t2.url , t2.css_class , t2.element , t2.element_txt , t2.label , t2.img_src , t2.name_attr , t2.href , t2.input_type
+    ORDER BY count DESC LIMIT 1000""" % (table_name, join_where_clause(query_dict),table_name)
+  #AND t2.log_time = (t1.log_time + 100000)
+  print sql_query
+  return sql_query
 
 def convert_title_to_url(graph_title, prepend_string, postpend_string):
   detail_param = urllib.quote(graph_title[1:(len(graph_title)-1)].replace("&", "%26").replace("::", "&").replace("#", "%23"), safe='~@#$&()*!+=:;,.?/\'');
