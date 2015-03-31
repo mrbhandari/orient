@@ -54,6 +54,17 @@
       margin-right:auto; 
     }
     
+    .truncate {
+        width: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+      
+    .rightalign {
+        
+    }
+    
     /*controls the max width of the name column */
 /*    .dataTable td > a {
         max-width: 30px;
@@ -71,7 +82,19 @@
   <p>Note: each user can only run one query at a time.</p>-->
 
   
-  
+    <div class="dropdown rightalign">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          Analysis
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu" role="menu" aria-labelledby="dLabel">
+          <li role="presentation"><a role="menuitem" target="_blank" tabindex="-1" href="/accounts/loggedin/">Correlation</a></li>
+          <li role="presentation"><a role="menuitem" target="_blank" tabindex="-1" href="/accounts/loggedin/preset/exit_rate">Exit rate</a></li>
+        </ul>
+    </div>
+  <br>
+
+</ul>
     <div class="bs-example" data-example-id="basic-forms">
         <form id='update_graphs' class="form-horizontal" action='/get'>
           <div class="form-group">
@@ -567,8 +590,8 @@
                         }
                         });
                     
-                    $('.fixedHeader').remove();
-                    new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
+                    //$('.fixedHeader').remove();
+                    //new $.fn.dataTable.FixedHeader( sum_table );//add fixed header
                     
                     
                     console.log(sum_table)

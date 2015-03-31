@@ -534,9 +534,11 @@ def get_sql_data(sql_query):
     
 #Exit rate stuff
 def exit_rate(request):
+    merchant_url_toggle = ''
     request_dict = dict(request.GET._iterlists())
     merchant, username = request.user.profile.merchant, request.user.username
-    
+    if merchant.lower() == 'budsies':
+      merchant_url_toggle = 1
     sql_query = """SELECT 
         a.*, a.visit_cnt / (1.0 + a.num_source) AS exit_rate
     FROM
@@ -564,13 +566,12 @@ def exit_rate(request):
 
 
     for i in range(0,len(sql_results)):
-    #  print sql_results[i][0]
-    #  sql_results[i][0] = convert_date(sql_results[i][0])
-      sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_event_details/?', '&analysis_type=exit_rate')  +"'> "+ sql_results[i][1] + "</a><a target='_blank' type='button' class='btn btn-default dropdown-toggle' href='"+ convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_next_events/?', '&analysis_type=exit_rate') +"'>Solution</a>"
-    #  sql_results[i][7] = "<a target='_blank' href='"+  sql_results[i][6]  +"'><img class='img' src='"+  sql_results[i][7]  +"'></a>"
-    #  sql_results[i][9] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][9]  +"'> "+ sql_results[i][9] +"</a>"
     
-    sql_results.insert(0, ['URL', 'Event', 'Exits', 'Total Visits', 'Exit Rate'])
+      solution_button  = "<a target='_blank' type='button' class='btn btn-default dropdown-toggle' href='"+ convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_next_events/?', '&analysis_type=exit_rate&include_url=0'+ merchant_url_toggle) +"'>Solution</a>"
+      sql_results[i][1] = "<a class='livepreview truncate' target='_blank' href='"+  convert_title_to_url(sql_results[i][1], '/accounts/loggedin/get_event_details/?', '&analysis_type=exit_rate')  +"'> "+ sql_results[i][1] + "</a>"
+      sql_results[i].insert(2, solution_button)
+    
+    sql_results.insert(0, ['URL', 'Event', 'Solution', 'Exits', 'Total Visits', 'Exit Rate'])
     
     
     return render_to_response('exit_rate.html', {
@@ -580,10 +581,16 @@ def exit_rate(request):
     })
 
 def get_next_events(request):
+    include_url = 0
+    
     query_dict = dict(request.GET._iterlists())
+    if query_dict.get('include_url'):
+      include_url = int(query_dict['include_url'][0])
+      query_dict.pop("include_url", None)
+    
     merchant, username = request.user.profile.merchant, request.user.username
     table_prefix = create_foldername_for_user(request.user.username) +"_"
-    sql_query = next_event_sql_query(query_dict, table_prefix, merchant)
+    sql_query = next_event_sql_query(query_dict, table_prefix, merchant, include_url)
     print sql_query
     sql_results = get_sql_data(sql_query)
     sql_results =  list(get_sql_data(sql_query))
@@ -601,12 +608,18 @@ def get_next_events(request):
     
     for i in range(0,len(sql_results)):
       sql_object = {}
+      if include_url == 0:
+        sql_results[i].insert(1, 'na')
       for n in range(0, len(sql_results[i])):
         sql_object[col_heading[n]] = sql_results[i][n]
+      
+      
       
       sql_results[i][1] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][1].replace("loginkey", "lk")  +"'> "+ sql_results[i][1].replace("loginkey", "lk") +"</a>"
       if sql_results[i][6] != '':
         sql_results[i][6] = "<a class='livepreview' target='_blank' href='"+  sql_results[i][6]  +"'> "+ sql_results[i][6][:20] +"...</a>"
+      
+      
       
       
       #append the visualize column
@@ -622,8 +635,12 @@ def get_next_events(request):
             'sql_results': sql_results,
     })
 
-def next_event_sql_query(query_dict, table_prefix, merchant):
-  analysis_type = ''
+def next_event_sql_query(query_dict, table_prefix, merchant, include_url):
+  url_selector, analysis_type = '', ''
+  if include_url == 1:
+    url_selector = ' t2.url, '
+    
+  
   try:
     analysis_type = query_dict['analysis_type'][0]
   except:
@@ -637,7 +654,7 @@ def next_event_sql_query(query_dict, table_prefix, merchant):
   
   sql_query = """SELECT 
     COUNT(*) AS count,
-    t2.url,
+    %s
     t2.css_class,
     t2.element,
     t2.element_txt,
@@ -657,8 +674,8 @@ def next_event_sql_query(query_dict, table_prefix, merchant):
         %s t2 ON (t1.uid = t2.uid
             
             AND t1.visit_id = t2.visit_id)
-    GROUP BY t2.url , t2.css_class , t2.element , t2.element_txt , t2.label , t2.img_src , t2.name_attr , t2.href , t2.input_type
-    ORDER BY count DESC LIMIT 1000""" % (table_name, join_where_clause(query_dict),table_name)
+    GROUP BY %s t2.css_class , t2.element , t2.element_txt , t2.label , t2.img_src , t2.name_attr , t2.href , t2.input_type
+    ORDER BY count DESC LIMIT 1000""" % (url_selector, table_name, join_where_clause(query_dict),table_name, url_selector)
   #AND t2.log_time = (t1.log_time + 100000)
   print sql_query
   return sql_query

@@ -30,7 +30,7 @@ img {
 </style>
 
 <div class="container">
-    <h1>Event Details</h1>
+    <div class="page-header"><h2>Event Details <small>What types of invents are included?</small></h2></div>
     
     
     <br>
@@ -54,7 +54,7 @@ img {
         {% else %}
             {% for cell in row %}
                     {% cycle '<tr>' '' '' '' '' '' '' '' '' '' ''  %}
-                    <th>{{ cell |safe |truncatechars_html:80 }}</th>
+                    <td>{{ cell |safe |truncatechars_html:80 }}</td>
                 {% cycle '' '' '' '' '' '' '' '' '' '' '</tr>' %}
             {% endfor %}
         {% endif %}

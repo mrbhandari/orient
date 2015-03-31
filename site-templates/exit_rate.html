@@ -30,7 +30,7 @@ img {
 </style>
 
 <div class="container">
-    <h1>Exit Rate analysis</h1>
+    <div class="page-header"><h2>Exit Rate Analysis <small>What are your highest exit rate events?</small></h2></div>
     
     
     <table id="foo" class="table table-bordered table-condensed table-hover table-striped">
@@ -39,16 +39,16 @@ img {
         {% if forloop.first %}
              <thead>
             {% for cell in row %}
-                {% cycle '<tr>' '' '' '' ''  %}
+                {% cycle '<tr>' '' '' '' '' ''  %}
                     <th>{{ cell |safe |truncatechars_html:80 }}</th>
-                {% cycle '' '' '' '' '</tr>' %}
+                {% cycle '' '' '' '' '' '</tr>' %}
             {% endfor %}
             </thead>
         {% else %}
             {% for cell in row %}
-                {% cycle '<tr>' '' '' '' ''  %}
+                {% cycle '<tr>' '' '' '' '' ''  %}
                     <td>{{ cell |safe |truncatechars_html:80 }}</td>
-                {% cycle '' '' '' '' '</tr>' %}
+                {% cycle '' '' '' '' '' '</tr>' %}
             {% endfor %}
         {% endif %}
     {% endfor %}
@@ -64,7 +64,7 @@ img {
           
            var sum_table = $('#foo').DataTable({
                         //destroy: true,
-                        "order": [[ 4, "desc" ]],
+                        "order": [[ 5, "desc" ]],
                         });
            console.log('testing')
     });

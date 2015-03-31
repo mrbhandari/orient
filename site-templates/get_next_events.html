@@ -30,7 +30,7 @@ img {
 </style>
 
 <div class="container">
-    <h1>Next Events</h1>
+    <div class="page-header"><h2>Next Events <small>Promote what people who didn't exit do next?</small></h2></div>
     
     
     <br>
@@ -54,7 +54,7 @@ img {
         {% else %}
             {% for cell in row %}
                     {% cycle '<tr>' '' '' '' '' '' '' '' '' '' ''  %}
-                    <th>{{ cell |safe |truncatechars_html:80 }}</th>
+                    <td>{{ cell |safe |truncatechars_html:80 }}</td>
                 {% cycle '' '' '' '' '' '' '' '' '' '' '</tr>' %}
             {% endfor %}
         {% endif %}
