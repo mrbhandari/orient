@@ -556,7 +556,7 @@ def exit_rate(request):
     WHERE
         a.num_source > 100
     ORDER BY exit_rate DESC
-    LIMIT 100;""" % (merchant)
+    LIMIT 2000;""" % (merchant)
   
     print sql_query
     sql_results = get_sql_data(sql_query)
