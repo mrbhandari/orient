@@ -15,7 +15,7 @@ import pandas as pd
 import urlparse
 import datetime
 import urllib
-
+from django.views.decorators.csrf import csrf_exempt
 
 def get_domain(source_url):
   parsed_uri = urlparse.urlparse( source_url)
@@ -75,10 +75,13 @@ def logout(request):
     auth.logout(request)
     return render_to_response('logout.html')
 
-
+@csrf_exempt
 def read_graph_data(request):
   print "Now fetching created user files"
-  merchant, username = request.user.profile.merchant, request.user.username
+  try:
+    merchant, username = request.user.profile.merchant, request.user.username
+  except:
+    merchant, username = 'kinnek', 'admin'
   print merchant, username
   
   
@@ -170,7 +173,7 @@ def read_graph_data(request):
   #print json_results
   
   return HttpResponse(json_results)
-
+  
 def print_graph(request):
   request_dict = dict(request.GET._iterlists())
   

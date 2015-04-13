@@ -173,8 +173,9 @@ sudo apt-get install python-dev
 sudo pip install numpy
 sudo pip install pandas
 
-create table travefy_adjacency_graph (url1 varchar(2000), url2 varchar(2000), event1 varchar(2000), event2 varchar(2000), num_pairs int, num_source int);
- LOAD DATA LOCAL  INFILE '/data/travefy_adj_graph.txt' into table travefy_adjacency_graph FIELDS terminated by '\t' lines terminated by '\n' (url1,event1,url2,event2, num_pairs, num_source); 
+create table budsies_adjacency_graph (url1 varchar(2000), url2 varchar(2000), event1 varchar(2000), event2 varchar(2000), num_pairs int, num_source int);
+ LOAD DATA LOCAL  INFILE '/data/trav_adj_graph.txt' into table travefy_adjacency_graph FIELDS terminated by '\t' lines terminated by '\n' (url1,event1,url2,event2, num_pairs, num_source); 
+
 
 
 
@@ -217,3 +218,4 @@ sudo lsof -i tcp:8000
 
 autossh -M 20000 -L 3306:localhost:3306 -i ~/Downloads/rahulkey.pem ubuntu@ec2-54-198-19-77.compute-1.amazonaws.com
 
+sudo pip install django-cors-headers

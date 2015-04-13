@@ -36,5 +36,4 @@ urlpatterns = patterns('',
     
     url(r'^accounts/loggedin/preset/exit_rate/?$', exit_rate, name='exit_rate'),
     url(r'^accounts/loggedin/get_next_events/?$', get_next_events, name='get_next_events'),
-
         )
