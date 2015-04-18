@@ -1,3 +1,5 @@
+
+
 //GLOBAL Variables
 var gZeroLeft = 0;
 var gZeroTop = 0;
@@ -17,7 +19,7 @@ var hasFirstPaint = 0;
 if (window.chrome && window.chrome.loadTimes) {
 	var paint = window.chrome.loadTimes().firstPaintTime * 1000;
 	var firstPaint = paint - (window.chrome.loadTimes().startLoadTime*1000);
-	var firstPaintLeft = (firstPaint / loaded)*100;
+	var firstPaintLeft = 0 //(firstPaint / loaded)*100;
 	hasFirstPaint = 1;
 }
 
@@ -49,7 +51,7 @@ function findImages() {
 		var clickedElement = elem
 	    //from orient_track.js
 	        //parsedData.type = "click";
-                parsedData.element = clickedElement.tagName;
+                //parsedData.element = clickedElement.tagName;
                 parsedData.css_class = clickedElement.className;
                 //parsedData.path = pathHref.path; //TODO: Fix this fucntion
                 parsedData.name_attr = clickedElement.getAttribute("name");
@@ -79,61 +81,59 @@ function findImages() {
 		//console.log(parsedData)
 		
 		
-
+		
 		for (key in parsedData) {
-		    //console.log(key)
-		    //console.log(parsedData[key])
-		    if (parsedData[key] != null) {
-			matchParsedData = key.toLowerCase() + '=' + String(parsedData[key]).toLowerCase().trim() //sometimes prased data is not a string
-			//console.log(matchParsedData)
-			if (element_to_color[matchParsedData]) {
-			    console.log(matchParsedData, element_to_color[matchParsedData])
-			    hasImage = 1;
+		    console.log(key)
+		    console.log(parsedData[key])
+		    //if (hasImage == 0) {
+			if (parsedData[key] != null) {
+			    matchParsedData = key.toLowerCase() + '=' + String(parsedData[key]).toLowerCase().trim() //sometimes prased data is not a string
+			    //console.log(matchParsedData)
+			    if (element_to_color[matchParsedData]) {
+				console.log(matchParsedData, element_to_color[matchParsedData])
+				hasImage = 1;
+				if(style['backgroundImage']) {
+				    var backgroundImage = style['backgroundImage'];
+				    var matches = re.exec(style['backgroundImage']);
+				    if (matches && matches.length > 1){
+					url = backgroundImage.substring(4);
+					url = url.substring(0, url.length - 1);
+					url = url.replace(/"/, "");
+					url = url.replace(/"/, "");
+					hasImage = 1;
+					if(elem.tagName == 'BODY'){
+					    body = 1;
+					}
+				    }
+				}
+				if(style['visibility'] == "hidden") {
+				    console.log('setting visibility to 0')
+				    hasImage = 0;
+				}
+				
+				if(hasImage == 1){
+				    var xy = getCumulativeOffset(elem);
+				    var wh = elem.getBoundingClientRect();
+				    var width = wh.width;
+				    var height = wh.height;
+				    if(width > 10){
+					if(height > 10){
+					    console.log('send to placeMarker', matchParsedData)
+					    placeMarker(xy, width, height, body, matchParsedData);
+					    
+					}
+				    }
+				}
+			    }
 			}
-		    }
+		    //}
 		    
 		}
+
 	}
 	
-        if(style['backgroundImage']) {
-            var backgroundImage = style['backgroundImage'];
-            var matches = re.exec(style['backgroundImage']);
-            if (matches && matches.length > 1){
-                url = backgroundImage.substring(4);
-                url = url.substring(0, url.length - 1);
-                url = url.replace(/"/, "");
-                url = url.replace(/"/, "");
-                hasImage = 1;
-                if(elem.tagName == 'BODY'){
-                    body = 1;
-                }
-            }
-        }
-        if(style['visibility'] == "hidden") {
-	    console.log('setting visibility to 0')
-            hasImage = 0;
-        }
-        if(hasImage == 1){
-            //if ( url ) {
-                //var entry = performance.getEntriesByName(url)[0];
-                //if ( entry ) {
-		console.log("has image true")
-                    var xy = getCumulativeOffset(elem);
-		    console.log(xy)
-                    var wh = elem.getBoundingClientRect();
-		    console.log(wh)
-                    var width = wh.width;
-                    var height = wh.height;
-                    if(width > 10){
-                        if(height > 10){
-                            console.log('send to placeMarker', matchParsedData)
-			    placeMarker(xy, width, height, body, matchParsedData);
-			    
-                        }
-                    }
-                //}
-            //}//if url
-	}
+
+
     }//end for loop
 }//end function findImages
 
@@ -166,13 +166,13 @@ function placeMarker(xy, width, height, body, matchParsedData) { //removed entry
 	}
 	// adjust opacity if it's the body element and position label top right
 	if(body == 1){
-	    var opacity = 0.6;
+	    var opacity = 0.2;
 	    var size = 18;
 	    var align = "right";
 	    var paddingTop = 10;
 	    var bodyText = "BODY ";
 	}else{
-	    var opacity = 0.925;
+	    var opacity = 0.325;
 	    var align = "center";
 	    var paddingTop = (height/2)-padding;
 	    var bodyText = "";
@@ -185,7 +185,7 @@ function placeMarker(xy, width, height, body, matchParsedData) { //removed entry
 	marker.style.cssText = "position:absolute; transition: 0.5s ease-in-out; box-sizing: border-box; color: #fff; padding-left:10px; padding-right:10px; line-height:14px; font-size: " + size + "px; font-weight:800; font-family:\"Helvetica Neue\",sans-serif; text-align:" + align + "; opacity: " + opacity + "; " + heatmap(heat) + " top: " + xy.top + "px; left: " + xy.left + "px; width: " + width + "px; height:" + height + "px; padding-top:" + paddingTop + "px; z-index: 4000;";
 	if(width > 50){
 	    if(height > 15 ){
-		marker.innerHTML = bodyText + heat;
+		marker.innerHTML =  '<div style="border:1px solid black;padding:5px;display:none;width:80px;height:50px;">'+ matchParsedData +'</div>' + bodyText + heat
 	    }
 	}
 	document.body.appendChild(marker);
@@ -254,9 +254,9 @@ function colorPage() {
     // build bottom legend
     var perfmap = document.createElement("div");
     perfmap.id = "perfmap";
-    var legend = "<div style='width:16.666666667%; height: 50px; float:left; background-color:#1a9850;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#66bd63;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#a6d96a;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#fdae61;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#f46d43;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#d73027;'></div><div style='position:absolute; z-index:2; right:0px; padding-top:5px; padding-right:10px;height:100%;color:#fff;'>Fully Loaded " + parseInt(loaded) + "ms</div><div id='perfmap-timeline' style='position:absolute; z-index:4; left:-100px; border-left:2px solid white;height:100%;'></div>";
+    var legend = "<div style='width:16.666666667%; height: 50px; float:left; background-color:#1a9850;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#66bd63;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#a6d96a;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#fdae61;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#f46d43;'></div><div style='width:16.666666667%; height: 50px; float:left; background-color:#d73027;'></div><div style='position:absolute; z-index:2; right:0px; padding-top:5px; padding-right:10px;height:100%;color:#fff;'>Lowest Correlation " + "< 0.1" + "ms</div><div id='perfmap-timeline' style='position:absolute; z-index:4; left:-100px; border-left:2px solid white;height:100%;'></div>";
     if(hasFirstPaint == 1){
-	    legend += "<div style='position:absolute; z-index:3; left:" + firstPaintLeft + "%; padding-top:5px; border-left:2px solid white;padding-left:5px;height:100%;color:#fff;'>First Paint " + parseInt(firstPaint) + "ms</div></div>";
+	    legend += "<div style='position:absolute; z-index:3; left:" + firstPaintLeft + "%; padding-top:5px; border-left:2px solid white;padding-left:5px;height:100%;color:#fff;'>Highest correlation " + "0.5" + "ms</div></div>";
     }
     perfmap.style.cssText = "position: fixed; width:100%; bottom:0; left:0; z-index:5000; height: 25px; color:#fff; font-family:\"Helvetica Neue\",sans-serif; font-size:14px; font-weight:800; line-height:14px;";
     perfmap.innerHTML = legend;
@@ -268,24 +268,32 @@ function colorPage() {
     // remove loading message
     loading.remove();
     
-    // mouse events to move timeline around on hover
+
+     //mouse events to move timeline around on hover
     var elements = document.getElementsByClassName("perfmap");
     var timeline = document.getElementById('perfmap-timeline');
     for ( var i=0, len = elements.length; i < len; i++ ) {
 	    elements[i].onmouseover = function(){
-	    var timelineLeft = document.documentElement.clientWidth * (this.dataset.ms / loaded);
-	    if(this.dataset.body != "1"){
-			    this.style.opacity = 1;
+	    
+		if(this.dataset.body != "1"){
+				this.style.opacity = 1;
+				
+		this.firstChild.setAttribute("style", "border:1px solid black;padding:5px;visibility:visible;background:black;height:100px")
+		
+		//var node = document.createElement("DIV");
+		//node.innerHTML= "testing 123"
+		//this.appendChild(node);
 	    }
-	    timeline.style.cssText = "opacity:1; transition: 0.5s ease-in-out; transform: translate("+ parseInt(timelineLeft) + "px,0); position:absolute; z-index:4; border-left:2px solid white; height:100%;";
-	}
+	    //timeline.style.cssText = "opacity:1; transition: 0.5s ease-in-out; transform: translate("+ parseInt(timelineLeft) + "px,0); position:absolute; z-index:4; border-left:2px solid white; height:100%;";
+	}// end on mouseover function
 	elements[i].onmouseout = function(){		
-	    var timelineLeft = document.documentElement.clientWidth * (this.dataset.ms / loaded);
-	    if(this.dataset.body != "1"){
-		    this.style.opacity = 0.925;
+		//var timelineLeft = document.documentElement.clientWidth * (this.dataset.ms / loaded);
+		if(this.dataset.body != "1"){
+			this.style.opacity = 0.525;
 	    }
-	    timeline.style.cssText = "opacity:0; transition: 0.5s ease-in-out; transform: translate("+ parseInt(timelineLeft) + "px,0); position:absolute; z-index:4; border-left:2px solid white; height:100%;";
-	}
+	    //timeline.style.cssText = "opacity:0; transition: 0.5s ease-in-out; transform: translate("+ parseInt(timelineLeft) + "px,0); position:absolute; z-index:4; border-left:2px solid white; height:100%;";
+	    this.firstChild.setAttribute("style", "border:1px solid black;padding:5px;display:none;width:80px;height:50px;")
+	}// end on mouseout function function
     }
 }//end function colorPage
 
